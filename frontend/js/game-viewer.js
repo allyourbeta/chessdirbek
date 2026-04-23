@@ -1,4 +1,6 @@
-// Navigation entry: push history and let router render.
+var _saveTagState = { tags: [] };
+var _saveTagFilter = null;
+
 function openGame(id) {
     // If called during render (deep link), skip pushState — router is already
     // rendering; just load data into the already-active view.
@@ -105,11 +107,16 @@ function showSavePositionModal() {
     const fen = g.fens[ply];
     const moveDesc = ply === 0 ? 'starting position' : `after ${Math.ceil(ply / 2)}. ${ply % 2 === 1 ? '' : '...'}${g.moves_san[ply - 1]}`;
     const title = `${g.white || '?'} vs ${g.black || '?'} - ${moveDesc}`;
-    const tags = g.tags.map(t => t.name).join(', ');
 
     document.getElementById('save-pos-fen').value = fen;
     document.getElementById('save-pos-title').value = title;
-    document.getElementById('save-pos-tags').value = tags;
+    _saveTagState.tags = g.tags.map(t => t.name);
+    _saveTagFilter = TagFilter.mount({
+        containerId: 'save-pos-tags-container',
+        state: _saveTagState,
+        onChange: function() {},
+        placeholder: 'Add tags...'
+    });
     document.getElementById('save-pos-notes').value = '';
     document.getElementById('save-pos-modal').style.display = 'flex';
     document.getElementById('save-pos-notes').focus();
@@ -122,7 +129,7 @@ function hideSavePositionModal() {
 async function doSavePosition() {
     const fen = document.getElementById('save-pos-fen').value;
     const title = document.getElementById('save-pos-title').value.trim();
-    const tags = document.getElementById('save-pos-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    const tags = _saveTagState.tags.slice();
     const notes = document.getElementById('save-pos-notes').value.trim();
 
     const res = await fetch(API + '/positions/', {

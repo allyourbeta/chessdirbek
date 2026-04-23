@@ -61,6 +61,7 @@ async function loadPositionDetail(id) {
         keyScope: navKeyScope,
         onNavigate: function (fen) {
             EngineUI.setPosition(fen);
+            document.getElementById('detail-fen').textContent = fen;
         },
     });
     BoardManager.create('detail-board', pos.fen, {
@@ -69,6 +70,7 @@ async function loadPositionDetail(id) {
         onPositionChange: function (newFen) {
             MoveNavigator.push('detail-nav', newFen);
             EngineUI.setPosition(newFen);
+            document.getElementById('detail-fen').textContent = newFen;
         },
     });
 
@@ -87,8 +89,6 @@ function copyFen() {
 }
 
 function _initCollapsibleCards(notes) {
-    var fenCard = document.getElementById('fen-card');
-    if (fenCard) fenCard.classList.remove('expanded');
     var notesCard = document.getElementById('notes-card');
     var notesLabel = document.getElementById('notes-card-label');
     if (notesCard) {
@@ -143,7 +143,8 @@ function editPosition() {
         document.getElementById('edit-id').value = pos.id;
         document.getElementById('fen-input').value = pos.fen;
         document.getElementById('pos-title').value = pos.title || '';
-        document.getElementById('pos-tags').value = pos.tags.map(t => t.name).join(', ');
+        _formTagState.tags = pos.tags.map(t => t.name);
+        _initFormTagFilter();
         document.getElementById('pos-notes').value = pos.notes || '';
         document.getElementById('pos-stockfish').value = pos.stockfish_analysis || '';
         document.getElementById('form-title').textContent = 'Edit Position';

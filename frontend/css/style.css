@@ -141,7 +141,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px var(--sp-6);
+  padding: var(--sp-4) var(--sp-6);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-xs);
@@ -151,23 +151,23 @@ header {
 }
 
 header h1 {
-  font-size: var(--fs-18);
+  font-size: var(--fs-22);
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
 }
 
-nav { display: flex; gap: 2px; align-items: center; }
+nav { display: flex; gap: var(--sp-1); align-items: center; }
 nav button {
   position: relative;
   background: none;
   border: 1px solid transparent;
   color: var(--text-secondary);
   font-family: inherit;
-  font-size: var(--fs-13);
+  font-size: var(--fs-15);
   font-weight: 500;
-  padding: 6px var(--sp-3);
-  border-radius: var(--radius);
+  padding: 8px var(--sp-4);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color .15s ease, background-color .15s ease;
 }
@@ -284,7 +284,7 @@ nav button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   align-items: center;
   margin-bottom: var(--sp-5);
   padding-bottom: var(--sp-3);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--grey-100);
   flex-wrap: wrap;
   gap: var(--sp-2);
 }
@@ -295,6 +295,34 @@ nav button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
+.list-header {
+  margin-bottom: var(--sp-4);
+}
+.list-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.list-header-top h2 {
+  font-size: var(--fs-24);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.list-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.list-header-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
 
 /* ------------------------------------------------------------------
    Form fields
@@ -303,8 +331,6 @@ label {
   display: block;
   font-size: var(--fs-11);
   color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   font-weight: 600;
   margin-bottom: 6px;
   margin-top: var(--sp-3);

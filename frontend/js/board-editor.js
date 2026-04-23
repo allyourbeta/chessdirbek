@@ -1,32 +1,27 @@
-/* Board Editor — regular script (no ES module import).
-   Uses BoardManager from board.js for the chessboard. */
-
 var BoardEditor = (function () {
     var START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     var BOARD_ID = 'editor-board';
     var _chess = null;
     var _activeTool = 'eraser';
     var _turn = 'w';
-
+    var _editorTagState = { tags: [] };
+    var _editorTagFilter = null;
     var PIECES = [
         { color: 'w', type: 'k' }, { color: 'w', type: 'q' }, { color: 'w', type: 'r' },
         { color: 'w', type: 'b' }, { color: 'w', type: 'n' }, { color: 'w', type: 'p' },
         { color: 'b', type: 'k' }, { color: 'b', type: 'q' }, { color: 'b', type: 'r' },
         { color: 'b', type: 'b' }, { color: 'b', type: 'n' }, { color: 'b', type: 'p' },
     ];
-
     var PIECE_SVG_KEYS = {
         'wk': 'wK', 'wq': 'wQ', 'wr': 'wR', 'wb': 'wB', 'wn': 'wN', 'wp': 'wP',
         'bk': 'bK', 'bq': 'bQ', 'br': 'bR', 'bb': 'bB', 'bn': 'bN', 'bp': 'bP',
     };
-
     function _getFen() {
         var raw = _chess.fen();
         var parts = raw.split(' ');
         parts[1] = _turn;
         return parts.join(' ');
     }
-
     function _createBoard(fen) {
         var el = document.getElementById(BOARD_ID);
         if (!el) return;
@@ -35,7 +30,6 @@ var BoardEditor = (function () {
             _onSquareClick(square);
         });
     }
-
     function init(params) {
         var fen = (params && params.fen) ? decodeURIComponent(params.fen) : null;
         _chess = new Chess();
@@ -54,9 +48,14 @@ var BoardEditor = (function () {
         _updateFenDisplay();
 
         document.getElementById('editor-pos-title').value = '';
-        document.getElementById('editor-pos-tags').value = '';
+        _editorTagState.tags = [];
+        _editorTagFilter = TagFilter.mount({
+            containerId: 'editor-pos-tags-container',
+            state: _editorTagState,
+            onChange: function() {},
+            placeholder: 'Add tags...'
+        });
     }
-
     function _onSquareClick(square) {
         if (_activeTool === 'eraser') {
             _chess.remove(square);
@@ -68,12 +67,10 @@ var BoardEditor = (function () {
         BoardManager.setPosition(BOARD_ID, fen);
         _updateFenDisplay();
     }
-
     function _renderPalette() {
         var el = document.getElementById('editor-palette');
         if (!el) return;
         var html = '<div class="editor-palette">';
-
         html += '<div class="palette-row">';
         PIECES.forEach(function (p, i) {
             if (i === 6) html += '</div><div class="palette-row">';
@@ -85,18 +82,15 @@ var BoardEditor = (function () {
             html += '</button>';
         });
         html += '</div>';
-
         html += '<div class="palette-row">';
         var eraserActive = _activeTool === 'eraser' ? ' active' : '';
         html += '<button class="palette-btn eraser-btn' + eraserActive + '" data-tool="eraser" onclick="BoardEditor.selectTool(\'eraser\')">';
         html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
         html += '</button>';
         html += '</div>';
-
         html += '</div>';
         el.innerHTML = html;
     }
-
     function selectTool(tool) {
         _activeTool = tool;
         var btns = document.querySelectorAll('.palette-btn');
@@ -104,7 +98,6 @@ var BoardEditor = (function () {
             b.classList.toggle('active', b.dataset.tool === tool);
         });
     }
-
     function setTurn(t) {
         _turn = t;
         var fen = _getFen();
@@ -112,7 +105,6 @@ var BoardEditor = (function () {
         _updateTurnButtons();
         _updateFenDisplay();
     }
-
     function _updateTurnButtons() {
         var wBtn = document.getElementById('editor-turn-w');
         var bBtn = document.getElementById('editor-turn-b');
@@ -123,19 +115,16 @@ var BoardEditor = (function () {
             bBtn.className = _turn === 'b' ? 'btn btn-sm btn-primary' : 'btn btn-sm';
         }
     }
-
     function _updateFenDisplay() {
         var el = document.getElementById('editor-fen');
         if (el) el.value = _getFen();
     }
-
     function clear() {
         _chess.clear();
         var fen = _getFen();
         BoardManager.setPosition(BOARD_ID, fen);
         _updateFenDisplay();
     }
-
     function startPos() {
         _chess.load(START_FEN);
         _turn = 'w';
@@ -144,11 +133,9 @@ var BoardEditor = (function () {
         BoardManager.setPosition(BOARD_ID, fen);
         _updateFenDisplay();
     }
-
     function flip() {
         BoardManager.flip(BOARD_ID);
     }
-
     function copyFen() {
         var fen = _getFen();
         if (navigator.clipboard) {
@@ -156,12 +143,10 @@ var BoardEditor = (function () {
             toast('FEN copied');
         }
     }
-
     async function save(posType) {
         var fen = _getFen();
         var title = document.getElementById('editor-pos-title').value.trim() || 'Untitled';
-        var tagsRaw = document.getElementById('editor-pos-tags').value;
-        var tags = tagsRaw ? tagsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
+        var tags = _editorTagState.tags.slice();
         var res = await fetch(API + '/positions/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -179,7 +164,6 @@ var BoardEditor = (function () {
             toast(err.detail || 'Error saving', 'error');
         }
     }
-
     function search(searchType) {
         var fen = _getFen();
         Router.navigate({ view: 'search' });
@@ -193,14 +177,12 @@ var BoardEditor = (function () {
             doPositionSearch();
         }, 50);
     }
-
     function openFromSearch() {
         var fen = document.getElementById('search-fen').value.trim();
         var params = {};
         if (fen) params.fen = fen;
         Router.navigate({ view: 'editor', params: params });
     }
-
     return {
         init: init,
         selectTool: selectTool,

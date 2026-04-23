@@ -71,7 +71,7 @@ const Practice = (function () {
     }
 
     var _playHideIds = ['practice-history-section', 'your-moves-section', 'detail-actions-card',
-        'fen-card', 'notes-card'];
+        'notes-card'];
 
     function _setPlayingUI(playing) {
         var fc = document.getElementById('practice-form-controls');

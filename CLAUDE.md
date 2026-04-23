@@ -50,3 +50,77 @@ To load/unload the automated backup:
 - Unload: `launchctl unload ~/Library/LaunchAgents/com.ashish.chessquiz-backup.plist`
 
 IMPORTANT: Always run `scripts/backup_now.sh` before any destructive operations, migrations, or bulk imports.
+
+## Frontend Architecture Notes
+
+The frontend is vanilla JS (no build tools). Scripts are loaded via `<script>`
+tags in `index.html`. Two files use `<script type="module">`:
+
+- `board.js` — ES module that imports cm-chessboard v8 from CDN. Defines
+  `BoardManager` (window global). Also bootstraps the app by calling
+  `Router.init()` at the end of its execution. This means all regular scripts
+  must be loaded before `board.js`, and any global they define will be
+  available when `Router.init()` triggers routing.
+- `board-editor.js` — regular script (NOT a module). Must appear before
+  `board.js` in `index.html` so `window.BoardEditor` exists when the router
+  might navigate to the editor view.
+
+### cm-chessboard v8 API
+
+The app uses cm-chessboard v8 via CDN. Key API facts for this version:
+
+- `enableSquareSelect(handler)` — one argument (the callback). The handler
+  receives an event with `event.square` (e.g. "e4"). Do NOT pass an event
+  type as the first argument — that is a different version's API.
+- `enableMoveInput(handler, color)` — used for drag-to-move on play boards.
+- `setPosition(fen, animated)` — updates the board display.
+- Exports: `Chessboard`, `COLOR`, `FEN`, `INPUT_EVENT_TYPE`. Do NOT try to
+  import `POINTER_EVENTS` or `SQUARE_SELECT_TYPE` — they do not exist in the
+  version served by `@8` on jsdelivr.
+
+### Board Editor Interaction Model
+
+The board editor uses click-to-place, NOT drag-and-drop:
+1. Click a piece in the palette to select it as the active tool
+2. Click a square on the board to place that piece
+3. Click the eraser tool, then click a square to remove a piece
+
+## Troubleshooting
+
+### Stockfish analysis shows "Analyzing..." but no lines
+
+This has occurred 5+ times. Before changing any code, try these steps IN ORDER:
+
+1. **Hard refresh** (Cmd+Shift+R on Mac). The browser aggressively caches JS
+   files, especially ES modules. A stale `stockfish-service.js` or
+   `engine-ui.js` can cause analysis to silently fail.
+2. **Open an incognito window** and test there. If it works in incognito, it's
+   a cache problem.
+3. **Check the console** for errors. If the stockfish WASM worker fails to
+   load, you'll see network errors for `stockfish.wasm.js` or `stockfish.wasm`.
+4. **Check StockfishService.state** in the console (`StockfishService.state`).
+   - `"uninitialized"` → engine was never started. Click "Show Engine".
+   - `"loading"` → engine is loading but stuck. Worker may have failed.
+   - `"ready"` → engine loaded but not analyzing. `analyze()` not called.
+   - `"analyzing"` → engine is running. If no lines show, `_onUpdate`
+     callback may be null (check engine-ui.js `_startAnalysis`).
+
+Only if ALL of the above fail to reveal the issue, look at the code. The
+historical root cause was a race condition in `stockfish-service.js` where
+a `bestmove` response set `_state = 'ready'`, causing subsequent `info` lines
+to be ignored. This was fixed by making the `bestmove` handler simply return
+without changing state (line ~94 in stockfish-service.js). If someone
+reintroduces `_state = 'ready'` in the bestmove handler, that is the bug.
+
+### Board editor not working
+
+The board editor has two known failure modes:
+
+1. **`BoardEditor` is undefined** — `board-editor.js` must be loaded as a
+   regular `<script>` (NOT `type="module"`) and must appear BEFORE `board.js`
+   in `index.html`. If it's a module or appears after `board.js`, the router
+   will try to call `BoardEditor.init()` before it exists.
+2. **Clicking squares does nothing** — the `BoardManager.enableSquareSelect()`
+   method must use cm-chessboard's native one-argument API. If someone changes
+   it to pass `POINTER_EVENTS.pointerdown` as the first argument, square
+   selection will silently fail.

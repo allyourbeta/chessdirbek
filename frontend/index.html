@@ -31,25 +31,37 @@
 <div id="notification-banner" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1000;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:16px;font-weight:500;text-align:center;min-width:300px;max-width:500px"></div>
 <div class="container">
   <div id="view-tabiyas" class="view active">
-    <div class="view-header">
-      <h2>Tabiyas</h2>
-      <button class="btn btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'tabiya'}})">+ New Tabiya</button>
-      <button class="btn btn-sm" onclick="Router.navigate({view:'bulkAdd', params:{type:'tabiya'}})">Bulk Add</button>
-      <button class="btn btn-sm" onclick="Router.navigate({view:'editor', params:{type:'tabiya'}})">Editor</button>
-      <button class="btn btn-sm" onclick="randomFromList('tabiya')">Random</button>
-      <div id="tabiyas-tag-filters" class="tag-row"></div>
+    <div class="list-header">
+      <div class="list-header-top">
+        <h2>Tabiyas</h2>
+        <button class="btn btn-primary btn-sm" onclick="Router.navigate({view:'addPosition', params:{type:'tabiya'}})">+ New Tabiya</button>
+      </div>
+      <div class="list-header-bar">
+        <div id="tabiyas-tag-filters" class="tag-row"></div>
+        <div class="list-header-tools">
+          <button class="btn btn-sm" onclick="randomFromList('tabiya')">Shuffle</button>
+          <button class="btn btn-sm btn-ghost" onclick="Router.navigate({view:'bulkAdd', params:{type:'tabiya'}})">Bulk Add</button>
+          <button class="btn btn-sm btn-ghost" onclick="Router.navigate({view:'editor', params:{type:'tabiya'}})">Editor</button>
+        </div>
+      </div>
     </div>
     <div id="tabiyas-count" class="text-muted" style="font-size:13px;margin-bottom:4px"></div>
     <div id="tabiyas-list" class="pos-list"></div>
   </div>
   <div id="view-tactics" class="view">
-    <div class="view-header">
-      <h2>Tactics</h2>
-      <button class="btn btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'puzzle'}})">+ New Tactic</button>
-      <button class="btn btn-sm" onclick="Router.navigate({view:'bulkAdd', params:{type:'puzzle'}})">Bulk Add</button>
-      <button class="btn btn-sm" onclick="Router.navigate({view:'editor', params:{type:'puzzle'}})">Editor</button>
-      <button class="btn btn-sm" onclick="randomFromList('puzzle')">Random</button>
-      <div id="tactics-tag-filters" class="tag-row"></div>
+    <div class="list-header">
+      <div class="list-header-top">
+        <h2>Tactics</h2>
+        <button class="btn btn-primary btn-sm" onclick="Router.navigate({view:'addPosition', params:{type:'puzzle'}})">+ New Tactic</button>
+      </div>
+      <div class="list-header-bar">
+        <div id="tactics-tag-filters" class="tag-row"></div>
+        <div class="list-header-tools">
+          <button class="btn btn-sm" onclick="randomFromList('puzzle')">Shuffle</button>
+          <button class="btn btn-sm btn-ghost" onclick="Router.navigate({view:'bulkAdd', params:{type:'puzzle'}})">Bulk Add</button>
+          <button class="btn btn-sm btn-ghost" onclick="Router.navigate({view:'editor', params:{type:'puzzle'}})">Editor</button>
+        </div>
+      </div>
     </div>
     <div id="tactics-count" class="text-muted" style="font-size:13px;margin-bottom:4px"></div>
     <div id="tactics-list" class="pos-list"></div>
@@ -73,8 +85,8 @@
         <input type="hidden" id="edit-id" value="">
         <label>Title</label>
         <input type="text" id="pos-title" placeholder="e.g. Lucena Position">
-        <label>Tags (comma separated)</label>
-        <input type="text" id="pos-tags" placeholder="e.g. endgame, rook, lucena">
+        <label>Tags</label>
+        <div id="pos-tags-container"></div>
         <label>Your Notes</label>
         <textarea id="pos-notes" placeholder="Your analysis and observations..."></textarea>
         <label>Analysis Notes</label>
@@ -110,7 +122,9 @@
       <span id="bulk-count" class="batch-progress"></span>
       <button class="btn btn-sm btn-danger" onclick="deleteSelectedGames()">Delete selected</button>
     </div>
-    <div id="games-list" class="pos-list"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="games-list"></div>
+    </div>
   </div>
   <div id="view-game-viewer" class="view">
     <div class="board-area">
@@ -124,13 +138,17 @@
         <div style="display:flex;gap:8px;align-items:stretch">
           <div id="game-board" class="board-wrap"></div>
         </div>
-        <div class="nav-btns">
-          <span id="gv-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
-          <button class="btn btn-sm" onclick="gvFlip()" style="margin-left:8px">Flip</button>
-          <button class="btn btn-sm" onclick="undoGameBoard()">Undo</button>
-          <button class="btn btn-sm" onclick="resetGameBoard()">Reset</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','tabiya')">+ Tabiya</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','puzzle')">+ Tactic</button>
+        <div class="board-controls">
+          <div class="control-group">
+            <span id="gv-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
+            <button class="btn btn-sm" onclick="gvFlip()">Flip</button>
+            <button class="btn btn-sm" onclick="undoGameBoard()">Undo</button>
+            <button class="btn btn-sm" onclick="resetGameBoard()">Reset</button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','tabiya')">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','puzzle')">+ Tactic</button>
+          </div>
         </div>
         <div id="game-engine-container" style="margin-top:8px"></div>
       </div>
@@ -148,8 +166,10 @@
         <div class="btn-row">
           <button class="btn btn-sm" onclick="showSavePositionModal()">Save with Notes</button>
           <button class="btn btn-sm" id="opening-tree-btn" onclick="toggleOpeningTree()">Opening Explorer</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteCurrentGame()">Delete</button>
+        </div>
+        <div class="btn-row" style="margin-top:var(--sp-2)">
           <button class="btn btn-sm" onclick="backToGames()">Back to Games</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCurrentGame()">Delete</button>
         </div>
         <div id="opening-tree-panel" class="tree-panel" style="display:none">
           <div class="tree-panel-header">Opening Explorer</div>
@@ -167,11 +187,15 @@
     <div class="board-area">
       <div>
         <div id="search-board" class="board-wrap"></div>
-        <div class="btn-row" style="margin-top:8px">
-          <button class="btn btn-sm" onclick="searchFlipBoard()">Flip</button>
-          <button class="btn btn-sm" onclick="searchSetStart()">Starting Position</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','tabiya')">+ Tabiya</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','puzzle')">+ Tactic</button>
+        <div class="board-controls">
+          <div class="control-group">
+            <button class="btn btn-sm" onclick="searchFlipBoard()">Flip</button>
+            <button class="btn btn-sm" onclick="searchSetStart()">Starting Position</button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','tabiya')">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','puzzle')">+ Tactic</button>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -184,9 +208,9 @@
           <button class="btn btn-sm" onclick="BoardEditor.openFromSearch()">Open Editor</button>
         </div>
         <label style="margin-top:12px">Search Type</label>
-        <div class="btn-row">
-          <label style="font-size:13px"><input type="radio" name="search-type" value="exact" checked> Exact position</label>
-          <label style="font-size:13px"><input type="radio" name="search-type" value="pawn"> Pawn structure</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="search-type" value="exact" checked> Exact position</label>
+          <label class="radio-label"><input type="radio" name="search-type" value="pawn"> Pawn structure</label>
         </div>
         <label style="margin-top:12px">Scope</label>
         <select id="search-scope" class="select-input" style="width:100%"></select>
@@ -230,31 +254,30 @@
       <div class="card" style="margin:0;padding:var(--sp-4)">
         <div id="detail-board" class="board-wrap"></div>
         <div id="practice-move-list" class="moves-panel" style="display:none;margin-top:8px;max-height:120px"></div>
-        <div class="btn-row" style="margin-top:12px">
-          <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
-          <button class="btn btn-sm" onclick="flipDetailBoard()">Flip</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','tabiya')">+ Tabiya</button>
-          <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','puzzle')">+ Tactic</button>
-          <button class="btn btn-sm" id="detail-random-btn" onclick="randomFromDetail()">Random</button>
+        <div class="board-controls">
+          <div class="control-group" id="detail-move-nav-wrap">
+            <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
+            <button class="btn btn-sm" onclick="flipDetailBoard()">Flip</button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','tabiya')">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','puzzle')">+ Tactic</button>
+          </div>
+          <div class="control-group">
+            <button class="btn btn-sm" id="detail-random-btn" onclick="randomFromDetail()">Shuffle</button>
+          </div>
         </div>
+        <div class="fen-bar" style="margin-top:var(--sp-2)">
+          <code id="detail-fen" class="fen-display" style="flex:1"></code>
+          <button class="btn btn-sm" onclick="event.stopPropagation();copyFen()" title="Copy FEN">Copy</button>
+        </div>
+        <div id="detail-engine-container" style="margin-top:var(--sp-2)"></div>
       </div>
       <div class="panel" style="display:flex;flex-direction:column;gap:0">
         <!-- Header Card -->
         <div class="card">
           <h2 id="detail-title" style="cursor:pointer" onclick="startTitleEdit()" title="Click to rename">Position</h2>
           <div id="detail-tags"></div>
-        </div>
-
-        <!-- FEN Card -->
-        <div class="card collapsible-card" id="fen-card">
-          <div class="collapsible-header" onclick="toggleCollapsible('fen-card')">
-            <span class="collapse-arrow">&#9654;</span>
-            <label style="margin:0;cursor:pointer">FEN</label>
-          </div>
-          <div class="card-body">
-            <div id="detail-fen" class="fen-display" style="margin-top:8px"></div>
-            <button class="btn btn-sm" style="margin-top:6px" onclick="event.stopPropagation();copyFen()">Copy FEN</button>
-          </div>
         </div>
 
         <!-- Notes Card -->
@@ -267,9 +290,6 @@
             <textarea id="detail-notes" placeholder="Your analysis and observations..." style="margin-top:8px"></textarea>
           </div>
         </div>
-
-        <!-- Engine Analysis (shared component) -->
-        <div id="detail-engine-container" class="card"></div>
 
         <div id="detail-stockfish-card" class="card" style="display:none">
           <pre id="detail-stockfish" class="detail-pre"></pre>
@@ -393,41 +413,43 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
       <h2 id="editor-title">Board Editor</h2>
       <button class="btn btn-sm" onclick="history.back()">Back</button>
     </div>
-    <div class="board-area">
-      <div>
-        <div id="editor-board" class="board-wrap"></div>
-        <div id="editor-palette" style="margin-top:12px"></div>
-        <div class="btn-row" style="margin-top:8px">
-          <button class="btn btn-sm" onclick="BoardEditor.clear()">Clear Board</button>
-          <button class="btn btn-sm" onclick="BoardEditor.startPos()">Starting Position</button>
-          <button class="btn btn-sm" onclick="BoardEditor.flip()">Flip</button>
+    <div class="card" style="padding:var(--sp-4)">
+      <div class="board-area">
+        <div>
+          <div id="editor-board" class="board-wrap"></div>
+          <div id="editor-palette" style="margin-top:12px"></div>
+          <div class="btn-row" style="margin-top:8px">
+            <button class="btn btn-sm" onclick="BoardEditor.clear()">Clear Board</button>
+            <button class="btn btn-sm" onclick="BoardEditor.startPos()">Starting Position</button>
+            <button class="btn btn-sm" onclick="BoardEditor.flip()">Flip</button>
+          </div>
         </div>
-      </div>
-      <div class="panel">
-        <label>Turn to Move</label>
-        <div class="btn-row" style="margin-top:0">
-          <button class="btn btn-sm" id="editor-turn-w" onclick="BoardEditor.setTurn('w')">White to move</button>
-          <button class="btn btn-sm" id="editor-turn-b" onclick="BoardEditor.setTurn('b')">Black to move</button>
-        </div>
-        <label style="margin-top:12px">FEN</label>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input type="text" id="editor-fen" readonly style="flex:1;font-family:'SF Mono','Fira Code',Menlo,Consolas,monospace;font-size:12px">
-          <button class="btn btn-sm" onclick="BoardEditor.copyFen()">Copy</button>
-        </div>
-        <label style="margin-top:12px">Title</label>
-        <input type="text" id="editor-pos-title" placeholder="Position title (optional)">
-        <label style="margin-top:12px">Tags</label>
-        <input type="text" id="editor-pos-tags" placeholder="Tags, comma separated">
-        <div class="btn-row" style="margin-top:16px">
-          <button class="btn btn-success btn-sm" onclick="BoardEditor.save('tabiya')">Save as Tabiya</button>
-          <button class="btn btn-success btn-sm" onclick="BoardEditor.save('puzzle')">Save as Tactic</button>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary btn-sm" onclick="BoardEditor.search('exact')">Search Exact Position</button>
-          <button class="btn btn-sm" onclick="BoardEditor.search('pawn')">Search Pawn Structure</button>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-sm" onclick="history.back()">Cancel</button>
+        <div class="panel">
+          <label>Turn to Move</label>
+          <div class="btn-row" style="margin-top:0">
+            <button class="btn btn-sm" id="editor-turn-w" onclick="BoardEditor.setTurn('w')">White to move</button>
+            <button class="btn btn-sm" id="editor-turn-b" onclick="BoardEditor.setTurn('b')">Black to move</button>
+          </div>
+          <label style="margin-top:12px">FEN</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" id="editor-fen" readonly style="flex:1;font-family:'SF Mono','Fira Code',Menlo,Consolas,monospace;font-size:12px">
+            <button class="btn btn-sm" onclick="BoardEditor.copyFen()">Copy</button>
+          </div>
+          <label style="margin-top:12px">Title</label>
+          <input type="text" id="editor-pos-title" placeholder="Position title (optional)">
+          <label style="margin-top:12px">Tags</label>
+          <div id="editor-pos-tags-container"></div>
+          <div class="btn-row" style="margin-top:16px">
+            <button class="btn btn-success btn-sm" onclick="BoardEditor.save('tabiya')">Save as Tabiya</button>
+            <button class="btn btn-success btn-sm" onclick="BoardEditor.save('puzzle')">Save as Tactic</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-sm" onclick="BoardEditor.search('exact')">Search Exact Position</button>
+            <button class="btn btn-sm" onclick="BoardEditor.search('pawn')">Search Pawn Structure</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sm" onclick="history.back()">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -501,7 +523,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').t
     <h2>Save Position</h2>
     <label>FEN</label><input type="text" id="save-pos-fen" readonly class="text-muted">
     <label>Title</label><input type="text" id="save-pos-title">
-    <label>Tags (comma separated)</label><input type="text" id="save-pos-tags">
+    <label>Tags</label><div id="save-pos-tags-container"></div>
     <label>Notes</label><textarea id="save-pos-notes" placeholder="Your notes about this position..."></textarea>
     <div class="btn-row"><button class="btn btn-primary" onclick="doSavePosition()">Save</button><button class="btn" onclick="hideSavePositionModal()">Cancel</button></div>
   </div>

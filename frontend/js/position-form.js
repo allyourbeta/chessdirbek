@@ -1,8 +1,20 @@
+var _formTagState = { tags: [] };
+var _formTagFilter = null;
+
+function _initFormTagFilter() {
+    _formTagFilter = TagFilter.mount({
+        containerId: 'pos-tags-container',
+        state: _formTagState,
+        onChange: function() {},
+        placeholder: 'Add tags...'
+    });
+}
+
 async function savePosition() {
     const editId = document.getElementById('edit-id').value;
     const fen = document.getElementById('fen-input').value.trim();
     const title = document.getElementById('pos-title').value.trim();
-    const tags = document.getElementById('pos-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+    const tags = _formTagState.tags.slice();
     const notes = document.getElementById('pos-notes').value.trim();
     const sf = document.getElementById('pos-stockfish').value.trim();
     if (!fen) { toast('FEN is required', true); return; }
@@ -71,7 +83,6 @@ function clearForm() {
     document.getElementById('edit-id').value = '';
     document.getElementById('fen-input').value = '';
     document.getElementById('pos-title').value = '';
-    document.getElementById('pos-tags').value = '';
     document.getElementById('pos-notes').value = '';
     document.getElementById('pos-stockfish').value = '';
     document.getElementById('form-title').textContent = 'New Position';
@@ -80,7 +91,8 @@ function clearForm() {
     AppState.addPositionType = 'tabiya';
     BoardManager.create('board', AppState.boardFen, { flipped: false });
     const saved = AppState.lastTags || localStorage.getItem('chessquiz-last-tags') || '';
-    if (saved) document.getElementById('pos-tags').value = saved;
+    _formTagState.tags = saved ? saved.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
+    _initFormTagFilter();
 }
 
 function setupAutoLoad() {
@@ -119,8 +131,7 @@ function setupUrlParams() {
 
 const _origSavePosition = savePosition;
 savePosition = async function() {
-    const tagsField = document.getElementById('pos-tags');
-    AppState.lastTags = tagsField.value;
+    AppState.lastTags = _formTagState.tags.join(', ');
     localStorage.setItem('chessquiz-last-tags', AppState.lastTags);
     return _origSavePosition.apply(this, arguments);
 };
@@ -211,6 +222,8 @@ window.clearForm = clearForm;
 window.setupAutoLoad = setupAutoLoad;
 window.setupKeyboardSave = setupKeyboardSave;
 window.setupUrlParams = setupUrlParams;
+window._formTagState = _formTagState;
+window._initFormTagFilter = _initFormTagFilter;
 window.loadPuzzleNavigation = loadPuzzleNavigation;
 window.navigateToPuzzle = navigateToPuzzle;
 window.navigatePuzzle = navigatePuzzle;

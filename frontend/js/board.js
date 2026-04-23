@@ -1,4 +1,4 @@
-import {Chessboard, COLOR, FEN, INPUT_EVENT_TYPE, POINTER_EVENTS}
+import {Chessboard, COLOR, FEN, INPUT_EVENT_TYPE}
     from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/Chessboard.js";
 import {Markers, MARKER_TYPE}
     from "https://cdn.jsdelivr.net/npm/cm-chessboard@8/src/extensions/markers/Markers.js";
@@ -165,7 +165,7 @@ const BoardManager = {
     enableSquareSelect(elementId, callback) {
         const board = this.boards[elementId];
         if (!board) return;
-        board.enableSquareSelect(POINTER_EVENTS.pointerdown, (event) => {
+        board.enableSquareSelect((event) => {
             callback(event.square);
         });
     },
@@ -173,7 +173,7 @@ const BoardManager = {
     disableSquareSelect(elementId) {
         const board = this.boards[elementId];
         if (!board) return;
-        board.disableSquareSelect(POINTER_EVENTS.pointerdown);
+        board.disableSquareSelect();
     },
 
     disableMoveInput(elementId) {

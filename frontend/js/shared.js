@@ -180,6 +180,7 @@ function renderRoute(route) {
             document.getElementById('form-title').textContent =
                 AppState.addPositionType === 'puzzle' ? 'New Tactic' : 'New Tabiya';
             BoardManager.setPosition('board', AppState.boardFen);
+            _initFormTagFilter();
             break;
         case 'games':
             _applyGameFilters(params);

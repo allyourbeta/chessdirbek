@@ -165,15 +165,24 @@ const BoardManager = {
     enableSquareSelect(elementId, callback) {
         const board = this.boards[elementId];
         if (!board) return;
-        board.enableSquareSelect((event) => {
-            callback(event.square);
-        });
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        if (board._squareSelectHandler) el.removeEventListener('pointerdown', board._squareSelectHandler);
+        board._squareSelectHandler = function (e) {
+            const sqEl = e.target.closest('[data-square]');
+            if (sqEl) callback(sqEl.getAttribute('data-square'));
+        };
+        el.addEventListener('pointerdown', board._squareSelectHandler);
     },
 
     disableSquareSelect(elementId) {
         const board = this.boards[elementId];
         if (!board) return;
-        board.disableSquareSelect();
+        if (board._squareSelectHandler) {
+            const el = document.getElementById(elementId);
+            if (el) el.removeEventListener('pointerdown', board._squareSelectHandler);
+            board._squareSelectHandler = null;
+        }
     },
 
     disableMoveInput(elementId) {
@@ -217,12 +226,3 @@ window.renderMiniBoard = renderMiniBoard;
 window.BoardManager = BoardManager;
 window.MARKER_TYPE = MARKER_TYPE;
 window.ARROW_TYPE = ARROW_TYPE;
-
-BoardManager.create('board', AppState.boardFen);
-BoardManager.create('detail-board', AppState.boardFen);
-setupAutoLoad();
-setupKeyboardSave();
-setupUrlParams();
-setupPuzzleKeyboardShortcuts();
-// Start the router: parse current URL and render the matching view.
-Router.init();

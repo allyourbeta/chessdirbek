@@ -1,5 +1,10 @@
-Read HOMEPAGE-EXACT-DIFFS.md. It contains 7 exact diffs. Apply each one literally — do not interpret, do not improvise, do not add anything that isn't in the diff. These are copy-paste replacements, not guidelines.
+Read CLAUDE.md and BOOTSTRAP-REFACTOR-DIFFS.md. This is a small structural refactor — 4 steps, each precisely described.
 
-For Diff 6 (board colors): after applying the first CSS selector, open localhost:8000 and check if the cm-chessboard board colors changed. If they didn't, try the alternative selectors listed in the spec. To check what selectors cm-chessboard uses, inspect the rendered SVG in the browser or read the cm-chessboard CSS file linked in index.html.
+Step 1: Create a new file (main.js) with exactly the content in the spec.
+Step 2: Delete 8 lines from the end of board.js. Do NOT change anything else in board.js.
+Step 3: Replace one script tag in index.html. Do NOT change anything else in index.html.
+Step 4: No backend changes needed.
 
-Do NOT modify any JS file except router.js (Diff 7, two line changes).
+This moves 8 lines from one file to another. Do NOT modify any logic, any function, any other file. After changes, run the backend tests and confirm they pass.
+
+If anything goes wrong: git restore .

@@ -37,10 +37,20 @@ async function savePosition() {
     if (editId) res = await fetch(API + '/positions/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     else res = await fetch(API + '/positions/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (res.ok) {
+        const saved = await res.json();
         toast(editId ? 'Position updated!' : 'Position saved!');
         clearForm();
-        const viewToGo = savedType === 'puzzle' ? 'tactics' : 'tabiyas';
-        Router.navigate({ view: viewToGo });
+        if (savedType === 'puzzle') {
+            Router.navigate(
+                { view: 'tactics', params: { featured: saved.id } },
+                { replace: true }
+            );
+        } else {
+            Router.navigate(
+                { view: 'tabiyas', params: { focus: saved.id } },
+                { replace: true }
+            );
+        }
     } else {
         const err = await res.json();
         const errorMsg = err.detail || 'Error saving';

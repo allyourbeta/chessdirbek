@@ -111,7 +111,7 @@ function renderTabiyasList() {
         return;
     }
     el.innerHTML = tabiyas.map(p =>
-        `<div class="pos-item" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'tabiya')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
+        `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'tabiya')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
     ).join('');
 }
 
@@ -131,7 +131,7 @@ function renderTacticsList() {
         return;
     }
     el.innerHTML = tactics.map(p =>
-        `<div class="pos-item" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'puzzle')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
+        `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'puzzle')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
     ).join('');
 }
 
@@ -178,11 +178,46 @@ function loadRandomFeatured() {
     document.getElementById('tactics-featured-title').style.cursor = 'pointer';
 }
 
+function loadFeaturedById(id) {
+    var pos = AppState.allPositions.find(function(p) {
+        return p.id === id && p.position_type === 'puzzle';
+    });
+    if (!pos) {
+        // Fall back to random if the requested position isn't in the list
+        // (e.g. tag filter excludes it, or it was deleted between save and render)
+        loadRandomFeatured();
+        return;
+    }
+    AppState.featuredTacticId = pos.id;
+    BoardManager.create('tactics-featured-board', pos.fen, {
+        flipped: pos.orientation === 'black',
+    });
+    EngineUI.mount('tactics-featured-engine');
+    EngineUI.setPosition(pos.fen);
+    document.getElementById('tactics-featured-title').textContent = pos.title || 'Untitled';
+    document.getElementById('tactics-featured-tags').innerHTML =
+        pos.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
+    document.getElementById('tactics-featured-title').onclick = function() {
+        showDetail(pos.id);
+    };
+    document.getElementById('tactics-featured-title').style.cursor = 'pointer';
+}
+
+function focusTabiyaRow(id) {
+    var row = document.querySelector('#tabiyas-list .pos-item[data-pos-id="' + id + '"]');
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    row.classList.add('row-highlight');
+    setTimeout(function() { row.classList.remove('row-highlight'); }, 1500);
+}
+
 function flipFeaturedBoard() {
     BoardManager.flip('tactics-featured-board');
 }
 
 window.loadRandomFeatured = loadRandomFeatured;
+window.loadFeaturedById = loadFeaturedById;
+window.focusTabiyaRow = focusTabiyaRow;
 window.flipFeaturedBoard = flipFeaturedBoard;
 window.loadPositions = loadPositions;
 window.loadTabiyas = loadTabiyas;

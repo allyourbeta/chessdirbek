@@ -134,13 +134,28 @@ function renderRoute(route) {
             _applyPositionFilters(params);
             _activateView('tabiyas', 'Tabiyas');
             mountTabiyaTagFilter();
-            loadTabiyas();
+            loadTabiyas().then(function() {
+                var focusId = params.focus ? parseInt(params.focus, 10) : null;
+                if (focusId && !isNaN(focusId)) {
+                    focusTabiyaRow(focusId);
+                    Router.syncUrl({ view: 'tabiyas', params: {} });
+                }
+            });
             break;
         case 'tactics':
             _applyPositionFilters(params);
             _activateView('tactics', 'Tactics');
             mountTacticsTagFilter();
-            loadTactics().then(function() { loadRandomFeatured(); });
+            loadTactics().then(function() {
+                var featuredId = params.featured ? parseInt(params.featured, 10) : null;
+                if (featuredId && !isNaN(featuredId)) {
+                    loadFeaturedById(featuredId);
+                    // One-shot: strip the param so Back from detail returns to a clean /tactics
+                    Router.syncUrl({ view: 'tactics', params: {} });
+                } else {
+                    loadRandomFeatured();
+                }
+            });
             break;
         case 'positionDetail':
             _applyPositionFilters(params);

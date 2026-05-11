@@ -203,13 +203,6 @@ function loadFeaturedById(id) {
     document.getElementById('tactics-featured-title').style.cursor = 'pointer';
 }
 
-function focusTabiyaRow(id) {
-    var row = document.querySelector('#tabiyas-list .pos-item[data-pos-id="' + id + '"]');
-    if (!row) return;
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    row.classList.add('row-highlight');
-    setTimeout(function() { row.classList.remove('row-highlight'); }, 1500);
-}
 
 function flipFeaturedBoard() {
     BoardManager.flip('tactics-featured-board');
@@ -267,7 +260,6 @@ function loadFeaturedTabiyaById(id) {
 
 window.loadRandomFeatured = loadRandomFeatured;
 window.loadFeaturedById = loadFeaturedById;
-window.focusTabiyaRow = focusTabiyaRow;
 window.flipFeaturedBoard = flipFeaturedBoard;
 window.loadRandomFeaturedTabiya = loadRandomFeaturedTabiya;
 window.flipFeaturedTabiyaBoard = flipFeaturedTabiyaBoard;

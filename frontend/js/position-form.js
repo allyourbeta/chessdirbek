@@ -40,17 +40,11 @@ async function savePosition() {
         const saved = await res.json();
         toast(editId ? 'Position updated!' : 'Position saved!');
         clearForm();
-        if (savedType === 'puzzle') {
-            Router.navigate(
-                { view: 'tactics', params: { featured: saved.id } },
-                { replace: true }
-            );
-        } else {
-            Router.navigate(
-                { view: 'tabiyas', params: { focus: saved.id } },
-                { replace: true }
-            );
-        }
+        const viewToGo = savedType === 'puzzle' ? 'tactics' : 'tabiyas';
+        Router.navigate(
+            { view: viewToGo, params: { featured: saved.id } },
+            { replace: true }
+        );
     } else {
         const err = await res.json();
         const errorMsg = err.detail || 'Error saving';

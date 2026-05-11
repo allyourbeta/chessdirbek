@@ -56,10 +56,6 @@
   border-color: var(--primary-300);
   box-shadow: var(--shadow-sm);
 }
-.pos-item.row-highlight {
-  background: rgba(74, 144, 217, 0.12);
-  transition: background 1.2s ease-out;
-}
 .pos-item-body {
   padding: var(--sp-4);
 }

@@ -46,6 +46,7 @@
     <div class="list-header">
       <div class="list-header-top">
         <h2>Tabiyas</h2>
+        <button class="btn btn-sm btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'tabiya'}})">+ New Tabiya</button>
         <button class="btn btn-sm" onclick="randomFromList('tabiya')">Shuffle</button>
       </div>
       <div class="list-header-bar">
@@ -68,9 +69,10 @@
         <div id="tactics-featured-engine" style="margin-top:14px"></div>
       </div>
       <div class="tactics-browse">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h2 style="font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.02em">Tactics</h2>
-          <div id="tactics-tag-filters" class="tag-row"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+          <h2 style="font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.02em;margin:0">Tactics</h2>
+          <button class="btn btn-sm btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'puzzle'}})">+ New Tactic</button>
+          <div id="tactics-tag-filters" class="tag-row" style="margin-left:auto"></div>
         </div>
         <div id="tactics-count" class="text-muted" style="font-size:16px;font-weight:500;margin-bottom:14px"></div>
         <div id="tactics-list" class="pos-list"></div>

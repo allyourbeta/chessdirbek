@@ -20,6 +20,9 @@ from backend.services.engine_service import (
     ENGINE_LEVELS,
     compute_engine_verdict,
 )
+from backend.services.name_service import (
+    generate_placeholder_name,
+)
 
 __all__ = [
     "validate_fen",
@@ -36,4 +39,5 @@ __all__ = [
     "get_fen_at_move",
     "ENGINE_LEVELS",
     "compute_engine_verdict",
+    "generate_placeholder_name",
 ]

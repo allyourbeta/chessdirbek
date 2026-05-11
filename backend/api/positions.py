@@ -15,7 +15,7 @@ from backend.api.schemas import (
 )
 from backend.database import get_db
 from backend.models import Position, PositionType, Tag
-from backend.services import validate_fen
+from backend.services import validate_fen, generate_placeholder_name
 
 router = APIRouter(prefix="/positions", tags=["positions"])
 
@@ -55,10 +55,14 @@ def create_position(data: PositionCreate, db: Session = Depends(get_db)):
             detail=f"This {position_type_name} position already exists."
         )
     
+    # Auto-generate a friendly placeholder name if title is missing/blank.
+    # Placeholders aren't unique identifiers — collisions are fine.
+    title = (data.title or "").strip() or generate_placeholder_name()
+    
     tags = _get_or_create_tags(db, data.tags)
     position = Position(
         fen=data.fen,
-        title=data.title,
+        title=title,
         notes=data.notes,
         stockfish_analysis=data.stockfish_analysis,
         position_type=data.position_type,
@@ -196,7 +200,7 @@ def update_position(
             raise HTTPException(status_code=400, detail=f"Invalid FEN: {error}")
         position.fen = data.fen
     if data.title is not None:
-        position.title = data.title
+        position.title = data.title.strip() or generate_placeholder_name()
     if data.notes is not None:
         position.notes = data.notes
     if data.stockfish_analysis is not None:

@@ -110,6 +110,15 @@ function renderTabiyasList() {
         el.innerHTML = `<div class="empty-state"><p>No tabiyas yet</p><p>Click "Add New" to save your first opening position.</p></div>`;
         return;
     }
+    // Put featured position first so it's always easy to find
+    const featuredId = AppState.featuredTabiyaId;
+    if (featuredId) {
+        tabiyas.sort(function(a, b) {
+            if (a.id === featuredId) return -1;
+            if (b.id === featuredId) return 1;
+            return 0; // preserve existing order for everything else
+        });
+    }
     el.innerHTML = tabiyas.map(p =>
         `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'tabiya')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
     ).join('');
@@ -129,6 +138,15 @@ function renderTacticsList() {
     if (!tactics.length) {
         el.innerHTML = `<div class="empty-state"><p>No tactics puzzles yet</p><p>Click "Add New" to save your first tactical puzzle.</p></div>`;
         return;
+    }
+    // Put featured position first so it's always easy to find
+    const featuredId = AppState.featuredTacticId;
+    if (featuredId) {
+        tactics.sort(function(a, b) {
+            if (a.id === featuredId) return -1;
+            if (b.id === featuredId) return 1;
+            return 0; // preserve existing order for everything else
+        });
     }
     el.innerHTML = tactics.map(p =>
         `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'puzzle')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
@@ -176,6 +194,7 @@ function loadRandomFeatured() {
         showDetail(pick.id);
     };
     document.getElementById('tactics-featured-title').style.cursor = 'pointer';
+    renderTacticsList();
 }
 
 function loadFeaturedById(id) {
@@ -201,6 +220,7 @@ function loadFeaturedById(id) {
         showDetail(pos.id);
     };
     document.getElementById('tactics-featured-title').style.cursor = 'pointer';
+    renderTacticsList();
 }
 
 
@@ -227,6 +247,7 @@ function loadRandomFeaturedTabiya() {
         showDetail(pick.id);
     };
     document.getElementById('tabiyas-featured-title').style.cursor = 'pointer';
+    renderTabiyasList();
 }
 
 function flipFeaturedTabiyaBoard() {
@@ -256,6 +277,7 @@ function loadFeaturedTabiyaById(id) {
         showDetail(pos.id);
     };
     document.getElementById('tabiyas-featured-title').style.cursor = 'pointer';
+    renderTabiyasList();
 }
 
 window.loadRandomFeatured = loadRandomFeatured;

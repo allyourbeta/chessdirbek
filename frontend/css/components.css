@@ -629,3 +629,9 @@
   color: var(--text-muted);
   font-weight: 400;
 }
+.featured-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}

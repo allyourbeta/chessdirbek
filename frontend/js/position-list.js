@@ -280,6 +280,28 @@ function loadFeaturedTabiyaById(id) {
     renderTabiyasList();
 }
 
+function editFeaturedPosition(type) {
+    var id = type === 'tactics' ? AppState.featuredTacticId : AppState.featuredTabiyaId;
+    if (!id) return;
+    // Reuse the existing editPosition flow: set the detail ID, call editPosition
+    AppState.currentDetailId = id;
+    editPosition();
+}
+
+async function deleteFeaturedPosition(type) {
+    var id = type === 'tactics' ? AppState.featuredTacticId : AppState.featuredTabiyaId;
+    if (!id || !confirm('Delete this position?')) return;
+    var res = await fetch(API + '/positions/' + id, { method: 'DELETE' });
+    if (res.ok) {
+        toast('Position deleted');
+        if (type === 'tactics') {
+            loadTactics().then(function() { loadRandomFeatured(); });
+        } else {
+            loadTabiyas().then(function() { loadRandomFeaturedTabiya(); });
+        }
+    }
+}
+
 window.loadRandomFeatured = loadRandomFeatured;
 window.loadFeaturedById = loadFeaturedById;
 window.flipFeaturedBoard = flipFeaturedBoard;
@@ -298,3 +320,5 @@ window.renderTabiyasList = renderTabiyasList;
 window.renderTacticsList = renderTacticsList;
 window.deleteFromList = deleteFromList;
 window.randomFromList = randomFromList;
+window.editFeaturedPosition = editFeaturedPosition;
+window.deleteFeaturedPosition = deleteFeaturedPosition;

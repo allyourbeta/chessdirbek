@@ -55,12 +55,14 @@
         <div id="tabiyas-featured-engine" style="margin-top:14px"></div>
       </div>
       <div class="collection-browse">
-        <h2 style="font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.02em;margin:0 0 4px 0">Tabiyas</h2>
-        <div id="tabiyas-count" class="text-muted" style="font-size:14px;font-weight:500;margin-bottom:14px"></div>
-        <div class="collection-action-bar">
+        <div class="collection-header-row">
+          <div class="collection-header-left">
+            <h2>Tabiyas</h2>
+            <span id="tabiyas-count" class="collection-count"></span>
+          </div>
           <button class="btn btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'tabiya'}})">+ New Tabiya</button>
-          <div id="tabiyas-tag-filters" class="tag-row"></div>
         </div>
+        <div id="tabiyas-tag-filters" class="tag-row" style="margin-bottom:12px"></div>
         <div id="tabiyas-list" class="pos-list"></div>
       </div>
     </div>
@@ -78,12 +80,14 @@
         <div id="tactics-featured-engine" style="margin-top:14px"></div>
       </div>
       <div class="collection-browse">
-        <h2 style="font-size:32px;font-weight:700;color:var(--text);letter-spacing:-0.02em;margin:0 0 4px 0">Tactics</h2>
-        <div id="tactics-count" class="text-muted" style="font-size:14px;font-weight:500;margin-bottom:14px"></div>
-        <div class="collection-action-bar">
+        <div class="collection-header-row">
+          <div class="collection-header-left">
+            <h2>Tactics</h2>
+            <span id="tactics-count" class="collection-count"></span>
+          </div>
           <button class="btn btn-primary" onclick="Router.navigate({view:'addPosition', params:{type:'puzzle'}})">+ New Tactic</button>
-          <div id="tactics-tag-filters" class="tag-row"></div>
         </div>
+        <div id="tactics-tag-filters" class="tag-row" style="margin-bottom:12px"></div>
         <div id="tactics-list" class="pos-list"></div>
       </div>
     </div>

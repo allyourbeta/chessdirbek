@@ -604,15 +604,28 @@
     grid-template-columns: 1fr;
   }
 }
-.collection-action-bar {
+.collection-header-row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
-.collection-action-bar > .tag-row {
-  margin-left: auto;
-  flex: 1;
-  min-width: 200px;
+.collection-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.collection-header-left h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.collection-count {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 400;
 }

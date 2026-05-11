@@ -608,3 +608,15 @@
     grid-template-columns: 1fr;
   }
 }
+.collection-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.collection-action-bar > .tag-row {
+  margin-left: auto;
+  flex: 1;
+  min-width: 200px;
+}

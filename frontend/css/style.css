@@ -528,6 +528,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
 
 /* Sizes */
 .btn-sm { padding: 4px 9px; font-size: var(--fs-12); }
+.btn-md { padding: 8px 18px; font-size: var(--fs-15); font-weight: 600; }
 .btn-lg { padding: 9px 16px; font-size: var(--fs-14); }
 
 /* Tertiary / text-only link button */

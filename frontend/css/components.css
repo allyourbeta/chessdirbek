@@ -580,22 +580,22 @@
 }
 
 /* ------------------------------------------------------------------
-   Tactics landing — featured board + browse grid
+   Collection landing (Tactics + Tabiyas) — featured board + browse grid
    ------------------------------------------------------------------ */
-.tactics-landing {
+.collection-landing {
   display: grid;
   grid-template-columns: 480px 1fr;
   gap: var(--sp-8);
   align-items: start;
 }
-.tactics-featured {
+.collection-featured {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: var(--sp-5);
   box-shadow: var(--shadow-sm);
 }
-.tactics-browse {
+.collection-browse {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -604,7 +604,7 @@
   min-width: 0;
 }
 @media (max-width: 960px) {
-  .tactics-landing {
+  .collection-landing {
     grid-template-columns: 1fr;
   }
 }

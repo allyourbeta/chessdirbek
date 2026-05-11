@@ -317,8 +317,39 @@ window.mountTacticsTagFilter = mountTacticsTagFilter;
 window.showDetail = showDetail;
 window.renderPositionsList = renderPositionsList;
 window.renderTabiyasList = renderTabiyasList;
+function forkFeaturedPosition(type) {
+    var id = type === 'tactics' ? AppState.featuredTacticId : AppState.featuredTabiyaId;
+    if (!id) return;
+    fetch(API + '/positions/' + id).then(function(r) { return r.json(); }).then(function(pos) {
+        // Pre-populate the form with data from the source position
+        // but do NOT set edit-id — this creates a new position, not an edit.
+        document.getElementById('edit-id').value = '';
+        document.getElementById('fen-input').value = pos.fen;
+        document.getElementById('pos-title').value = '';  // blank — will auto-generate on save
+        window._formTagState.tags = pos.tags.map(function(t) { return t.name; });
+        window._initFormTagFilter();
+        document.getElementById('pos-notes').value = pos.notes || '';
+        document.getElementById('pos-stockfish').value = pos.stockfish_analysis || '';
+        document.getElementById('form-title').textContent =
+            'Fork from ' + (pos.title || 'untitled');
+        document.getElementById('delete-btn').style.display = 'none';
+        AppState.boardFen = pos.fen;
+        AppState.addPositionType = pos.position_type || 'tabiya';
+
+        Router.navigate({
+            view: 'addPosition',
+            params: { type: pos.position_type || 'tabiya' }
+        });
+        BoardManager.setPosition('board', AppState.boardFen);
+        if (typeof window._applyFormOrientation === 'function') {
+            window._applyFormOrientation(pos.orientation || 'white');
+        }
+    });
+}
+
 window.renderTacticsList = renderTacticsList;
 window.deleteFromList = deleteFromList;
 window.randomFromList = randomFromList;
 window.editFeaturedPosition = editFeaturedPosition;
 window.deleteFeaturedPosition = deleteFeaturedPosition;
+window.forkFeaturedPosition = forkFeaturedPosition;

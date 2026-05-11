@@ -135,10 +135,12 @@ function renderRoute(route) {
             _activateView('tabiyas', 'Tabiyas');
             mountTabiyaTagFilter();
             loadTabiyas().then(function() {
-                var focusId = params.focus ? parseInt(params.focus, 10) : null;
-                if (focusId && !isNaN(focusId)) {
-                    focusTabiyaRow(focusId);
+                var featuredId = params.featured ? parseInt(params.featured, 10) : null;
+                if (featuredId && !isNaN(featuredId)) {
+                    loadFeaturedTabiyaById(featuredId);
                     Router.syncUrl({ view: 'tabiyas', params: {} });
+                } else {
+                    loadRandomFeaturedTabiya();
                 }
             });
             break;

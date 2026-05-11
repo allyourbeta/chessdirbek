@@ -33,6 +33,8 @@ const AppState = {
     searchFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     selectedGameIds: new Set(),
     addPositionType: 'tabiya',
+    featuredTacticId: null,
+    featuredTabiyaId: null,
 };
 
 window.AppState = AppState;

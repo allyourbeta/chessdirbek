@@ -215,10 +215,63 @@ function flipFeaturedBoard() {
     BoardManager.flip('tactics-featured-board');
 }
 
+function loadRandomFeaturedTabiya() {
+    var tabiyas = AppState.allPositions.filter(function(p) {
+        return p.position_type === 'tabiya';
+    });
+    if (!tabiyas.length) return;
+    var pick = tabiyas[Math.floor(Math.random() * tabiyas.length)];
+    AppState.featuredTabiyaId = pick.id;
+    BoardManager.create('tabiyas-featured-board', pick.fen, {
+        flipped: pick.orientation === 'black',
+    });
+    EngineUI.mount('tabiyas-featured-engine');
+    EngineUI.setPosition(pick.fen);
+    document.getElementById('tabiyas-featured-title').textContent = pick.title || 'Untitled';
+    document.getElementById('tabiyas-featured-tags').innerHTML =
+        pick.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
+    document.getElementById('tabiyas-featured-title').onclick = function() {
+        showDetail(pick.id);
+    };
+    document.getElementById('tabiyas-featured-title').style.cursor = 'pointer';
+}
+
+function flipFeaturedTabiyaBoard() {
+    BoardManager.flip('tabiyas-featured-board');
+}
+
+function loadFeaturedTabiyaById(id) {
+    var pos = AppState.allPositions.find(function(p) {
+        return p.id === id && p.position_type === 'tabiya';
+    });
+    if (!pos) {
+        // Fall back to random if the requested position isn't in the list
+        // (e.g. tag filter excludes it, or it was deleted between save and render)
+        loadRandomFeaturedTabiya();
+        return;
+    }
+    AppState.featuredTabiyaId = pos.id;
+    BoardManager.create('tabiyas-featured-board', pos.fen, {
+        flipped: pos.orientation === 'black',
+    });
+    EngineUI.mount('tabiyas-featured-engine');
+    EngineUI.setPosition(pos.fen);
+    document.getElementById('tabiyas-featured-title').textContent = pos.title || 'Untitled';
+    document.getElementById('tabiyas-featured-tags').innerHTML =
+        pos.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
+    document.getElementById('tabiyas-featured-title').onclick = function() {
+        showDetail(pos.id);
+    };
+    document.getElementById('tabiyas-featured-title').style.cursor = 'pointer';
+}
+
 window.loadRandomFeatured = loadRandomFeatured;
 window.loadFeaturedById = loadFeaturedById;
 window.focusTabiyaRow = focusTabiyaRow;
 window.flipFeaturedBoard = flipFeaturedBoard;
+window.loadRandomFeaturedTabiya = loadRandomFeaturedTabiya;
+window.flipFeaturedTabiyaBoard = flipFeaturedTabiyaBoard;
+window.loadFeaturedTabiyaById = loadFeaturedTabiyaById;
 window.loadPositions = loadPositions;
 window.loadTabiyas = loadTabiyas;
 window.loadTactics = loadTactics;

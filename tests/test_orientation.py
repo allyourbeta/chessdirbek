@@ -20,7 +20,7 @@ _tmp.close()
 DB_PATH = _tmp.name
 os.environ["CHESSQUIZ_DB_URL"] = f"sqlite:///{DB_PATH}"
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _seed_legacy_rows_without_orientation_column():

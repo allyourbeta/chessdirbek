@@ -4,7 +4,7 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from backend.services import (
     compute_pawn_sig,

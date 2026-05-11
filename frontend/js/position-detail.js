@@ -158,7 +158,13 @@ function editPosition() {
         AppState.boardFen = pos.fen;
         AppState.addPositionType = pos.position_type || 'tabiya';
         Router.navigate({ view: 'addPosition', params: { type: pos.position_type || 'tabiya' } });
-        BoardManager.setPosition('board', AppState.boardFen);
+        BoardManager.create('board', AppState.boardFen, {
+            mode: 'analysis',
+            onPositionChange: function(newFen) {
+                document.getElementById('fen-input').value = newFen;
+                AppState.boardFen = newFen;
+            },
+        });
         // Honor the saved orientation when bringing the position into the edit form.
         if (typeof window._applyFormOrientation === 'function') {
             window._applyFormOrientation(pos.orientation || 'white');

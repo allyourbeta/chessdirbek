@@ -1,6 +1,11 @@
 var _formTagState = { tags: [] };
 var _formTagFilter = null;
 
+function _onBoardPositionChange(newFen) {
+    document.getElementById('fen-input').value = newFen;
+    AppState.boardFen = newFen;
+}
+
 function _initFormTagFilter() {
     _formTagFilter = TagFilter.mount({
         containerId: 'pos-tags-container',
@@ -121,7 +126,11 @@ function clearForm() {
     document.getElementById('delete-btn').style.display = 'none';
     AppState.boardFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
     AppState.addPositionType = 'tabiya';
-    BoardManager.create('board', AppState.boardFen, { flipped: false });
+    BoardManager.create('board', AppState.boardFen, {
+        flipped: false,
+        mode: 'analysis',
+        onPositionChange: _onBoardPositionChange,
+    });
     const saved = AppState.lastTags || localStorage.getItem('chessquiz-last-tags') || '';
     _formTagState.tags = saved ? saved.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
     _initFormTagFilter();
@@ -259,6 +268,7 @@ window._formTagState = _formTagState;
 window._initFormTagFilter = _initFormTagFilter;
 window._applyFormOrientation = _applyFormOrientation;
 window._orientationForFen = _orientationForFen;
+window._onBoardPositionChange = _onBoardPositionChange;
 window.loadPuzzleNavigation = loadPuzzleNavigation;
 window.navigateToPuzzle = navigateToPuzzle;
 window.navigatePuzzle = navigatePuzzle;

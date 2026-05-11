@@ -330,8 +330,6 @@ function forkFeaturedPosition(type) {
         window._initFormTagFilter();
         document.getElementById('pos-notes').value = pos.notes || '';
         document.getElementById('pos-stockfish').value = pos.stockfish_analysis || '';
-        document.getElementById('form-title').textContent =
-            'Fork from ' + (pos.title || 'untitled');
         document.getElementById('delete-btn').style.display = 'none';
         AppState.boardFen = pos.fen;
         AppState.addPositionType = pos.position_type || 'tabiya';
@@ -340,10 +338,19 @@ function forkFeaturedPosition(type) {
             view: 'addPosition',
             params: { type: pos.position_type || 'tabiya' }
         });
-        BoardManager.setPosition('board', AppState.boardFen);
+        // These must come AFTER Router.navigate since renderRoute overwrites them
+        BoardManager.create('board', AppState.boardFen, {
+            mode: 'analysis',
+            onPositionChange: function(newFen) {
+                document.getElementById('fen-input').value = newFen;
+                AppState.boardFen = newFen;
+            },
+        });
         if (typeof window._applyFormOrientation === 'function') {
             window._applyFormOrientation(pos.orientation || 'white');
         }
+        document.getElementById('form-title').textContent =
+            'Fork from ' + (pos.title || 'untitled');
     });
 }
 

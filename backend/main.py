@@ -14,6 +14,7 @@ from backend.api import (
     games_router,
     opening_tree_router,
     positions_router,
+    positions_extra_router,
     practice_router,
     tags_router,
 )
@@ -37,6 +38,7 @@ app.add_middleware(
 
 app.include_router(annotations_router, prefix="/api")
 app.include_router(positions_router, prefix="/api")
+app.include_router(positions_extra_router, prefix="/api")
 app.include_router(tags_router, prefix="/api")
 app.include_router(chess_router, prefix="/api")
 app.include_router(games_router, prefix="/api")

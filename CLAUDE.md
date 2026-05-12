@@ -5,18 +5,18 @@ Personal chess position quiz app. Save positions (FEN), annotate them with notes
 ## Architecture
 
 ```
-React (browser)
+Vanilla JS (browser)
   ├── Stockfish WASM (engine analysis, client-side)
-  ├── react-chessboard (board rendering)
+  ├── cm-chessboard v8 (board rendering, via CDN)
   └── calls → Python backend (FastAPI)
-                ├── python-chess (FEN validation, pawn structure search, position analysis)
+                ├── python-chess (FEN validation, pawn structure search)
                 └── SQLite via SQLAlchemy (persistence)
 ```
 
 ## Tech Stack
 - **Backend**: Python 3 + FastAPI + SQLAlchemy + SQLite
 - **Chess logic**: python-chess (backend), stockfish.js WASM (frontend)
-- **Frontend**: React + TypeScript + react-chessboard
+- **Frontend**: Vanilla JS + cm-chessboard v8 (CDN) + chess.js (move validation)
 - **Database**: SQLite (single file, no server)
 
 ## File Limits
@@ -25,6 +25,8 @@ React (browser)
 ## Backend Structure
 - `models/` — SQLAlchemy models
 - `api/` — FastAPI route handlers (all DB calls here)
+  - `positions.py`, `positions_extra.py` — Position CRUD + bulk operations  
+  - `practice.py`, `practice_stats.py` — Practice games + analytics
 - `services/` — Pure functions for chess logic (no DB, no FastAPI imports)
 - `main.py` — App entry point, mounts routers
 - `database.py` — DB engine/session setup
@@ -56,14 +58,18 @@ IMPORTANT: Always run `scripts/backup_now.sh` before any destructive operations,
 The frontend is vanilla JS (no build tools). Scripts are loaded via `<script>`
 tags in `index.html`. Two files use `<script type="module">`:
 
-- `board.js` — ES module that imports cm-chessboard v8 from CDN. Defines
+- `main.js` — ES module that imports cm-chessboard v8 from CDN. Defines
   `BoardManager` (window global). Also bootstraps the app by calling
   `Router.init()` at the end of its execution. This means all regular scripts
-  must be loaded before `board.js`, and any global they define will be
+  must be loaded before `main.js`, and any global they define will be
   available when `Router.init()` triggers routing.
 - `board-editor.js` — regular script (NOT a module). Must appear before
-  `board.js` in `index.html` so `window.BoardEditor` exists when the router
+  `main.js` in `index.html` so `window.BoardEditor` exists when the router
   might navigate to the editor view.
+
+Split files (to honor 300-line limit):
+- `position-list.js` + `featured.js` — Position lists and featured board management
+- `practice-ui.js` + `practice-ui-actions.js` — Practice session UI and inline actions
 
 ### cm-chessboard v8 API
 
@@ -117,8 +123,8 @@ reintroduces `_state = 'ready'` in the bestmove handler, that is the bug.
 The board editor has two known failure modes:
 
 1. **`BoardEditor` is undefined** — `board-editor.js` must be loaded as a
-   regular `<script>` (NOT `type="module"`) and must appear BEFORE `board.js`
-   in `index.html`. If it's a module or appears after `board.js`, the router
+   regular `<script>` (NOT `type="module"`) and must appear BEFORE `main.js`
+   in `index.html`. If it's a module or appears after `main.js`, the router
    will try to call `BoardEditor.init()` before it exists.
 2. **Clicking squares does nothing** — the `BoardManager.enableSquareSelect()`
    method must use cm-chessboard's native one-argument API. If someone changes

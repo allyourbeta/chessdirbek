@@ -1,7 +1,7 @@
 """Position API routes. All DB calls for positions happen here."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, joinedload
 from typing import Optional
 

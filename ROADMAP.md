@@ -1,4 +1,4 @@
-# ChessQuiz Roadmap
+# Chessdirbek Roadmap
 
 Living document. The single source of truth for "what's the state of this project and what should I work on next?"
 
@@ -92,7 +92,7 @@ Tests:
 
 ### 2. Import Lichess studies content (~30 min after Phase 17 ships)
 
-Use the new Lichess Studies import to pull StanFurd studies into ChessQuiz. Then manually walk through each tactical study chapter and save the critical position as a Puzzle.
+Use the new Lichess Studies import to pull StanFurd studies into Chessdirbek. Then manually walk through each tactical study chapter and save the critical position as a Puzzle.
 
 This is content work — populating the puzzle UI with real data from my own curated studies (Tactics 1-4, Tactics missed, etc.).
 

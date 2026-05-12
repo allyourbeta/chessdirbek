@@ -6,12 +6,12 @@ import sys
 
 def main():
     print("=" * 60)
-    print("ChessQuiz Database Cleanup")
+    print("Chessdirbek Database Cleanup")
     print("=" * 60)
     print("\nThis script will remove test data that leaked into production.")
     print("Real user data (positions 1-5 and their practice games) will be preserved.")
     
-    conn = sqlite3.connect('chessquiz.db')
+    conn = sqlite3.connect('chessdirbek.db')
     cursor = conn.cursor()
     
     # First, analyze what we'll delete

@@ -1,6 +1,6 @@
 {
-  "name": "ChessQuiz",
-  "short_name": "ChessQuiz",
+  "name": "Chessdirbek",
+  "short_name": "Chessdirbek",
   "description": "Chess position trainer with FEN management, tagging, and Stockfish analysis",
   "start_url": "/",
   "display": "standalone",

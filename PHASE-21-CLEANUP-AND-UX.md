@@ -190,7 +190,7 @@ git mv UI-REFINEMENTS-SPEC.md docs/archive/
 git mv board_editor_analysis_handoff.md docs/archive/
 git mv board_editor_exact_signature_bug_handoff.md docs/archive/
 git mv board_editor_input_failure_handoff.md docs/archive/
-git mv chessquiz-ui-cleanup-spec-v2.md docs/archive/
+git mv chessdirbek-ui-cleanup-spec-v2.md docs/archive/
 git mv claude-code-prompt.md docs/archive/
 git mv next_fix.md docs/archive/
 git mv stock_spec.md docs/archive/
@@ -217,7 +217,7 @@ If any of these turn out to also be stale on inspection, leave them alone — ou
 The current README is a stub template. Replace with:
 
 ```markdown
-# ChessQuiz
+# Chessdirbek
 
 Personal chess position quiz app. Save positions (FEN), annotate them with notes and Stockfish analysis, tag them, and quiz yourself.
 

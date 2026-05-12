@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-os.environ["CHESSQUIZ_DB_URL"] = "sqlite:///:memory:"
+os.environ["CHESSDIRBEK_DB_URL"] = "sqlite:///:memory:"
 
 from backend.main import app
 from fastapi.testclient import TestClient

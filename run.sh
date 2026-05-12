@@ -1,7 +1,7 @@
 #!/bin/bash
-# Start ChessQuiz server
+# Start Chessdirbek server
 cd "$(dirname "$0")"
-echo "🎯 ChessQuiz starting at http://localhost:8000"
+echo "🎯 Chessdirbek starting at http://localhost:8000"
 echo "   API docs at http://localhost:8000/docs"
 echo ""
 python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000

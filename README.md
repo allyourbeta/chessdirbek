@@ -1,4 +1,4 @@
-# ChessQuiz
+# Chessdirbek
 
 Personal chess position quiz app. Save positions (FEN), annotate them with notes and Stockfish analysis, tag them, and quiz yourself.
 

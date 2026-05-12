@@ -131,7 +131,7 @@ function clearForm() {
         mode: 'analysis',
         onPositionChange: _onBoardPositionChange,
     });
-    const saved = AppState.lastTags || localStorage.getItem('chessquiz-last-tags') || '';
+    const saved = AppState.lastTags || localStorage.getItem('chessdirbek-last-tags') || '';
     _formTagState.tags = saved ? saved.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
     _initFormTagFilter();
 }
@@ -174,7 +174,7 @@ function setupUrlParams() {
 const _origSavePosition = savePosition;
 savePosition = async function() {
     AppState.lastTags = _formTagState.tags.join(', ');
-    localStorage.setItem('chessquiz-last-tags', AppState.lastTags);
+    localStorage.setItem('chessdirbek-last-tags', AppState.lastTags);
     return _origSavePosition.apply(this, arguments);
 };
 

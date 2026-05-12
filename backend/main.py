@@ -1,4 +1,4 @@
-"""ChessQuiz API — main entry point."""
+"""Chessdirbek API — main entry point."""
 
 from pathlib import Path
 
@@ -26,7 +26,7 @@ Base.metadata.create_all(bind=engine)
 # Apply additive column migrations (ELO, etc.) for existing databases
 run_lightweight_migrations()
 
-app = FastAPI(title="ChessQuiz", version="0.1.0")
+app = FastAPI(title="Chessdirbek", version="0.1.0")
 
 # CORS for local React dev server
 app.add_middleware(
@@ -57,7 +57,7 @@ app.mount("/vendor", StaticFiles(directory=FRONTEND_DIR / "vendor"), name="vendo
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "app": "ChessQuiz"}
+    return {"status": "ok", "app": "Chessdirbek"}
 
 
 # Static PWA files (manifest, service worker, icons, favicon)

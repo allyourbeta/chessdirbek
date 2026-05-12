@@ -1,4 +1,4 @@
-"""Shared test fixtures for ChessQuiz."""
+"""Shared test fixtures for Chessdirbek."""
 
 import os
 import pytest
@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Set test database URL before any imports
-os.environ["CHESSQUIZ_DB_URL"] = "sqlite:///:memory:"
+os.environ["CHESSDIRBEK_DB_URL"] = "sqlite:///:memory:"
 
 from backend.main import app
 from backend.database import get_db, Base

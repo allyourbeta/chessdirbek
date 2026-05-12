@@ -2,7 +2,7 @@
 
 ## Core Concept
 
-ChessQuiz needs to distinguish between two fundamentally different types of positions:
+Chessdirbek needs to distinguish between two fundamentally different types of positions:
 
 1. **Puzzles**: Positions with a specific correct answer or sequence that the user needs to find
 2. **Tabiyas**: Key opening/middlegame positions that serve as starting points for practice and exploration

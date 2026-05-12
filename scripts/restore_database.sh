@@ -2,14 +2,14 @@
 set -euo pipefail
 
 PROJECT_ROOT="$HOME/Droppbox/programming/projects/chessquiz"
-DB_FILE="$PROJECT_ROOT/chessquiz.db"
+DB_FILE="$PROJECT_ROOT/chessdirbek.db"
 BACKUP_DIR="$PROJECT_ROOT/backups"
 
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <backup-filename>"
     echo ""
     echo "Available backups:"
-    ls -lht "$BACKUP_DIR"/chessquiz-*.db 2>/dev/null | head -20 || echo "  No backups found"
+    ls -lht "$BACKUP_DIR"/chessdirbek-*.db 2>/dev/null | head -20 || echo "  No backups found"
     exit 1
 fi
 
@@ -59,7 +59,7 @@ fi
 
 # Create a safety backup of current DB before overwriting
 if [ -f "$DB_FILE" ]; then
-    SAFETY_BACKUP="$BACKUP_DIR/chessquiz-BEFORE-RESTORE-$(date +%Y%m%d-%H%M%S).db"
+    SAFETY_BACKUP="$BACKUP_DIR/chessdirbek-BEFORE-RESTORE-$(date +%Y%m%d-%H%M%S).db"
     echo ""
     echo "Creating safety backup of current database..."
     python3 -c "

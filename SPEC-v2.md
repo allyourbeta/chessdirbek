@@ -1,8 +1,8 @@
-# ChessQuiz v2 — Comprehensive Phased Implementation Spec
+# Chessdirbek v2 — Comprehensive Phased Implementation Spec
 
 ## Context
 
-ChessQuiz is a personal chess study home base. v1 handles positions (FEN snapshots). v2 transforms it into a full chess database and study system comparable to ChessBase/SCID, but web-based and personal.
+Chessdirbek is a personal chess study home base. v1 handles positions (FEN snapshots). v2 transforms it into a full chess database and study system comparable to ChessBase/SCID, but web-based and personal.
 
 **Read CLAUDE.md before starting any phase.** Architecture rules: 300-line file limit, layered architecture, etc.
 

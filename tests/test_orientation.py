@@ -18,7 +18,7 @@ import tempfile
 _tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
 _tmp.close()
 DB_PATH = _tmp.name
-os.environ["CHESSQUIZ_DB_URL"] = f"sqlite:///{DB_PATH}"
+os.environ["CHESSDIRBEK_DB_URL"] = f"sqlite:///{DB_PATH}"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

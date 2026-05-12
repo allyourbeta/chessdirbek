@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Set test database before importing
-os.environ["CHESSQUIZ_DB_URL"] = "sqlite:///:memory:"
+os.environ["CHESSDIRBEK_DB_URL"] = "sqlite:///:memory:"
 
 from backend.main import app
 from backend.services import generate_placeholder_name

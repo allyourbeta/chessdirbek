@@ -2,13 +2,13 @@
 set -euo pipefail
 
 PROJECT_ROOT="$HOME/Droppbox/programming/projects/chessquiz"
-DB_FILE="$PROJECT_ROOT/chessquiz.db"
+DB_FILE="$PROJECT_ROOT/chessdirbek.db"
 BACKUP_DIR="$PROJECT_ROOT/backups"
 RETENTION_DAYS=30
 
 mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_FILE="$BACKUP_DIR/chessquiz-$TIMESTAMP.db"
+BACKUP_FILE="$BACKUP_DIR/chessdirbek-$TIMESTAMP.db"
 
 # Use Python + SQLite's native backup API (safer than cp for live databases)
 python3 -c "
@@ -21,8 +21,8 @@ dst.close()
 "
 
 # Prune old backups beyond retention window
-find "$BACKUP_DIR" -name "chessquiz-*.db" -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_DIR" -name "chessdirbek-*.db" -mtime +$RETENTION_DAYS -delete
 
 echo "Backup created: $BACKUP_FILE"
 echo "Retained backups:"
-ls -lht "$BACKUP_DIR"/chessquiz-*.db 2>/dev/null | head -5 || echo "  No backups found yet"
+ls -lht "$BACKUP_DIR"/chessdirbek-*.db 2>/dev/null | head -5 || echo "  No backups found yet"

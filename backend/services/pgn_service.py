@@ -8,6 +8,10 @@ import chess.polyglot
 
 from backend.services.index_service import compute_pawn_sig, compute_zobrist
 
+# Standard NAG-to-symbol mapping (most common move annotations).
+# See PGN specification §10 for the full list.
+_NAG_SYMBOLS = {1: "!", 2: "?", 3: "!!", 4: "??", 5: "!?", 6: "?!"}
+
 
 def parse_single_pgn(pgn_text: str) -> dict:
     """Parse a single PGN game.
@@ -35,7 +39,14 @@ def parse_single_pgn(pgn_text: str) -> dict:
     for node in game.mainline():
         if node.parent and len(node.parent.variations) > 1:
             has_variations = True
-        moves_san.append(board.san(node.move))
+        san = board.san(node.move)
+        # Append NAG symbols (!, ?, !!, ??, !?, ?!) to the move text
+        for nag in sorted(node.nags):
+            sym = _NAG_SYMBOLS.get(nag)
+            if sym:
+                san += sym
+                break  # Only use the first recognized NAG per move
+        moves_san.append(san)
         moves_uci.append(node.move.uci())
         board.push(node.move)
         fens.append(board.fen())

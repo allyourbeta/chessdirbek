@@ -5,6 +5,7 @@ from backend.api.opening_tree import router as opening_tree_router
 from backend.api.positions import router as positions_router
 from backend.api.positions_extra import router as positions_extra_router
 from backend.api.practice import router as practice_router
+from backend.api.practice_stats import router as practice_stats_router
 from backend.api.tags_and_chess import chess_router, tags_router
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
     "collections_router",
     "opening_tree_router",
     "practice_router",
+    "practice_stats_router",
 ]

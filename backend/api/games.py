@@ -33,7 +33,6 @@ from backend.services import (
 
 router = APIRouter(prefix="/games", tags=["games"])
 
-
 @router.post("/", response_model=GameBrief, status_code=201)
 def create_game(data: GameCreate, db: Session = Depends(get_db)):
     parsed = parse_single_pgn(data.pgn_text)
@@ -45,7 +44,6 @@ def create_game(data: GameCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(game)
     return game
-
 
 @router.post("/import", response_model=BulkPGNImportResult)
 def bulk_import(data: BulkPGNImport, db: Session = Depends(get_db)):
@@ -67,7 +65,6 @@ def bulk_import(data: BulkPGNImport, db: Session = Depends(get_db)):
         game_ids=result["game_ids"],
     )
 
-
 @router.post("/import/stream")
 def bulk_import_stream(data: BulkPGNImport):
     """SSE import. Emits start/progress/done/error events. Cancel via /import/cancel/{job_id}."""
@@ -81,16 +78,13 @@ def bulk_import_stream(data: BulkPGNImport):
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "X-Job-Id": job_id},
     )
 
-
 @router.post("/import/cancel/{job_id}", status_code=202)
 def bulk_import_cancel(job_id: str):
     if not signal_cancel(job_id):
         raise HTTPException(status_code=404, detail="Import job not found")
     return {"cancelled": True, "job_id": job_id}
 
-
 _VALID_RESULTS = {"1-0", "0-1", "1/2-1/2"}
-
 
 def _apply_game_filters(query, tag, tags, collection_id, search, eco, result):
     tag_names = []

@@ -83,6 +83,7 @@
           <label>FEN</label>
           <input type="text" id="fen-input" placeholder="Paste FEN here...">
           <div class="btn-row">
+            <button class="btn btn-primary btn-sm" onclick="savePosition()">Save Position</button>
             <button class="btn btn-sm" onclick="loadFen()">Load Board</button>
             <button class="btn btn-sm" onclick="setStartPos()">Starting Position</button>
             <button class="btn btn-sm" onclick="flipBoard()">Flip Board</button>
@@ -101,7 +102,6 @@
         <label>Analysis Notes</label>
         <textarea id="pos-stockfish" placeholder="Paste analysis notes here..." style="margin-top:8px"></textarea>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="savePosition()">Save Position</button>
           <button class="btn" onclick="clearForm()">Clear</button>
           <button class="btn btn-danger" id="delete-btn" style="display:none" onclick="deletePosition()">Delete</button>
         </div>

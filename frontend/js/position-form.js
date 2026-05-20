@@ -149,6 +149,26 @@ function setupAutoLoad() {
     });
 }
 
+function setupAutoGrowTextareas() {
+    function autoGrow(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 400) + 'px';
+    }
+    
+    const notesTextarea = document.getElementById('pos-notes');
+    const stockfishTextarea = document.getElementById('pos-stockfish');
+    
+    if (notesTextarea) {
+        notesTextarea.addEventListener('input', () => autoGrow(notesTextarea));
+        autoGrow(notesTextarea); // Set initial height
+    }
+    
+    if (stockfishTextarea) {
+        stockfishTextarea.addEventListener('input', () => autoGrow(stockfishTextarea));
+        autoGrow(stockfishTextarea); // Set initial height
+    }
+}
+
 function setupKeyboardSave() {
     document.addEventListener('keydown', e => {
         if ((e.metaKey || e.ctrlKey) && e.key === 's') {
@@ -263,6 +283,7 @@ window.setStartPos = setStartPos;
 window.flipBoard = flipBoard;
 window.clearForm = clearForm;
 window.setupAutoLoad = setupAutoLoad;
+window.setupAutoGrowTextareas = setupAutoGrowTextareas;
 window.setupKeyboardSave = setupKeyboardSave;
 window.setupUrlParams = setupUrlParams;
 window._formTagState = _formTagState;

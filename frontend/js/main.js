@@ -16,6 +16,7 @@ BoardManager.create('detail-board', AppState.boardFen);
 
 // Run setup (defined in position-form.js, loaded as regular script before this)
 setupAutoLoad();
+setupAutoGrowTextareas();
 setupKeyboardSave();
 setupUrlParams();
 setupPuzzleKeyboardShortcuts();

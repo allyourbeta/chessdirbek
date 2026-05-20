@@ -42,9 +42,10 @@
   --warning-100: #FCEFC7;
   --warning-500: #E9B949;
   --warning-700: #A27C1A;
+  --info-500: #9333ea;
 
   /* Semantic alias tokens used throughout components */
-  --bg:             var(--grey-050);
+  --bg:             #f5f3ef;
   --surface:        #ffffff;
   --surface-sunken: var(--grey-050);
   --surface-hover:  var(--grey-100);
@@ -65,8 +66,8 @@
   --green: var(--success-500);
   --red:   var(--danger-500);
 
-  --light-sq: #EEE5CF;
-  --dark-sq:  #7B8FAA;
+  --light-sq: #f0d9b5;
+  --dark-sq:  #b58863;
 
   /* Type scale
      Body reads at 16px; all UI controls use 12/13/14 so the interface feels
@@ -120,7 +121,7 @@
   --shadow: var(--shadow-sm);
 
   /* Layout */
-  --content-max: 1400px;
+  --content-max: 1800px;
   --nav-height: 64px;
 }
 
@@ -201,7 +202,7 @@ nav button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   border-radius: var(--radius-md);
   border: none;
   background: var(--primary-500);
-  color: #fff;
+  color: var(--text-on-primary);
   cursor: pointer;
   transition: background 0.15s;
 }

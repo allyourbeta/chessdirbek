@@ -25,7 +25,7 @@
 }
 .tag-filter.selected {
   background: var(--primary-500);
-  color: #fff;
+  color: var(--text-on-primary);
   border-color: var(--primary-500);
 }
 .tag-row { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
@@ -35,8 +35,8 @@
    ------------------------------------------------------------------ */
 .pos-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-8);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
 }
 .pos-item {
   display: flex;
@@ -59,13 +59,13 @@
 }
 .pos-item--featured {
   border: 2px solid var(--primary-500);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(76, 99, 182, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background: var(--primary-050);
 }
 .pos-item--featured:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(76, 99, 182, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 .pos-item-body {
   padding: var(--sp-4);
@@ -95,6 +95,13 @@
   transition: opacity .15s;
 }
 .pos-item:hover .pos-item-delete {
+  opacity: 1;
+}
+.pos-item .mini-board {
+  opacity: 0.60;
+  transition: opacity 0.15s ease;
+}
+.pos-item:hover .mini-board {
   opacity: 1;
 }
 
@@ -192,7 +199,7 @@
 }
 .engine-eval-bar-fill {
   height: 100%;
-  background: #f0f0f0;
+  background: var(--grey-100);
   width: 50%;
   transition: width 0.3s ease;
 }
@@ -216,9 +223,9 @@
   text-align: right;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
-.engine-line-score.positive { color: #16a34a; }
-.engine-line-score.negative { color: #dc2626; }
-.engine-line-score.mate { color: #9333ea; }
+.engine-line-score.positive { color: var(--success-500); }
+.engine-line-score.negative { color: var(--danger-500); }
+.engine-line-score.mate { color: var(--info-500); }
 .engine-line-score.neutral { color: var(--text-muted); }
 .engine-line-depth {
   font-size: var(--fs-11);
@@ -591,10 +598,9 @@
    ------------------------------------------------------------------ */
 .collection-landing {
   display: grid;
-  grid-template-columns: 480px 2fr;
-  gap: 60px;
+  grid-template-columns: 540px 1fr;
+  gap: 40px;
   align-items: start;
-  padding-left: 24px;
 }
 .collection-featured {
   background: var(--surface);

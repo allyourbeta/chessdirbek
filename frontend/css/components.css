@@ -46,19 +46,26 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: border-color .12s ease, box-shadow .12s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color .12s ease;
   box-shadow: var(--shadow-xs);
   overflow: hidden;
   position: relative;
   min-width: 0;
 }
 .pos-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   border-color: var(--primary-300);
-  box-shadow: var(--shadow-sm);
 }
 .pos-item--featured {
-  border-left: 4px solid var(--primary);
-  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  border: 2px solid var(--primary-500);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25), 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: var(--primary-050);
+}
+.pos-item--featured:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 .pos-item-body {
   padding: var(--sp-4);

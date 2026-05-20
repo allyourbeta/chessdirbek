@@ -33,7 +33,13 @@ function renderMiniBoard(fen, orientation) {
             const c = flipped ? 7 - j : j;
             const l = (r + c) % 2 === 0;
             const p = b[r][c];
-            const img = p ? `<img src="${PIECE_SVG[pieceKey(p)]}" style="position:absolute;width:100%;height:100%">` : '';
+            // Try to use SVG sprite first, fallback to base64 if sprite not loaded
+            const pid = p ? pieceKey(p).toLowerCase() : '';
+            const spriteEl = document.getElementById('piece-sprites');
+            const useSprite = p && spriteEl && spriteEl.innerHTML.includes(`id="${pid}"`);
+            const img = p ? (useSprite 
+                ? `<svg viewBox="0 0 45 45" style="position:absolute;width:100%;height:100%"><use href="#${pid}"/></svg>`
+                : `<img src="${PIECE_SVG[pieceKey(p)]}" style="position:absolute;width:100%;height:100%">`) : '';
             h += `<div class="mini-sq ${l ? 'light' : 'dark'}">${img}</div>`;
         }
     }

@@ -270,6 +270,20 @@ async function saveBoardPosition(boardId, positionType) {
         else toast(err.detail || 'Error saving', 'error');
     }
 }
+// Load staunty piece sprites for mini boards
+fetch('https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/pieces/staunty.svg')
+  .then(r => r.text())
+  .then(svg => { 
+    const spriteEl = document.getElementById('piece-sprites');
+    if (spriteEl) {
+      spriteEl.innerHTML = svg;
+    }
+  })
+  .catch(() => {
+    // Fallback to base64 pieces if sprite loading fails
+    console.warn('Failed to load staunty sprites, using fallback pieces');
+  });
+
 window.API = API;
 window.PIECE_SVG = PIECE_SVG;
 window.pieceKey = pieceKey;

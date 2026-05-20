@@ -43,18 +43,18 @@
   flex-direction: column;
   padding: 0;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color .12s ease;
-  box-shadow: var(--shadow-xs);
+  box-shadow: none;
   overflow: hidden;
   position: relative;
   min-width: 0;
 }
 .pos-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-color: var(--primary-300);
 }
 .pos-item--featured {
@@ -592,8 +592,9 @@
 .collection-landing {
   display: grid;
   grid-template-columns: 480px 2fr;
-  gap: var(--sp-8);
+  gap: 60px;
   align-items: start;
+  padding-left: 24px;
 }
 .collection-featured {
   background: var(--surface);

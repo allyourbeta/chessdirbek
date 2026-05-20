@@ -21,6 +21,10 @@ function parseFenBoard(fen) {
     return b;
 }
 
+function _playBoardSound() {
+    if (window.playMoveSound) window.playMoveSound();
+}
+
 function renderMiniBoard(fen, orientation) {
     const b = parseFenBoard(fen);
     const flipped = orientation === 'black';
@@ -112,6 +116,7 @@ const BoardManager = {
                     board._fen = newFen;
                     board._analysisHistory.push(newFen);
                     board.setPosition(newFen, true);
+                    _playBoardSound();
                     if (board._onPositionChange) board._onPositionChange(newFen);
                     return true;
                 }
@@ -127,7 +132,7 @@ const BoardManager = {
         }
         board._fen = fen;
         board.setPosition(fen, true);
-        if (window.playMoveSound) playMoveSound();
+        _playBoardSound();
     },
 
     flip(elementId) {

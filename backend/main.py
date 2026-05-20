@@ -95,7 +95,10 @@ def serve_frontend():
 # client-side router can read the URL and render the correct view.
 _SPA_ROUTES = {
     "positions",  # legacy
-    "tabiyas",
+    "tabiyas",  # legacy redirect
+    "tabiya",
+    "endings",
+    "strategy", 
     "tactics",
     "games",
     "collections",

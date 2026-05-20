@@ -1,10 +1,18 @@
 // Chessdirbek Service Worker — enables PWA install (Add to Dock)
 // Network-first strategy: always fetch from server, fall back to cache
 
-const CACHE_NAME = 'chessdirbek-v1';
+const CACHE_NAME = 'chessdirbek-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.clients.claim());
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
 
 self.addEventListener('fetch', (event) => {
   // Network-first: try server, fall back to cache for offline resilience

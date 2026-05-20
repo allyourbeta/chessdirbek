@@ -1,81 +1,81 @@
-async function loadPositions() {
-    let u = API + '/positions/';
-    const tags = AppState.positionTagFilters || [];
-    if (tags.length) {
-        u += '?' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
+async function loadCategoryPositions(categoryKey) {
+    const category = CATEGORIES[categoryKey];
+    if (!category) {
+        console.error('Unknown category:', categoryKey);
+        return;
     }
-    AppState.allPositions = await (await fetch(u)).json();
-    renderPositionsList();
-}
-
-async function loadTabiyas() {
-    let u = API + '/positions/?position_type=tabiya';
+    
+    let u = API + '/positions/?position_type=' + category.positionType;
     const tags = AppState.positionTagFilters || [];
     if (tags.length) {
         u += '&' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     }
+    
     const positions = await (await fetch(u)).json();
     AppState.allPositions = positions;
-    renderTabiyasList();
+    renderCategoryList(categoryKey);
 }
 
-async function loadTactics() {
-    let u = API + '/positions/?position_type=puzzle';
-    const tags = AppState.positionTagFilters || [];
-    if (tags.length) {
-        u += '&' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
+function mountCategoryTagFilter(categoryKey) {
+    const category = CATEGORIES[categoryKey];
+    if (!category) {
+        console.error('Unknown category:', categoryKey);
+        return;
     }
-    const positions = await (await fetch(u)).json();
-    AppState.allPositions = positions;
-    renderTacticsList();
-}
 
-function mountPositionTagFilter() {
     TagFilter.mount({
-        containerId: 'tag-filters',
+        containerId: 'cat-tag-filters',
         state: { tags: AppState.positionTagFilters },
         onChange: tags => {
             AppState.positionTagFilters = tags;
             if (!Router.isRendering()) {
-                const route = { view: 'positions', params: tags.length ? { tags: tags.slice() } : {} };
+                const route = { view: categoryKey, params: tags.length ? { tags: tags.slice() } : {} };
                 history.pushState(route, '', Router.build(route));
             }
-            loadPositions();
+            loadCategoryPositions(categoryKey);
         },
         placeholder: 'Filter by tag...',
     });
 }
 
-function mountTabiyaTagFilter() {
-    TagFilter.mount({
-        containerId: 'tabiyas-tag-filters',
-        state: { tags: AppState.positionTagFilters },
-        onChange: tags => {
-            AppState.positionTagFilters = tags;
-            if (!Router.isRendering()) {
-                const route = { view: 'tabiyas', params: tags.length ? { tags: tags.slice() } : {} };
-                history.pushState(route, '', Router.build(route));
-            }
-            loadTabiyas();
-        },
-        placeholder: 'Filter by tag...',
-    });
-}
-
-function mountTacticsTagFilter() {
-    TagFilter.mount({
-        containerId: 'tactics-tag-filters',
-        state: { tags: AppState.positionTagFilters },
-        onChange: tags => {
-            AppState.positionTagFilters = tags;
-            if (!Router.isRendering()) {
-                const route = { view: 'tactics', params: tags.length ? { tags: tags.slice() } : {} };
-                history.pushState(route, '', Router.build(route));
-            }
-            loadTactics();
-        },
-        placeholder: 'Filter by tag...',
-    });
+function renderCategoryList(categoryKey) {
+    const category = CATEGORIES[categoryKey];
+    if (!category) {
+        console.error('Unknown category:', categoryKey);
+        return;
+    }
+    
+    const el = document.getElementById('cat-list');
+    if (!el) return;
+    
+    const positions = AppState.allPositions.filter(p => p.position_type === category.positionType);
+    const countEl = document.getElementById('cat-count');
+    if (countEl) {
+        const tags = AppState.positionTagFilters || [];
+        countEl.textContent = tags.length
+            ? 'Showing ' + positions.length + ' positions'
+            : positions.length + ' positions';
+    }
+    
+    if (!positions.length) {
+        const emptySingular = category.label.toLowerCase().slice(0, -1); // Remove 's' from plural
+        el.innerHTML = `<div class="empty-state"><p>No ${emptySingular} positions yet</p><p>Click "Add New" to save your first ${emptySingular} position.</p></div>`;
+        return;
+    }
+    
+    // Put featured position first so it's always easy to find
+    const featuredId = AppState.featuredCategoryId;
+    if (featuredId) {
+        positions.sort(function(a, b) {
+            if (a.id === featuredId) return -1;
+            if (b.id === featuredId) return 1;
+            return 0; // preserve existing order for everything else
+        });
+    }
+    
+    el.innerHTML = positions.map(p =>
+        `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id})" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
+    ).join('');
 }
 
 function showDetail(id) {
@@ -86,105 +86,53 @@ function showDetail(id) {
     Router.navigate({ view: 'positionDetail', id, positionType, params });
 }
 
-function renderPositionsList() {
-    const route = Router.current();
-    if (route.view === 'tactics') {
-        renderTacticsList();
-    } else {
-        renderTabiyasList();
-    }
-}
-
-function renderTabiyasList() {
-    const el = document.getElementById('tabiyas-list');
-    if (!el) return;
-    const tabiyas = AppState.allPositions.filter(p => p.position_type === 'tabiya');
-    const countEl = document.getElementById('tabiyas-count');
-    if (countEl) {
-        const tags = AppState.positionTagFilters || [];
-        countEl.textContent = tags.length
-            ? 'Showing ' + tabiyas.length + ' positions'
-            : tabiyas.length + ' positions';
-    }
-    if (!tabiyas.length) {
-        el.innerHTML = `<div class="empty-state"><p>No tabiyas yet</p><p>Click "Add New" to save your first opening position.</p></div>`;
-        return;
-    }
-    // Put featured position first so it's always easy to find
-    const featuredId = AppState.featuredTabiyaId;
-    if (featuredId) {
-        tabiyas.sort(function(a, b) {
-            if (a.id === featuredId) return -1;
-            if (b.id === featuredId) return 1;
-            return 0; // preserve existing order for everything else
-        });
-    }
-    el.innerHTML = tabiyas.map(p =>
-        `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'tabiya')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
-    ).join('');
-}
-
-function renderTacticsList() {
-    const el = document.getElementById('tactics-list');
-    if (!el) return;
-    const tactics = AppState.allPositions.filter(p => p.position_type === 'puzzle');
-    const countEl = document.getElementById('tactics-count');
-    if (countEl) {
-        const tags = AppState.positionTagFilters || [];
-        countEl.textContent = tags.length
-            ? 'Showing ' + tactics.length + ' positions'
-            : tactics.length + ' positions';
-    }
-    if (!tactics.length) {
-        el.innerHTML = `<div class="empty-state"><p>No tactics puzzles yet</p><p>Click "Add New" to save your first tactical puzzle.</p></div>`;
-        return;
-    }
-    // Put featured position first so it's always easy to find
-    const featuredId = AppState.featuredTacticId;
-    if (featuredId) {
-        tactics.sort(function(a, b) {
-            if (a.id === featuredId) return -1;
-            if (b.id === featuredId) return 1;
-            return 0; // preserve existing order for everything else
-        });
-    }
-    el.innerHTML = tactics.map(p =>
-        `<div class="pos-item" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div><div class="pos-item-tags">${p.tags.map(t => '<span class="tag">#' + t.name + '</span>').join('')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id},'puzzle')" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`
-    ).join('');
-}
-
-async function deleteFromList(id, type) {
+async function deleteFromList(id) {
     if (!confirm('Delete this position?')) return;
     if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
         toast('Position deleted');
-        if (type === 'puzzle') loadTactics();
-        else loadTabiyas();
+        // Reload current category
+        if (AppState.currentCategory) {
+            loadCategoryPositions(AppState.currentCategory);
+        }
     }
 }
 
-async function randomFromList(posType) {
-    const filtered = AppState.allPositions.filter(p =>
-        posType === 'puzzle' ? p.position_type === 'puzzle' : p.position_type === 'tabiya'
-    );
-    if (!filtered.length) { toast('No positions match these tags', 'warn'); return; }
-    const pick = filtered[Math.floor(Math.random() * filtered.length)];
+async function randomFromList() {
+    if (!AppState.allPositions.length) { 
+        toast('No positions match these tags', 'warn'); 
+        return; 
+    }
+    const pick = AppState.allPositions[Math.floor(Math.random() * AppState.allPositions.length)];
     showDetail(pick.id);
 }
 
+// Legacy loadPositions function for backward compatibility
+async function loadPositions() {
+    let u = API + '/positions/';
+    const tags = AppState.positionTagFilters || [];
+    if (tags.length) {
+        u += '?' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
+    }
+    AppState.allPositions = await (await fetch(u)).json();
+    renderPositionsList();
+}
 
+function renderPositionsList() {
+    const route = Router.current();
+    if (route.view === 'tactics') {
+        renderCategoryList('tactics');
+    } else {
+        renderCategoryList('tabiya');
+    }
+}
 
-
-
-window.loadPositions = loadPositions;
-window.loadTabiyas = loadTabiyas;
-window.loadTactics = loadTactics;
-window.mountPositionTagFilter = mountPositionTagFilter;
-window.mountTabiyaTagFilter = mountTabiyaTagFilter;
-window.mountTacticsTagFilter = mountTacticsTagFilter;
+window.loadCategoryPositions = loadCategoryPositions;
+window.mountCategoryTagFilter = mountCategoryTagFilter;
+window.renderCategoryList = renderCategoryList;
 window.showDetail = showDetail;
-window.renderPositionsList = renderPositionsList;
-window.renderTabiyasList = renderTabiyasList;
-
-window.renderTacticsList = renderTacticsList;
 window.deleteFromList = deleteFromList;
 window.randomFromList = randomFromList;
+
+// Keep legacy functions for backward compatibility
+window.loadPositions = loadPositions;
+window.renderPositionsList = renderPositionsList;

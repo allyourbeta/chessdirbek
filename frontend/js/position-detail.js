@@ -25,8 +25,10 @@ async function loadPositionDetail(id) {
         document.getElementById('aggregate-stats-section').style.display = 'none';
         document.getElementById('your-moves-section').style.display = 'none';
         
+        var catKey = TYPE_TO_CATEGORY[pos.position_type] || 'tabiya';
+        var backLabel = CATEGORIES[catKey] ? CATEGORIES[catKey].label : 'Tabiya';
         const backBtn = document.getElementById('detail-back-btn');
-        if (backBtn) backBtn.textContent = 'Back to Tactics';
+        if (backBtn) backBtn.textContent = 'Back to ' + backLabel;
         
         document.getElementById('prev-puzzle-btn').style.display = 'none';
         document.getElementById('next-puzzle-btn').style.display = 'none';
@@ -40,8 +42,10 @@ async function loadPositionDetail(id) {
         document.getElementById('aggregate-stats-section').style.display = '';
         document.getElementById('your-moves-section').style.display = '';
         
+        var catKey = TYPE_TO_CATEGORY[pos.position_type] || 'tabiya';
+        var backLabel = CATEGORIES[catKey] ? CATEGORIES[catKey].label : 'Tabiya';
         const backBtn = document.getElementById('detail-back-btn');
-        if (backBtn) backBtn.textContent = 'Back to Tabiyas';
+        if (backBtn) backBtn.textContent = 'Back to ' + backLabel;
         
         document.getElementById('prev-puzzle-btn').style.display = 'none';
         document.getElementById('next-puzzle-btn').style.display = 'none';
@@ -211,7 +215,7 @@ async function deleteFromDetail() {
     const id = AppState.currentDetailId;
     if (!id || !confirm('Delete this position?')) return;
     const pos = AppState.allPositions.find(p => p.id === id);
-    const viewToReturn = (pos && pos.position_type === 'puzzle') ? 'tactics' : 'tabiyas';
+    const viewToReturn = (pos && TYPE_TO_CATEGORY[pos.position_type]) || 'tabiya';
     if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
         topBanner('Position deleted');
         Router.navigate({ view: viewToReturn });
@@ -221,7 +225,7 @@ async function deleteFromDetail() {
 async function randomFromDetail() {
     const id = AppState.currentDetailId;
     const type = AppState.currentDetailType || 'tabiya';
-    const posType = type === 'puzzle' ? 'puzzle' : 'tabiya';
+    const posType = type;  // 'puzzle', 'tabiya', 'endgame', or 'strategy'
     const tags = AppState.positionTagFilters || [];
     let u = API + '/positions/random?position_type=' + posType;
     if (id) u += '&exclude_id=' + id;
@@ -232,7 +236,7 @@ async function randomFromDetail() {
         if (!res.ok) { toast('Error', 'error'); return; }
         const pos = await res.json();
         const params = tags.length ? { tags: tags.slice() } : {};
-        Router.navigate({ view: 'positionDetail', id: pos.id, positionType: posType === 'puzzle' ? 'puzzle' : undefined, params });
+        Router.navigate({ view: 'positionDetail', id: pos.id, positionType: posType, params });
     } catch (e) {
         toast('Error', 'error');
     }

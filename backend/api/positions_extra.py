@@ -51,8 +51,7 @@ def bulk_reclassify(
                 position.solution_san = request.solution_san
                 position.theme = request.theme
             else:
-                # Changing to tabiya
-                position.position_type = PositionType.tabiya
+                position.position_type = request.new_type
                 # Preserve theme as tag if exists
                 if position.theme:
                     theme_tag = _get_or_create_tags(db, [position.theme])

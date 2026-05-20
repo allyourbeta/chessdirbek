@@ -49,24 +49,26 @@ const Router = (function () {
         if (!parts.length) return { view: 'tactics', params: q };
 
         const [a, b] = parts;
-        if (a === 'tabiyas') {
-            if (!b) return { view: 'tabiyas', params: q };
-            if (b === 'new') return { view: 'addPosition', params: q };
+        // Check if 'a' is a known category key
+        if (CATEGORIES[a]) {
+            if (!b) return { view: a, params: q };
+            if (b === 'new') return { view: 'addPosition', params: Object.assign(q, { type: CATEGORIES[a].positionType }) };
             const id = parseInt(b, 10);
-            if (!isNaN(id)) return { view: 'positionDetail', id, params: q };
+            if (!isNaN(id)) return { view: 'positionDetail', id, positionType: CATEGORIES[a].positionType, params: q };
         }
-        if (a === 'tactics') {
-            if (!b) return { view: 'tactics', params: q };
-            if (b === 'new') return { view: 'addPosition', params: q };
+        // Legacy redirect for old tabiyas URL (plural to singular)
+        if (a === 'tabiyas') {
+            if (!b) return { view: 'tabiya', params: q };
+            if (b === 'new') return { view: 'addPosition', params: Object.assign(q, { type: 'tabiya' }) };
             const id = parseInt(b, 10);
-            if (!isNaN(id)) return { view: 'positionDetail', id, positionType: 'puzzle', params: q };
+            if (!isNaN(id)) return { view: 'positionDetail', id, positionType: 'tabiya', params: q };
         }
         // Legacy positions URL support
         if (a === 'positions') {
-            if (!b) return { view: 'tabiyas', params: q };
-            if (b === 'new') return { view: 'addPosition', params: q };
+            if (!b) return { view: 'tabiya', params: q };
+            if (b === 'new') return { view: 'addPosition', params: Object.assign(q, { type: 'tabiya' }) };
             const id = parseInt(b, 10);
-            if (!isNaN(id)) return { view: 'positionDetail', id, params: q };
+            if (!isNaN(id)) return { view: 'positionDetail', id, positionType: 'tabiya', params: q };
         }
         if (a === 'games') {
             if (!b) return { view: 'games', params: q };
@@ -97,17 +99,19 @@ const Router = (function () {
     // route object -> URL path + query
     function build(route) {
         const p = route.params || {};
+        // Handle category views generically
+        if (CATEGORIES[route.view]) {
+            return CATEGORIES[route.view].urlPrefix + _qs(p);
+        }
+        
         switch (route.view) {
-            case 'tabiyas':        return '/tabiyas' + _qs(p);
-            case 'tactics':        return '/tactics' + _qs(p);
             case 'positionDetail': 
-                // Determine URL based on position type if available
-                const prefix = route.positionType === 'puzzle' ? '/tactics' : '/tabiyas';
-                return `${prefix}/${route.id}` + _qs(p);
+                var catKey = TYPE_TO_CATEGORY[route.positionType] || 'tabiya';
+                return CATEGORIES[catKey].urlPrefix + '/' + route.id + _qs(p);
             case 'addPosition':    
-                // Determine URL based on type param
-                const addPrefix = p && p.type === 'puzzle' ? '/tactics' : '/tabiyas';
-                return `${addPrefix}/new` + _qs(p);
+                var addType = p && p.type ? p.type : 'tabiya';
+                var addCatKey = Object.keys(CATEGORIES).find(k => CATEGORIES[k].positionType === addType) || 'tabiya';
+                return CATEGORIES[addCatKey].urlPrefix + '/new' + _qs(p);
             case 'games':          return '/games' + _qs(p);
             case 'gameDetail':     return `/games/${route.id}` + _qs(p);
             case 'gameImport':     return '/games/import' + _qs(p);
@@ -118,7 +122,7 @@ const Router = (function () {
             case 'editor':         return '/editor' + _qs(p);
             case 'practice':       return '/practice' + _qs(p);
             case 'practiceGameDetail': return `/practice/games/${route.id}` + _qs(p);
-            default:               return '/positions';
+            default:               return '/tactics';
         }
     }
 

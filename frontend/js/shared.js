@@ -130,46 +130,44 @@ function renderRoute(route) {
     AnnotationPanel.unmount();
     const params = (route && route.params) || {};
     switch (route.view) {
-        case 'tabiyas':
-            _applyPositionFilters(params);
-            _activateView('tabiyas', 'Tabiyas');
-            mountTabiyaTagFilter();
-            loadTabiyas().then(function() {
-                var featuredId = params.featured ? parseInt(params.featured, 10) : null;
-                if (featuredId && !isNaN(featuredId)) {
-                    loadFeaturedTabiyaById(featuredId);
-                    Router.syncUrl({ view: 'tabiyas', params: {} });
-                } else {
-                    loadRandomFeaturedTabiya();
-                }
-            });
-            break;
         case 'tactics':
+        case 'tabiya':
+        case 'endings':
+        case 'strategy':
             _applyPositionFilters(params);
-            _activateView('tactics', 'Tactics');
-            mountTacticsTagFilter();
-            loadTactics().then(function() {
+            var cat = CATEGORIES[route.view];
+            AppState.currentCategory = route.view;
+            _activateView('category', cat.label);
+            // Set dynamic text content
+            document.getElementById('cat-browse-title').textContent = cat.label;
+            document.getElementById('cat-add-btn').textContent = '+ ' + cat.addLabel;
+            document.getElementById('cat-add-btn').onclick = function() {
+                Router.navigate({view:'addPosition', params:{type: cat.positionType}});
+            };
+            mountCategoryTagFilter(route.view);
+            loadCategoryPositions(route.view).then(function() {
                 var featuredId = params.featured ? parseInt(params.featured, 10) : null;
                 if (featuredId && !isNaN(featuredId)) {
-                    loadFeaturedById(featuredId);
-                    // One-shot: strip the param so Back from detail returns to a clean /tactics
-                    Router.syncUrl({ view: 'tactics', params: {} });
+                    loadCategoryFeaturedById(featuredId);
+                    Router.syncUrl({ view: route.view, params: {} });
                 } else {
-                    loadRandomFeatured();
+                    loadRandomCategoryFeatured();
                 }
             });
             break;
         case 'positionDetail':
             _applyPositionFilters(params);
-            const navContext = route.positionType === 'puzzle' ? 'Tactics' : 'Tabiyas';
-            _activateView('detail', navContext);
+            var catKey = TYPE_TO_CATEGORY[route.positionType] || 'tabiya';
+            var navLabel = CATEGORIES[catKey] ? CATEGORIES[catKey].label : 'Tabiya';
+            _activateView('detail', navLabel);
             loadPositionDetail(route.id);
             break;
         case 'addPosition':
             _activateView('add', 'Add New');
             AppState.addPositionType = (route.params && route.params.type) || 'tabiya';
-            document.getElementById('form-title').textContent =
-                AppState.addPositionType === 'puzzle' ? 'New Tactic' : 'New Tabiya';
+            // Find the matching category label for the form title
+            var addCat = Object.values(CATEGORIES).find(c => c.positionType === AppState.addPositionType);
+            document.getElementById('form-title').textContent = addCat ? addCat.addLabel : 'New Position';
             BoardManager.setPosition('board', AppState.boardFen);
             _initFormTagFilter();
             break;
@@ -264,7 +262,8 @@ async function saveBoardPosition(boardId, positionType) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fen: fen, title: title, position_type: positionType })
     });
-    if (res.ok) toast('\u2713 Saved as ' + (positionType === 'tabiya' ? 'tabiya' : 'tactic'));
+    var savedCat = Object.values(CATEGORIES).find(c => c.positionType === positionType);
+    if (res.ok) toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : positionType));
     else {
         var err = await res.json();
         if (res.status === 409) toast('Position already saved', 'warn');

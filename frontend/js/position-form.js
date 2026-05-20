@@ -45,7 +45,7 @@ async function savePosition() {
         const saved = await res.json();
         toast(editId ? 'Position updated!' : 'Position saved!');
         clearForm();
-        const viewToGo = savedType === 'puzzle' ? 'tactics' : 'tabiyas';
+        const viewToGo = TYPE_TO_CATEGORY[savedType] || 'tabiya';
         Router.navigate(
             { view: viewToGo, params: { featured: saved.id } },
             { replace: true }
@@ -60,7 +60,8 @@ async function savePosition() {
             formTitle.textContent = err.detail;
             setTimeout(() => {
                 formTitle.style.color = '';
-                formTitle.textContent = savedType === 'puzzle' ? 'New Tactic' : 'New Tabiya';
+                var addCat = Object.values(CATEGORIES).find(c => c.positionType === savedType);
+                formTitle.textContent = addCat ? addCat.addLabel : 'New Position';
             }, 3000);
         }
     }
@@ -72,7 +73,7 @@ async function deletePosition() {
     if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
         topBanner('Position deleted');
         clearForm();
-        Router.navigate({ view: 'tabiyas' });
+        Router.navigate({ view: TYPE_TO_CATEGORY[AppState.addPositionType] || 'tabiya' });
     }
 }
 

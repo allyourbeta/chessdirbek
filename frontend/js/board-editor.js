@@ -154,9 +154,9 @@ var BoardEditor = (function () {
         });
         if (res.ok) {
             var data = await res.json();
-            toast('\u2713 Saved as ' + (posType === 'puzzle' ? 'tactic' : 'tabiya'));
-            var routeType = posType === 'puzzle' ? 'puzzle' : undefined;
-            Router.navigate({ view: 'positionDetail', id: data.id, positionType: routeType });
+            var savedCat = Object.values(CATEGORIES).find(c => c.positionType === posType);
+            toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : posType));
+            Router.navigate({ view: 'positionDetail', id: data.id, positionType: posType });
         } else if (res.status === 409) {
             toast('Position already saved', 'warn');
         } else {

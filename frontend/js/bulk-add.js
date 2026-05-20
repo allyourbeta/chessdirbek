@@ -3,10 +3,11 @@ var BulkAdd = (function () {
 
     function init(params) {
         var type = (params && params.type) || 'tabiya';
-        var title = type === 'puzzle' ? 'Bulk Add Tactics' : 'Bulk Add Tabiyas';
+        var cat = Object.values(CATEGORIES).find(c => c.positionType === type);
+        var title = cat ? 'Bulk Add ' + cat.label : 'Bulk Add Positions';
         document.getElementById('bulk-add-title').textContent = title;
         var radios = document.querySelectorAll('input[name="bulk-type"]');
-        radios.forEach(function (r) { r.checked = r.value === (type === 'puzzle' ? 'puzzle' : 'tabiya'); });
+        radios.forEach(function (r) { r.checked = r.value === type; });
         document.getElementById('bulk-fen-input').value = '';
         _bulkTagState.tags = [];
         TagFilter.mount({
@@ -44,7 +45,7 @@ var BulkAdd = (function () {
         if (!lines.length) { toast('No FENs entered', true); return; }
 
         var type = _getType();
-        var posType = type === 'puzzle' ? 'puzzle' : 'tabiya';
+        var posType = type;  // radio value is already the correct position_type
         var tags = _bulkTagState.tags.slice();
 
         var fens = [];

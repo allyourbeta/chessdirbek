@@ -41,16 +41,13 @@ def create_position(data: PositionCreate, db: Session = Depends(get_db)):
     if not is_valid:
         raise HTTPException(status_code=400, detail=f"Invalid FEN: {error}")
 
-    # Check for duplicate position with same FEN and type
-    existing = db.query(Position).filter(
-        Position.fen == data.fen,
-        Position.position_type == data.position_type
-    ).first()
+    # Check for duplicate position with same FEN (global check)
+    existing = db.query(Position).filter(Position.fen == data.fen).first()
     if existing:
-        position_type_name = "tactic" if data.position_type == PositionType.puzzle else "tabiya"
+        existing_category = existing.position_type.value  # e.g. "tabiya", "endgame"
         raise HTTPException(
-            status_code=409, 
-            detail=f"This {position_type_name} position already exists."
+            status_code=409,
+            detail=f"This position already exists (in {existing_category})."
         )
     
     # Auto-generate a friendly placeholder name if title is missing/blank.

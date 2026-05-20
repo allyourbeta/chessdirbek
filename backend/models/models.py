@@ -23,6 +23,8 @@ class PositionType(str, PyEnum):
     """Position can be either a puzzle (with solution) or a tabiya (key position)."""
     puzzle = "puzzle"
     tabiya = "tabiya"
+    endgame = "endgame"
+    strategy = "strategy"
 
 # Many-to-many join table: positions <-> tags
 position_tags = Table(

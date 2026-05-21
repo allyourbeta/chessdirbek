@@ -276,8 +276,14 @@ function setupPuzzleKeyboardShortcuts() {
     });
 }
 
+function openEditorFromForm() {
+    var posType = AppState.addPositionType || 'tabiya';
+    Router.navigate({ view: 'editor', params: { positionType: posType } });
+}
+
 window.savePosition = savePosition;
 window.deletePosition = deletePosition;
+window.openEditorFromForm = openEditorFromForm;
 window.loadFen = loadFen;
 window.setStartPos = setStartPos;
 window.flipBoard = flipBoard;

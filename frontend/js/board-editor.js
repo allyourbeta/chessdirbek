@@ -6,6 +6,7 @@ var BoardEditor = (function () {
     var _turn = 'w';
     var _editorTagState = { tags: [] };
     var _editorTagFilter = null;
+    var _positionType = null; // set when opened from a category form
     var PIECES = [
         { color: 'w', type: 'k' }, { color: 'w', type: 'q' }, { color: 'w', type: 'r' },
         { color: 'w', type: 'b' }, { color: 'w', type: 'n' }, { color: 'w', type: 'p' },
@@ -32,6 +33,7 @@ var BoardEditor = (function () {
     }
     function init(params) {
         var fen = (params && params.fen) ? decodeURIComponent(params.fen) : null;
+        _positionType = (params && params.positionType) || null;
         _chess = new Chess();
         if (fen && _chess.load(fen)) {
             _turn = _chess.turn();
@@ -46,6 +48,7 @@ var BoardEditor = (function () {
         _renderPalette();
         _updateTurnButtons();
         _updateFenDisplay();
+        _updateSaveButtons();
 
         document.getElementById('editor-pos-title').value = '';
         _editorTagState.tags = [];
@@ -143,9 +146,28 @@ var BoardEditor = (function () {
             toast('FEN copied');
         }
     }
+    function _updateSaveButtons() {
+        var singleEl = document.getElementById('editor-save-single');
+        var multiEl = document.getElementById('editor-save-multi');
+        var titleEl = document.getElementById('editor-title');
+        if (_positionType) {
+            var cat = Object.values(CATEGORIES).find(function(c) { return c.positionType === _positionType; });
+            var label = cat ? cat.addLabel : 'New Position';
+            if (titleEl) titleEl.textContent = 'Board Editor — ' + label;
+            if (singleEl) singleEl.style.display = '';
+            if (multiEl) multiEl.style.display = 'none';
+        } else {
+            if (titleEl) titleEl.textContent = 'Board Editor';
+            if (singleEl) singleEl.style.display = 'none';
+            if (multiEl) multiEl.style.display = '';
+        }
+    }
+    function saveContext() {
+        if (_positionType) save(_positionType);
+    }
     async function save(posType) {
         var fen = _getFen();
-        var title = document.getElementById('editor-pos-title').value.trim() || 'Untitled';
+        var title = document.getElementById('editor-pos-title').value.trim();
         var tags = _editorTagState.tags.slice();
         var res = await fetch(API + '/positions/', {
             method: 'POST',
@@ -156,7 +178,12 @@ var BoardEditor = (function () {
             var data = await res.json();
             var savedCat = Object.values(CATEGORIES).find(c => c.positionType === posType);
             toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : posType));
-            Router.navigate({ view: 'positionDetail', id: data.id, positionType: posType });
+            var catKey = TYPE_TO_CATEGORY[posType];
+            if (catKey) {
+                Router.navigate({ view: catKey, params: { featured: data.id } });
+            } else {
+                Router.navigate({ view: 'positionDetail', id: data.id, positionType: posType });
+            }
         } else if (res.status === 409) {
             toast('Position already saved', 'warn');
         } else {
@@ -192,6 +219,7 @@ var BoardEditor = (function () {
         flip: flip,
         copyFen: copyFen,
         save: save,
+        saveContext: saveContext,
         search: search,
         openFromSearch: openFromSearch,
     };

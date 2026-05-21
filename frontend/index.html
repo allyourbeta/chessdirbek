@@ -90,6 +90,7 @@
             <button class="btn btn-sm" onclick="loadFen()">Load Board</button>
             <button class="btn btn-sm" onclick="setStartPos()">Starting Position</button>
             <button class="btn btn-sm" onclick="flipBoard()">Flip Board</button>
+            <button class="btn btn-sm" onclick="openEditorFromForm()">Editor</button>
           </div>
         </div>
       </div>
@@ -455,9 +456,14 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
           <input type="text" id="editor-pos-title" placeholder="Position title (optional)">
           <label style="margin-top:12px">Tags</label>
           <div id="editor-pos-tags-container"></div>
-          <div class="btn-row" style="margin-top:16px">
+          <div class="btn-row" id="editor-save-single" style="margin-top:16px;display:none">
+            <button class="btn btn-success" id="editor-save-ctx-btn" onclick="BoardEditor.saveContext()">Save</button>
+          </div>
+          <div class="btn-row" id="editor-save-multi" style="margin-top:16px">
             <button class="btn btn-success btn-sm" onclick="BoardEditor.save('tabiya')">Save as Tabiya</button>
             <button class="btn btn-success btn-sm" onclick="BoardEditor.save('puzzle')">Save as Tactic</button>
+            <button class="btn btn-success btn-sm" onclick="BoardEditor.save('endgame')">Save as Ending</button>
+            <button class="btn btn-success btn-sm" onclick="BoardEditor.save('strategy')">Save as Strategy</button>
           </div>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" onclick="BoardEditor.search('exact')">Search Exact Position</button>

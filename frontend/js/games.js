@@ -99,10 +99,17 @@ function _gameDate(g) {
 }
 
 function _gameOpening(g) {
-    const parts = [];
-    if (g.eco) parts.push(g.eco);
-    if (g.opening) parts.push(g.opening);
-    return parts.join(' ');
+    const eco = String(g.eco || '').trim().toUpperCase();
+    const openingFromPgn = String(g.opening || '').trim();
+    const openingFromEco = window.EcoOpenings ? window.EcoOpenings.nameFor(eco) : '';
+    const openingName = openingFromPgn || openingFromEco;
+
+    if (eco && openingName) {
+        // Use an em dash to make the ECO code scannable while filling the
+        // column with useful opening information.
+        return `${eco} — ${openingName}`;
+    }
+    return eco || openingName || '';
 }
 
 function renderGamesList() {

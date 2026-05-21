@@ -8,6 +8,7 @@ async function loadPositionDetail(id) {
     AppState.detailFlipped = flipped;
     
     document.getElementById('detail-title').textContent = pos.title || 'Untitled';
+    document.getElementById('detail-star').innerHTML = renderStarIcon(pos.starred);
     document.getElementById('detail-fen').textContent = pos.fen;
     const notesEl = document.getElementById('detail-notes');
     notesEl.value = pos.notes || '';
@@ -242,6 +243,14 @@ async function randomFromDetail() {
     }
 }
 
+function toggleDetailStar() {
+    var id = AppState.currentDetailId;
+    if (!id) return;
+    toggleStar(id, function(newStarred) {
+        document.getElementById('detail-star').innerHTML = renderStarIcon(newStarred);
+    });
+}
+
 window.loadPositionDetail = loadPositionDetail;
 window.toggleCollapsible = toggleCollapsible;
 window.copyFen = copyFen;
@@ -250,3 +259,4 @@ window.editPosition = editPosition;
 window.flipDetailBoard = flipDetailBoard;
 window.deleteFromDetail = deleteFromDetail;
 window.randomFromDetail = randomFromDetail;
+window.toggleDetailStar = toggleDetailStar;

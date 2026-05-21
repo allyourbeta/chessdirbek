@@ -14,6 +14,7 @@ function loadRandomCategoryFeatured() {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pick.fen);
     document.getElementById('cat-featured-title').textContent = pick.title || 'Untitled';
+    document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pick.starred);
     document.getElementById('cat-featured-tags').innerHTML =
         pick.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
     document.getElementById('cat-featured-title').onclick = function() {
@@ -44,6 +45,7 @@ function loadCategoryFeaturedById(id) {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pos.fen);
     document.getElementById('cat-featured-title').textContent = pos.title || 'Untitled';
+    document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pos.starred);
     document.getElementById('cat-featured-tags').innerHTML =
         pos.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
     document.getElementById('cat-featured-title').onclick = function() {
@@ -81,6 +83,15 @@ async function deleteFeaturedPosition() {
             });
         }
     }
+}
+
+function toggleFeaturedStar() {
+    var id = AppState.featuredCategoryId;
+    if (!id) return;
+    toggleStar(id, function(newStarred) {
+        document.getElementById('cat-featured-star').innerHTML = renderStarIcon(newStarred);
+        renderCategoryList(AppState.currentCategory);
+    });
 }
 
 function forkCategoryFeatured() {
@@ -157,6 +168,7 @@ window.loadRandomCategoryFeatured = loadRandomCategoryFeatured;
 window.loadCategoryFeaturedById = loadCategoryFeaturedById;
 window.flipCategoryFeaturedBoard = flipCategoryFeaturedBoard;
 window.shuffleCategoryFeatured = shuffleCategoryFeatured;
+window.toggleFeaturedStar = toggleFeaturedStar;
 window.forkCategoryFeatured = forkCategoryFeatured;
 window.editFeaturedPosition = editFeaturedPosition;
 window.deleteFeaturedPosition = deleteFeaturedPosition;

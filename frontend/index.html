@@ -62,6 +62,7 @@
         <div class="featured-info">
           <div class="featured-title-row">
             <h3 id="cat-featured-title" class="featured-title"></h3>
+            <button class="star-toggle" id="cat-featured-star" onclick="event.stopPropagation();toggleFeaturedStar()" title="Toggle star"></button>
           </div>
           <div id="cat-featured-tags" class="featured-tags"></div>
         </div>
@@ -293,7 +294,10 @@
       <div class="panel" style="display:flex;flex-direction:column;gap:0">
         <!-- Header Card -->
         <div class="card">
-          <h2 id="detail-title" style="cursor:pointer" onclick="startTitleEdit()" title="Click to rename">Position</h2>
+          <div class="detail-title-row">
+            <h2 id="detail-title" style="cursor:pointer" onclick="startTitleEdit()" title="Click to rename">Position</h2>
+            <button class="star-toggle" id="detail-star" onclick="event.stopPropagation();toggleDetailStar()" title="Toggle star"></button>
+          </div>
           <div id="detail-tags"></div>
         </div>
 

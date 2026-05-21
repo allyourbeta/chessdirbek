@@ -65,6 +65,11 @@ def run_lightweight_migrations():
                     "UPDATE positions SET orientation = 'black' "
                     "WHERE SUBSTR(fen, INSTR(fen, ' ') + 1, 1) = 'b'"
                 ))
+            if "starred" not in cols:
+                conn.execute(text(
+                    "ALTER TABLE positions ADD COLUMN starred BOOLEAN "
+                    "NOT NULL DEFAULT 0"
+                ))
 
 
 def get_db():

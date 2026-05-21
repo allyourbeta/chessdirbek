@@ -63,6 +63,14 @@ class Position(Base):
         server_default="white",
     )
 
+    # Gmail-style star: simple binary flag for priority review
+    starred = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
+    )
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,

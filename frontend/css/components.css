@@ -78,6 +78,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pos-item-star {
+  flex-shrink: 0;
+  line-height: 1;
+  display: inline-flex;
 }
 .pos-item-tags {
   display: flex;
@@ -663,6 +671,33 @@
 .featured-engine-row > div:first-child {
   flex: 1;
   min-width: 0;
+}
+
+/* Star toggle (Gmail-style) */
+.star-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.star-toggle:hover {
+  opacity: 1;
+}
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-title-row h2 {
+  margin: 0;
+}
+.detail-title-row .star-toggle {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Browse header structure */

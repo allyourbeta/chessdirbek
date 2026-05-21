@@ -64,19 +64,25 @@ function renderCategoryList(categoryKey) {
     }
     
     // Put featured position first so it's always easy to find
+    // Then starred positions, then everything else
     const featuredId = AppState.featuredCategoryId;
-    if (featuredId) {
-        positions.sort(function(a, b) {
+    positions.sort(function(a, b) {
+        // Featured always first
+        if (featuredId) {
             if (a.id === featuredId) return -1;
             if (b.id === featuredId) return 1;
-            return 0; // preserve existing order for everything else
-        });
-    }
+        }
+        // Starred before unstarred
+        if (a.starred && !b.starred) return -1;
+        if (!a.starred && b.starred) return 1;
+        return 0; // preserve existing order within same group
+    });
     
     el.innerHTML = positions.map(p => {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';
-        return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${p.title || 'Untitled'}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id})" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+        const starHtml = p.starred ? '<span class="pos-item-star">' + STAR_SVG_FILLED + '</span>' : '';
+        return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${p.title || 'Untitled'}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id})" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
 }
 

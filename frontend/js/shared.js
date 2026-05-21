@@ -306,3 +306,28 @@ document.addEventListener('click', function(e) {
 window.toggleNewMenu = toggleNewMenu;
 window.closeNewMenu = closeNewMenu;
 window.renderRoute = renderRoute;
+
+/* ── Star / priority toggle ── */
+var STAR_SVG_FILLED = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#f4b400" stroke="#f4b400" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+var STAR_SVG_EMPTY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-subtle)" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+function renderStarIcon(starred) {
+    return starred ? STAR_SVG_FILLED : STAR_SVG_EMPTY;
+}
+
+async function toggleStar(positionId, callback) {
+    var res = await fetch(API + '/positions/' + positionId + '/star', { method: 'PATCH' });
+    if (!res.ok) { toast('Failed to toggle star', 'error'); return; }
+    var data = await res.json();
+    // Update in-memory list
+    if (AppState.allPositions) {
+        var pos = AppState.allPositions.find(function(p) { return p.id === positionId; });
+        if (pos) pos.starred = data.starred;
+    }
+    if (callback) callback(data.starred);
+}
+
+window.renderStarIcon = renderStarIcon;
+window.toggleStar = toggleStar;
+window.STAR_SVG_FILLED = STAR_SVG_FILLED;
+window.STAR_SVG_EMPTY = STAR_SVG_EMPTY;

@@ -71,6 +71,7 @@ class PositionOut(BaseModel):
     solution_san: Optional[str]
     theme: Optional[str]
     orientation: str
+    starred: bool
     tags: list[TagOut]
     created_at: datetime
     updated_at: datetime
@@ -88,6 +89,7 @@ class PositionBrief(BaseModel):
     solution_san: Optional[str]
     theme: Optional[str]
     orientation: str
+    starred: bool
     tags: list[TagOut]
 
     class Config:

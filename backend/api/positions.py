@@ -236,6 +236,18 @@ def update_position(
     return position
 
 
+@router.patch("/{position_id}/star")
+def toggle_star(position_id: int, db: Session = Depends(get_db)):
+    """Toggle the starred flag on a position. Returns new state."""
+    position = db.query(Position).filter(Position.id == position_id).first()
+    if not position:
+        raise HTTPException(status_code=404, detail="Position not found")
+    position.starred = not position.starred
+    db.commit()
+    db.refresh(position)
+    return {"id": position.id, "starred": position.starred}
+
+
 @router.delete("/{position_id}", status_code=204)
 def delete_position(position_id: int, db: Session = Depends(get_db)):
     """Delete a position."""

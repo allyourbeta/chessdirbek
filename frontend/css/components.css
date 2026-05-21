@@ -604,12 +604,25 @@
 /* ------------------------------------------------------------------
    Collection landing (Tactics + Tabiyas) — featured board + browse grid
    ------------------------------------------------------------------ */
-.collection-landing {
+/* Shared two-column layout: board/primary on the left (bounded width),
+   info panel on the right (fills remainder). Single source of truth — used by
+   the category overview and the position detail view so they stay identical.
+   Change the columns/gap/breakpoint here and both views update together. */
+.split-layout {
   display: grid;
   grid-template-columns: minmax(620px, 680px) minmax(0, 1fr);
   gap: 32px;
   align-items: start;
 }
+.split-layout > * {
+  min-width: 0;
+}
+@media (max-width: 1180px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 .collection-featured {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -625,11 +638,6 @@
   box-shadow: var(--shadow-sm);
   min-width: 0;
 }
-@media (max-width: 1180px) {
-  .collection-landing {
-    grid-template-columns: 1fr;
-  }
-}
 /* Featured board area structure */
 .featured-board-controls {
   display: flex;
@@ -644,9 +652,12 @@
 }
 .featured-title-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 8px;
+}
+.featured-title-row .star-toggle {
+  display: inline-flex;
+  align-items: center;
 }
 .featured-title {
   font-size: 20px;

@@ -281,6 +281,16 @@ nav button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 }
 .view { display: none; } .view.active { display: block; }
 .board-wrap { width: 450px; height: 450px; }
+/* Fluid variant: fills its column, capped so it doesn't balloon on wide screens.
+   Used by the featured (category) board and the detail board so they share one
+   sizing definition. */
+.board-wrap--fluid {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  max-width: 640px;
+  margin: 0 auto;
+}
 .board-area {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -573,6 +583,7 @@ textarea {
 @media (max-width: 860px) {
   .board-area { grid-template-columns: 1fr; }
   .board-wrap { width: 100%; height: auto; aspect-ratio: 1; max-width: 400px; }
+  .board-wrap--fluid { max-width: 400px; }
   .container { padding: var(--sp-4); }
   header { padding: var(--sp-3) var(--sp-4); }
   .view-header h2 { font-size: var(--fs-20); }

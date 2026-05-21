@@ -50,9 +50,9 @@
 <div id="notification-banner" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1000;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:16px;font-weight:500;text-align:center;min-width:300px;max-width:500px"></div>
 <div class="container">
   <div id="view-category" class="view">
-    <div class="collection-landing">
+    <div class="split-layout">
       <div class="collection-featured">
-        <div id="cat-featured-board" class="board-wrap" style="width:100%;height:auto;aspect-ratio:1;margin:0 auto"></div>
+        <div id="cat-featured-board" class="board-wrap board-wrap--fluid"></div>
         <div class="featured-board-controls">
           <button class="btn btn-md btn-ghost" onclick="flipCategoryFeaturedBoard()">Flip</button>
           <button class="btn btn-md btn-ghost" onclick="shuffleCategoryFeatured()">Shuffle</button>
@@ -267,9 +267,9 @@
     </div>
   </div>
   <div id="view-detail" class="view">
-    <div class="board-area">
+    <div class="split-layout">
       <div class="card" style="margin:0;padding:var(--sp-4)">
-        <div id="detail-board" class="board-wrap"></div>
+        <div id="detail-board" class="board-wrap board-wrap--fluid"></div>
         <div id="practice-move-list" class="moves-panel" style="display:none;margin-top:8px;max-height:120px"></div>
         <div class="board-controls">
           <div class="control-group" id="detail-move-nav-wrap">

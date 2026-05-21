@@ -139,7 +139,7 @@ const EngineUI = (function () {
         container.innerHTML =
             '<div class="engine-panel">' +
                 '<div class="engine-controls">' +
-                    '<button class="btn engine-toggle" id="engine-toggle-btn">Show Engine</button>' +
+                    '<button class="btn btn-md engine-toggle" id="engine-toggle-btn">Show Engine</button>' +
                     '<select class="select-input engine-lines-select" id="engine-lines-select" style="display:none">' +
                         '<option value="1">1 line</option>' +
                         '<option value="2">2 lines</option>' +

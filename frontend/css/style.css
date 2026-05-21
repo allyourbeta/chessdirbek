@@ -164,10 +164,12 @@ header h1 {
   line-height: 1;
 }
 .header-logo {
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
   vertical-align: middle;
+  display: block;
+  object-fit: cover;
 }
 nav {
   display: flex;

@@ -260,14 +260,16 @@ function showView(name) {
 async function saveBoardPosition(boardId, positionType) {
     var fen = BoardManager.getPosition(boardId);
     if (!fen) { toast('No position on board', true); return; }
-    var title = 'Untitled';
+    var title;
     if (AppState.currentGame) {
         var g = AppState.currentGame, ply = AppState.currentPly;
-        var moveDesc = ply === 0 ? 'starting position' : 'after ' + Math.ceil(ply / 2) + '.' + (ply % 2 === 1 ? '' : '...') + g.moves_san[ply - 1];
-        title = (g.white || '?') + ' vs ' + (g.black || '?') + ' - ' + moveDesc;
+        title = NamingService.generateGamePositionName(g, ply, g.moves_san);
     } else if (AppState.currentDetailId) {
         var el = document.getElementById('detail-title');
-        title = 'From ' + (el ? el.textContent : 'position');
+        var sourceTitle = el ? el.textContent : null;
+        title = NamingService.generateFromPositionName(sourceTitle);
+    } else {
+        title = NamingService.getFallbackName();
     }
     var savedCat = Object.values(CATEGORIES).find(c => c.positionType === positionType);
     try {

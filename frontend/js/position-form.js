@@ -31,7 +31,7 @@ async function savePosition() {
     const orientation = BoardManager.isFlipped('board') ? 'black' : 'white';
     const body = {
         fen,
-        title: title || null,
+        title: title || NamingService.generatePositionName(),
         notes: notes || null,
         stockfish_analysis: sf || null,
         position_type: savedType,

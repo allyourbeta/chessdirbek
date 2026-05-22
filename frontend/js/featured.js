@@ -129,7 +129,7 @@ function forkCategoryFeatured() {
             window._applyFormOrientation(pos.orientation || 'white');
         }
         document.getElementById('form-title').textContent =
-            'Fork from ' + (pos.title || 'untitled');
+            NamingService.generateForkName(pos.title);
     });
 }
 

@@ -107,7 +107,7 @@ var BoardEditor = (function () {
         html += '</div>';
         html += '<div class="palette-row">';
         var eraserActive = _activeTool === 'eraser' ? ' active' : '';
-        html += '<button class="palette-btn eraser-btn' + eraserActive + '" data-tool="eraser">');
+        html += '<button class="palette-btn eraser-btn' + eraserActive + '" data-tool="eraser">';
         html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
         html += '</button>';
         html += '</div>';
@@ -187,7 +187,7 @@ var BoardEditor = (function () {
     }
     async function save(posType) {
         var fen = _getFen();
-        var title = document.getElementById('editor-pos-title').value.trim();
+        var title = document.getElementById('editor-pos-title').value.trim() || NamingService.generatePositionName();
         var tags = _editorTagState.tags.slice();
         try {
             var data = await ApiClient.post('/positions/', { fen: fen, title: title, position_type: posType, tags: tags });

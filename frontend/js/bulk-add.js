@@ -76,7 +76,7 @@ var BulkAdd = (function () {
                 try {
                     await ApiClient.post('/positions/', {
                         fen: fens[j],
-                        title: 'Untitled',
+                        title: NamingService.generatePositionName(),
                         position_type: posType,
                         tags: tags,
                     });

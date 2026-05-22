@@ -115,8 +115,7 @@ function showSavePositionModal() {
     if (!g) return;
     const ply = AppState.currentPly;
     const fen = g.fens[ply];
-    const moveDesc = ply === 0 ? 'starting position' : `after ${Math.ceil(ply / 2)}. ${ply % 2 === 1 ? '' : '...'}${g.moves_san[ply - 1]}`;
-    const title = `${g.white || '?'} vs ${g.black || '?'} - ${moveDesc}`;
+    const title = NamingService.generateGamePositionName(g, ply, g.moves_san);
 
     document.getElementById('save-pos-fen').value = fen;
     document.getElementById('save-pos-title').value = title;

@@ -8,28 +8,11 @@ from backend.api.game_helpers import (
     create_game_from_parsed,
     get_or_create_tags,
 )
-from backend.api.game_schemas import (
-    BulkPGNImport,
-    BulkPGNImportResult,
-    GameBrief,
-    GameCreate,
-    GameDetail,
-    GameUpdate,
-    PositionSearchRequest,
-    PositionSearchResult,
-)
-from backend.api.import_service import (
-    new_job_id,
-    run_import,
-    signal_cancel,
-    stream_import,
-)
+from backend.api.game_schemas import BulkPGNImport, BulkPGNImportResult, GameBrief, GameCreate, GameDetail, GameUpdate, PositionSearchRequest, PositionSearchResult
+from backend.api.import_service import new_job_id, run_import, signal_cancel, stream_import
 from backend.database import get_db
 from backend.models import Game, GameCollection, PositionIndex, Tag
-from backend.services import (
-    compute_zobrist,
-    parse_single_pgn,
-)
+from backend.services import compute_zobrist, parse_single_pgn
 
 router = APIRouter(prefix="/games", tags=["games"])
 
@@ -277,13 +260,21 @@ def search_position(
         )
 
     seen = set()
-    results = []
+    unique_matches = []
     for m in matches:
         key = (m.game_id, m.half_move)
         if key in seen:
             continue
         seen.add(key)
-        game = db.query(Game).filter(Game.id == m.game_id).first()
+        unique_matches.append(m)
+
+    game_ids = list({m.game_id for m in unique_matches})
+    games = db.query(Game).filter(Game.id.in_(game_ids)).all() if game_ids else []
+    games_by_id = {g.id: g for g in games}
+
+    results = []
+    for m in unique_matches:
+        game = games_by_id.get(m.game_id)
         if game:
             results.append(
                 PositionSearchResult(

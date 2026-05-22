@@ -12,6 +12,7 @@ function initSearchBoard() {
 function renderSearchScope() {
     const el = document.getElementById('search-scope');
     if (!el) return;
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for collection names
     el.innerHTML = '<option value="">All games</option>' +
         (AppState.allCollections || []).map(c =>
             `<option value="${c.id}">${Html.escape(c.name)}</option>`
@@ -58,6 +59,7 @@ async function doPositionSearch() {
     const results = document.getElementById('search-results');
 
     status.textContent = 'Searching...';
+    // SAFE_INNER_HTML: Clearing element content
     results.innerHTML = '';
 
     let data;
@@ -87,9 +89,11 @@ async function doPositionSearch() {
 function renderSearchResults(data) {
     const el = document.getElementById('search-results');
     if (!data.length) {
+        // SAFE_INNER_HTML: Static template with no dynamic content
         el.innerHTML = '<div class="empty-state"><p>No matches</p><p>Try a different position or search type.</p></div>';
         return;
     }
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for player names and events
     el.innerHTML = data.map(r => {
         const w = r.white || '?';
         const b = r.black || '?';

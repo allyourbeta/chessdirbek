@@ -114,6 +114,7 @@ var BulkAdd = (function () {
             html += '</div></details>';
         }
         html += '</div>';
+        // SAFE_INNER_HTML: Template with escaped content - _esc() function used for all user data
         el.innerHTML = html;
         el.style.display = 'block';
     }
@@ -121,6 +122,7 @@ var BulkAdd = (function () {
     function _esc(s) {
         var d = document.createElement('div');
         d.textContent = s;
+        // SAFE_INNER_HTML: HTML escaping utility - textContent auto-escapes, innerHTML retrieves escaped result
         return d.innerHTML;
     }
 

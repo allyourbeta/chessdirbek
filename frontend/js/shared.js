@@ -33,6 +33,7 @@ function setButtonLoading(btn, loading = true) {
     if (loading) {
         btn.disabled = true;
         btn.dataset.originalText = btn.textContent;
+        // SAFE_INNER_HTML: Static template with controlled button content
         btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite;width:16px;height:16px;border:2px solid var(--border);border-top:2px solid currentColor;border-radius:50%;vertical-align:middle"></span> ' + btn.textContent;
     } else {
         btn.disabled = false;
@@ -81,7 +82,8 @@ function showProminentNotification(msg, type = 'info', minDuration = 3000) {
         banner.style.border = '1px solid var(--border)';
     }
     if (minDuration >= 3000) {
-        banner.innerHTML = msg + ' <button data-action="hide-notification" style="margin-left:16px;padding:4px 8px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:4px;color:inherit;cursor:pointer">Dismiss</button>';
+        // SAFE_INNER_HTML: Template with escaped message content
+        banner.innerHTML = Html.escape(msg) + ' <button data-action="hide-notification" style="margin-left:16px;padding:4px 8px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:4px;color:inherit;cursor:pointer">Dismiss</button>';
     }
     if (minDuration > 0) {
         notificationTimeout = setTimeout(() => {
@@ -292,6 +294,7 @@ fetch('https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/pieces/staunty.svg')
   .then(svg => { 
     const spriteEl = document.getElementById('piece-sprites');
     if (spriteEl) {
+      // SAFE_INNER_HTML: Loading trusted SVG content from CDN
       spriteEl.innerHTML = svg;
     }
   })

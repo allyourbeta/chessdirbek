@@ -112,6 +112,7 @@ var BoardEditor = (function () {
         html += '</button>';
         html += '</div>';
         html += '</div>';
+        // SAFE_INNER_HTML: Controlled template - only piece selection interface with static content
         el.innerHTML = html;
     }
     function selectTool(tool) {

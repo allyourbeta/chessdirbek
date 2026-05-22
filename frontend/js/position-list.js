@@ -59,6 +59,7 @@ function renderCategoryList(categoryKey) {
     
     if (!positions.length) {
         const emptySingular = category.label.toLowerCase().slice(0, -1); // Remove 's' from plural
+        // SAFE_INNER_HTML: Static template with controlled variable interpolation
         el.innerHTML = `<div class="empty-state"><p>No ${emptySingular} positions yet</p><p>Click "Add New" to save your first ${emptySingular} position.</p></div>`;
         return;
     }
@@ -78,6 +79,7 @@ function renderCategoryList(categoryKey) {
         return 0; // preserve existing order within same group
     });
     
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for titles
     el.innerHTML = positions.map(p => {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';

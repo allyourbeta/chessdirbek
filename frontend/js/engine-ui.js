@@ -52,6 +52,7 @@ const EngineUI = (function () {
         if (!output) return;
 
         if (!lines || !lines.length) {
+            // SAFE_INNER_HTML: Static template with no dynamic content
             output.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Analyzing...</div>';
             return;
         }
@@ -70,6 +71,7 @@ const EngineUI = (function () {
                 '<span class="engine-line-moves">' + _formatMoves(entry.moves, _currentFen) + '</span>' +
                 '</div>';
         }
+        // SAFE_INNER_HTML: Controlled template - only chess evaluation data from trusted engine
         output.innerHTML = html;
     }
 
@@ -98,6 +100,7 @@ const EngineUI = (function () {
             if (bar) bar.style.display = 'none';
             if (output) output.style.display = 'none';
             // Clear any stale analysis output
+            // SAFE_INNER_HTML: Clearing element content
             if (output) output.innerHTML = '';
             return;
         }
@@ -148,6 +151,7 @@ const EngineUI = (function () {
         if (!container) return;
         _containerId = containerId;
 
+        // SAFE_INNER_HTML: Static template with controlled button actions
         container.innerHTML =
             '<div class="engine-panel">' +
                 '<div class="engine-controls">' +
@@ -197,6 +201,7 @@ const EngineUI = (function () {
         _selectHandler = null;
 
         var container = document.getElementById(_containerId);
+        // SAFE_INNER_HTML: Clearing element content
         if (container) container.innerHTML = '';
         _containerId = null;
         _currentFen = null;

@@ -97,6 +97,7 @@ function _gameOpening(g) {
 function renderGamesList() {
     const el = document.getElementById('games-list');
     if (!AppState.allGames.length && AppState.gameTotalCount === 0) {
+        // SAFE_INNER_HTML: Static template with no dynamic content
         el.innerHTML = '<div class="empty-state"><p>No games yet</p><p>Import PGN games to get started.</p></div>';
         updateBulkBar();
         renderPager();
@@ -122,6 +123,7 @@ function renderGamesList() {
             <td class="col-moves">${MoveCounts.fullMoveCountFromPlies(g.move_count)}</td>
         </tr>`;
     }).join('');
+    // SAFE_INNER_HTML: Template with escaped content - all user data (names, results, openings, dates) passed through Html.escape()
     el.innerHTML = `<table class="games-table">
         <thead><tr>
             <th class="col-select"></th>
@@ -152,6 +154,7 @@ function renderPager() {
     const totalPages = Math.max(1, Math.ceil(total / size));
     const start = total ? page * size + 1 : 0;
     const end = Math.min(total, (page + 1) * size);
+    // SAFE_INNER_HTML: Static template with controlled numeric values
     pager.innerHTML = `
         <button class="btn btn-sm games-prev-btn" ${page <= 0 ? 'disabled' : ''}>&larr; Prev</button>
         <span>${start}–${end} of ${total}</span>
@@ -220,6 +223,7 @@ async function deleteSelectedGames() {
 
 function renderCollectionFilter() {
     const el = document.getElementById('game-collection-filter');
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for collection names
     el.innerHTML = '<option value="">All Collections</option>' +
         AppState.allCollections.map(c => `<option value="${c.id}" ${AppState.gameCollectionFilter == c.id ? 'selected' : ''}>${Html.escape(c.name)} (${c.game_count})</option>`).join('');
 }

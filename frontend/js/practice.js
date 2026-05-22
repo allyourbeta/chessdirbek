@@ -73,8 +73,9 @@ const Practice = (function () {
             var div = document.createElement('div');
             div.id = 'practice-playing-controls';
             div.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap';
+            // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for user inputs
             div.innerHTML = '<span style="font-size:13px">Playing as <strong>' +
-                active.userColor + '</strong> vs Stockfish (' + active.level + ')</span>' +
+                Html.escape(active.userColor) + '</strong> vs Stockfish (' + Html.escape(active.level) + ')</span>' +
                 '<button class="btn btn-sm" id="practice-resign-btn">Resign</button>' +
                 '<button class="btn btn-danger btn-sm" id="practice-stop-btn">Stop</button>';
             section.appendChild(div);
@@ -98,6 +99,7 @@ const Practice = (function () {
         var el = document.getElementById('practice-move-list');
         if (!el || !_playChess || !active) return;
         var hist = _playChess.history();
+        // SAFE_INNER_HTML: Clearing element content
         if (!hist.length) { el.innerHTML = ''; return; }
         var startNum = parseInt(active.startFen.split(' ')[5], 10) || 1;
         var isBlackStart = active.startFen.split(' ')[1] === 'b';
@@ -110,6 +112,7 @@ const Practice = (function () {
             if (hist[i + 1]) html += ' ' + hist[i + 1];
             html += ' '; startNum++; i += 2;
         }
+        // SAFE_INNER_HTML: Controlled template - only chess moves (SAN notation) from trusted source
         el.innerHTML = html;
         el.scrollTop = el.scrollHeight;
     }

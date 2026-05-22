@@ -29,6 +29,7 @@ function resetImportView() {
         placeholder: 'Add tags...'
     });
     document.getElementById('import-new-coll').value = '';
+    // SAFE_INNER_HTML: Clearing element content
     document.getElementById('import-result').innerHTML = '';
     document.getElementById('import-file-name').textContent = '';
     document.getElementById('import-force').checked = false;
@@ -42,6 +43,7 @@ function resetImportView() {
 function renderImportCollections() {
     const el = document.getElementById('import-collection-select');
     if (!el) return;
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for collection names
     el.innerHTML = '<option value="">None</option>' +
         AppState.allCollections.map(c => `<option value="${c.id}">${Html.escape(c.name)}</option>`).join('');
 }
@@ -81,6 +83,7 @@ function _renderImportResult(resultEl, data) {
         html += `<details><summary style="cursor:pointer;color:var(--text-muted)">Errors</summary>` +
                 `<pre style="font-size:12px;color:var(--red);margin-top:8px">${Html.escape(data.errors.join('\n'))}</pre></details>`;
     }
+    // SAFE_INNER_HTML: Template with controlled content - numeric values and Html.escape() for error messages
     resultEl.innerHTML = html;
 }
 
@@ -92,6 +95,7 @@ function _renderProgress(resultEl, ev) {
     const imported = ev.imported || 0;
     const rate = elapsed > 0 ? processed / elapsed : 0;
     const remaining = rate > 0 ? (total - processed) / rate : Infinity;
+    // SAFE_INNER_HTML: Template with controlled numeric values
     resultEl.innerHTML = `
         <div style="margin-bottom:8px;font-size:13px">
             <strong>${processed}</strong> of <strong>${total}</strong> games processed
@@ -127,6 +131,7 @@ async function _streamImport(resultEl, pgn, tags, collIds, force) {
         const seconds = elapsed % 60;
         const timeStr = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : `0:${seconds.toString().padStart(2, '0')}`;
         
+        // SAFE_INNER_HTML: Static template with controlled time values
         resultEl.innerHTML = `
             <div style="text-align:center;padding:20px">
                 <div style="display:inline-block;animation:spin 1s linear infinite;width:24px;height:24px;border:3px solid var(--border);border-top:3px solid var(--accent);border-radius:50%"></div>
@@ -202,6 +207,7 @@ async function doImport() {
     const force = document.getElementById('import-force').checked;
 
     _showImportUI(true);
+    // SAFE_INNER_HTML: Static template with no dynamic content
     resultEl.innerHTML = '<p class="text-muted">Starting import…</p>';
 
     try {
@@ -209,10 +215,12 @@ async function doImport() {
         const pgn = _importFile ? await _importFile.text() : pasted;
         const data = await _streamImport(resultEl, pgn, tags, collIds, force);
         if (!data) {
+            // SAFE_INNER_HTML: Static error message template
             resultEl.innerHTML = '<p style="color:var(--red)">Import ended unexpectedly</p>';
             return;
         }
         if (data.cancelled) {
+            // SAFE_INNER_HTML: Static error message template
             resultEl.innerHTML = '<p style="color:var(--red)">Import cancelled. No games were saved.</p>';
             return;
         }
@@ -223,8 +231,10 @@ async function doImport() {
         }
     } catch (e) {
         if (e.name === 'AbortError') {
+            // SAFE_INNER_HTML: Static error message template
             resultEl.innerHTML = '<p style="color:var(--red)">Import cancelled. No games were saved.</p>';
         } else {
+            // SAFE_INNER_HTML: Template with escaped error message
             resultEl.innerHTML = `<p style="color:var(--red)">Import error: ${Html.escape(e.message || e)}</p>`;
         }
     } finally {

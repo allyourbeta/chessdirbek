@@ -38,6 +38,7 @@ function _playPip(ctx) {
 function toggleMute() {
     AppState.soundMuted = !AppState.soundMuted;
     const btn = document.getElementById('mute-btn');
+    // SAFE_INNER_HTML: Static HTML entities for sound icons
     if (btn) btn.innerHTML = AppState.soundMuted ? '&#x1f507;' : '&#x1f50a;';
 }
 

@@ -74,6 +74,7 @@ var MoveNavigator = (function () {
         var len = inst.fens.length;
         var atFirst = inst.idx <= 0;
         var atLast = inst.idx >= len - 1;
+        // SAFE_INNER_HTML: Static template with controlled numeric values (indices and lengths)
         el.innerHTML =
             '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="first">|&lt;</button>' +
             '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="prev">&lt;</button>' +

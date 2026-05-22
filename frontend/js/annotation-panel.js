@@ -17,6 +17,7 @@ const AnnotationPanel = (function () {
         if (!container) return;
         _containerId = containerId;
 
+        // SAFE_INNER_HTML: Static template with controlled button actions
         container.innerHTML =
             '<div class="annotation-panel">' +
                 '<label class="annotation-label">Position notes</label>' +
@@ -71,6 +72,7 @@ const AnnotationPanel = (function () {
             ta.removeEventListener('blur', _onBlur);
         }
         var container = document.getElementById(_containerId);
+        // SAFE_INNER_HTML: Clearing element content
         if (container) container.innerHTML = '';
         _containerId = null;
         _currentFen = null;

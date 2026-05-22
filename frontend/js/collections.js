@@ -10,9 +10,11 @@ async function loadCollectionsView() {
 function renderCollectionsView() {
     const el = document.getElementById('collections-list');
     if (!AppState.allCollections.length) {
+        // SAFE_INNER_HTML: Static template with no dynamic content
         el.innerHTML = '<div class="empty-state"><p>No collections yet</p><p>Create one to organize your games.</p></div>';
         return;
     }
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for collection names and descriptions
     el.innerHTML = AppState.allCollections.map(c => {
         const desc = c.description ? `<div class="text-muted" style="font-size:12px;margin-top:4px">${Html.escape(c.description)}</div>` : '';
         return `<div class="pos-item" data-collection-id="${c.id}">

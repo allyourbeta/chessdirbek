@@ -28,6 +28,7 @@ const PracticeUI = (function () {
         const body = document.getElementById('practice-save-body');
         const verdict = Practice.guessVerdict();
         const suggestedResult = formatResult(verdict, active.userColor);
+        // SAFE_INNER_HTML: Template with controlled content - formatMoveCountFromPlies output is safe, Html.escape() used for user inputs
         body.innerHTML = '<p style="margin-bottom:8px"><strong>' + MoveCounts.formatMoveCountFromPlies(pending.moveCount, true) + '</strong> as ' + Html.escape(active.userColor) + ' vs Stockfish (' + Html.escape(active.level) + ')</p>' +
             '<p class="text-muted" style="font-size:12px;margin-bottom:12px">Suggested result: <strong>' + suggestedResult + '</strong>' +
             (verdict !== '?' ? ' <span style="margin-left:6px">(' + verdict + ')</span>' : '') + '</p>' +
@@ -51,6 +52,7 @@ const PracticeUI = (function () {
 
     function _renderStats(el, s) {
         if (!s || !s.total_games) {
+            // SAFE_INNER_HTML: Static template with no dynamic content
             el.innerHTML = '<p class="text-muted" style="font-size:13px">No practice games yet</p>';
             return;
         }
@@ -84,6 +86,7 @@ const PracticeUI = (function () {
             });
             html += '</div></details></div>';
         }
+        // SAFE_INNER_HTML: Controlled template - all interpolated values are numeric statistics from trusted source
         el.innerHTML = html;
     }
 
@@ -93,8 +96,10 @@ const PracticeUI = (function () {
             const hasFilters = document.getElementById('practice-verdict-filter')?.value || 
                               document.getElementById('practice-level-filter')?.value;
             if (hasFilters) {
+                // SAFE_INNER_HTML: Static template with hardcoded action handler
                 el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No games match these filters. Try adjusting your filters or <a href="#" data-action="practice-clear-filters">clear filters</a>.</div>';
             } else {
+                // SAFE_INNER_HTML: Static template with no dynamic content
                 el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No practice games yet. Start practicing to see your history here.</div>';
             }
             return; 
@@ -124,13 +129,16 @@ const PracticeUI = (function () {
         }).join('');
         
         if (append) {
+            // SAFE_INNER_HTML: rows variable contains escaped content built with Html.escape()
             el.innerHTML += rows;
         } else {
+            // SAFE_INNER_HTML: rows variable contains escaped content built with Html.escape()  
             el.innerHTML = rows;
         }
     }
 
     function _renderTree(el, tree) {
+        // SAFE_INNER_HTML: Clearing element content
         if (!tree || !tree.moves || !tree.moves.length) { el.innerHTML = ''; return; }
         const rows = tree.moves.map(m => {
             const wr = (m.win_rate * 100).toFixed(0);
@@ -140,6 +148,7 @@ const PracticeUI = (function () {
                 <span style="margin-left:auto">${wr}% win</span>
             </div>`;
         }).join('');
+        // SAFE_INNER_HTML: Controlled template - only numeric values and chess moves (SAN) from trusted source
         el.innerHTML = rows;
     }
 
@@ -147,9 +156,11 @@ const PracticeUI = (function () {
         const el = document.getElementById('practice-positions-list');
         if (!el) return;
         if (!summaries || !summaries.length) {
+            // SAFE_INNER_HTML: Static template with no dynamic content
             el.innerHTML = `<div class="empty-state"><p>No practice games yet</p><p>Open a saved position and click "Practice this position".</p></div>`;
             return;
         }
+        // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for user-controlled titles
         el.innerHTML = summaries.map(s => {
             const wr = (s.win_rate * 100).toFixed(0);
             const last = s.last_played ? new Date(s.last_played).toLocaleDateString() : '—';

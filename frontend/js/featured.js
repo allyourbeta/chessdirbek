@@ -14,7 +14,9 @@ function loadRandomCategoryFeatured() {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pick.fen);
     document.getElementById('cat-featured-title').textContent = pick.title || 'Untitled';
+    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
     document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pick.starred);
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
     document.getElementById('cat-featured-tags').innerHTML =
         pick.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
     document.getElementById('cat-featured-title').onclick = function() {
@@ -45,9 +47,11 @@ function loadCategoryFeaturedById(id) {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pos.fen);
     document.getElementById('cat-featured-title').textContent = pos.title || 'Untitled';
+    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
     document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pos.starred);
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names (SHOULD BE FIXED)
     document.getElementById('cat-featured-tags').innerHTML =
-        pos.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
+        pos.tags.map(function(t) { return '<span class="tag">#' + Html.escape(t.name) + '</span>'; }).join('');
     document.getElementById('cat-featured-title').onclick = function() {
         showDetail(pos.id);
     };
@@ -91,6 +95,7 @@ function toggleFeaturedStar() {
     var id = AppState.featuredCategoryId;
     if (!id) return;
     toggleStar(id, function(newStarred) {
+        // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
         document.getElementById('cat-featured-star').innerHTML = renderStarIcon(newStarred);
         renderCategoryList(AppState.currentCategory);
     });

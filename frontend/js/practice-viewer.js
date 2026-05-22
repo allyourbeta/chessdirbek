@@ -107,6 +107,7 @@ const PracticeViewer = (function () {
         document.getElementById('pv-meta').textContent =
             `${date} · ${MoveCounts.formatMoveCountFromPlies(g.move_count, true)} · starting eval ${_fmtEval(g.starting_eval)} · final eval ${_fmtEval(g.final_eval)}`;
         const verdictLabel = verdict || 'unknown';
+        // SAFE_INNER_HTML: Controlled content - formatResult returns safe values
         document.getElementById('pv-verdict').innerHTML =
             `Result: <span class="${vcls}"><strong>${result}</strong></span>` +
             ` <span class="text-muted" style="font-size:11px">(${verdictLabel})</span>` +
@@ -184,6 +185,7 @@ const PracticeViewer = (function () {
 
     function _renderMoves() {
         const el = document.getElementById('pv-moves');
+        // SAFE_INNER_HTML: Static template with no dynamic content
         if (!_sans.length) { el.innerHTML = '<p class="text-muted" style="font-size:12px">No moves recorded</p>'; return; }
         // Determine starting move number and side from root FEN.
         const startFen = _rootFen || '';
@@ -213,6 +215,7 @@ const PracticeViewer = (function () {
             i += 2;
         }
         html += '</table>';
+        // SAFE_INNER_HTML: Controlled template - only chess moves (SAN notation) from trusted source
         el.innerHTML = html;
         _highlight();
     }

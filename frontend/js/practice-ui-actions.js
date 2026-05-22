@@ -113,6 +113,7 @@
         const confirmDiv = document.createElement('div');
         confirmDiv.id = `delete-confirm-${gameId}`;
         confirmDiv.style.cssText = 'display:inline-flex;gap:4px;align-items:center';
+        // SAFE_INNER_HTML: Static template with controlled gameId (numeric ID)
         confirmDiv.innerHTML = `
             <span style="font-size:11px;color:var(--danger)">Delete?</span>
             <button class="btn btn-sm" style="padding:2px 6px;font-size:11px;background:var(--danger);color:white" data-confirm-delete="${gameId}">Yes</button>
@@ -180,6 +181,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
         `;
+        // SAFE_INNER_HTML: Static template with controlled gameId (numeric ID)
         notification.innerHTML = `
             <span>Practice game deleted</span>
             <button class="btn btn-sm" style="background:var(--primary);color:white" data-undo-delete="${gameId}">Undo</button>
@@ -204,25 +206,11 @@
         const deleted = deletedGames.find(g => g.gameId === gameId);
         if (!deleted) return;
         
-        // Restore the row
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = deleted.rowHtml;
-        const restoredRow = tempDiv.firstChild;
-        
-        if (deleted.listEl && deleted.listEl.children[deleted.rowIndex]) {
-            deleted.listEl.insertBefore(restoredRow, deleted.listEl.children[deleted.rowIndex]);
-        } else if (deleted.listEl) {
-            deleted.listEl.appendChild(restoredRow);
+        // Rather than restore potentially unsafe HTML, just reload the practice history
+        // This ensures all content goes through proper escaping
+        if (AppState.currentDetailId) {
+            Practice.loadPracticeHistory(AppState.currentDetailId);
         }
-        
-        // Animate restoration
-        restoredRow.style.opacity = '0';
-        restoredRow.style.transform = 'translateX(-20px)';
-        setTimeout(() => {
-            restoredRow.style.transition = 'opacity 0.3s, transform 0.3s';
-            restoredRow.style.opacity = '1';
-            restoredRow.style.transform = 'translateX(0)';
-        }, 10);
         
         // Remove undo notification
         const notif = document.getElementById(`undo-notif-${gameId}`);
@@ -231,11 +219,6 @@
         // Remove from deletedGames array
         deletedGames = deletedGames.filter(g => g.gameId !== gameId);
         
-        // Re-create the game in backend (this would need a restore endpoint)
-        // For now, just reload the practice history
-        if (AppState.currentDetailId) {
-            Practice.loadPracticeHistory(AppState.currentDetailId);
-        }
     };
 
 })(PracticeUI);

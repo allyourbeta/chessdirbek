@@ -15,6 +15,7 @@ async function loadPositionDetail(id) {
     }
     
     document.getElementById('detail-title').textContent = pos.title || 'Untitled';
+    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
     document.getElementById('detail-star').innerHTML = renderStarIcon(pos.starred);
     document.getElementById('detail-fen').textContent = pos.fen;
     const notesEl = document.getElementById('detail-notes');
@@ -22,6 +23,7 @@ async function loadPositionDetail(id) {
     notesEl._lastSaved = pos.notes || '';
     notesEl.oninput = _onDetailNotesInput;
     notesEl.onblur = _autoSaveDetailNotes;
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
     document.getElementById('detail-tags').innerHTML = pos.tags.map(t => `<span class="tag">#${Html.escape(t.name)}</span>`).join('');
     _initCollapsibleCards(pos.notes);
     
@@ -116,9 +118,11 @@ function _initCollapsibleCards(notes) {
     if (notesCard) {
         if (notes && notes.trim()) {
             notesCard.classList.add('expanded');
+            // SAFE_INNER_HTML: Static template with controlled styling
             if (notesLabel) notesLabel.innerHTML = 'Your Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span>';
         } else {
             notesCard.classList.remove('expanded');
+            // SAFE_INNER_HTML: Static template with controlled styling
             if (notesLabel) notesLabel.innerHTML = 'Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(click to add)</span>';
         }
     }
@@ -196,6 +200,7 @@ function _onDetailNotesInput() {
     if (_detailNotesTimeout) clearTimeout(_detailNotesTimeout);
     _detailNotesTimeout = setTimeout(_autoSaveDetailNotes, 1000);
     var lbl = document.getElementById('notes-card-label');
+    // SAFE_INNER_HTML: Static template with controlled styling
     if (lbl) lbl.innerHTML = 'Your Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span>';
 }
 async function _autoSaveDetailNotes() {
@@ -257,6 +262,7 @@ function toggleDetailStar() {
     var id = AppState.currentDetailId;
     if (!id) return;
     toggleStar(id, function(newStarred) {
+        // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
         document.getElementById('detail-star').innerHTML = renderStarIcon(newStarred);
     });
 }

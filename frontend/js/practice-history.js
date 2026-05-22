@@ -49,6 +49,7 @@ const PracticeHistory = (function () {
             PracticeUI.renderHistory(stats, games, tree, append);
         } catch (_) {
             const el = document.getElementById('practice-stats');
+            // SAFE_INNER_HTML: Static error message template
             if (el) el.innerHTML = '<p class="text-muted">Could not load practice history</p>';
         }
     }

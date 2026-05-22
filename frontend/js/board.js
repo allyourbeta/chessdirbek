@@ -40,6 +40,7 @@ function renderMiniBoard(fen, orientation) {
             // Try to use SVG sprite first, fallback to base64 if sprite not loaded
             const pid = p ? pieceKey(p).toLowerCase() : '';
             const spriteEl = document.getElementById('piece-sprites');
+            // SAFE_INNER_HTML: Reading SVG sprite content to check for piece availability
             const useSprite = p && spriteEl && spriteEl.innerHTML.includes(`id="${pid}"`);
             const img = p ? (useSprite 
                 ? `<svg viewBox="0 0 45 45" style="position:absolute;width:100%;height:100%"><use href="#${pid}"/></svg>`
@@ -59,6 +60,7 @@ const BoardManager = {
         }
         const el = document.getElementById(elementId);
         if (!el) return;
+        // SAFE_INNER_HTML: Clearing element content
         el.innerHTML = '';
         const orientation = options.flipped ? COLOR.black : COLOR.white;
         const board = new Chessboard(el, {

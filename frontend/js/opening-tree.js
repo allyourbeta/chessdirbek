@@ -25,12 +25,14 @@ async function loadOpeningTree(fen) {
     if (!fen) return;
 
     const el = document.getElementById('opening-tree-content');
+    // SAFE_INNER_HTML: Static template with no dynamic content
     el.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Loading...</div>';
 
     try {
         _treeData = await ApiClient.get('/opening-tree/', { fen });
         renderOpeningTree();
     } catch (e) {
+        // SAFE_INNER_HTML: Static error message template
         el.innerHTML = '<div style="color:var(--red);font-size:12px">Error loading tree</div>';
     }
 }
@@ -38,6 +40,7 @@ async function loadOpeningTree(fen) {
 function renderOpeningTree() {
     const el = document.getElementById('opening-tree-content');
     if (!_treeData || !_treeData.moves.length) {
+        // SAFE_INNER_HTML: Static template with no dynamic content
         el.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:8px">No games found for this position.</div>';
         return;
     }
@@ -75,6 +78,7 @@ function renderOpeningTree() {
 
     html += '</table>';
     html += `<div style="font-size:11px;color:var(--text-muted);padding:6px 8px 0">${_treeData.total_games} game(s) in database</div>`;
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for move data
     el.innerHTML = html;
 }
 

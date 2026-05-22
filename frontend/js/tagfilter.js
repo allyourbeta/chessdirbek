@@ -29,6 +29,7 @@
         if (!el) return;
         state.tags = state.tags || [];
 
+        // SAFE_INNER_HTML: Clearing element content
         el.innerHTML = '';
         el.classList.add('tagfilter');
 
@@ -66,6 +67,7 @@
         let debounceTimer = null;
 
         function renderChips() {
+            // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
             chipsEl.innerHTML = state.tags.length
                 ? state.tags.map((t, i) =>
                     `<span class="tagfilter-chip">#${Html.escape(t)}<span class="tagfilter-chip-x" data-i="${i}" title="Remove">&times;</span></span>`
@@ -89,6 +91,7 @@
 
         function renderDropdown() {
             if (!suggestions.length) { hideDropdown(); return; }
+            // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for all tag suggestions
             dropdown.innerHTML = suggestions.map((s, i) =>
                 `<div class="tagfilter-option ${i === highlight ? 'active' : ''}" data-name="${Html.escape(s.name)}">#${Html.escape(s.name)}</div>`
             ).join('');

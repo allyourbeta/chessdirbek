@@ -10,10 +10,14 @@ function openGame(id) {
 
 // Data loader — called by renderRoute for /games/:id.
 async function loadGameDetail(id) {
-    const res = await fetch(API + '/games/' + id);
-    if (!res.ok) { toast('Failed to load game', true); return; }
-    const game = await res.json();
-    AppState.currentGame = game;
+    let game;
+    try {
+        game = await ApiClient.get('/games/' + id);
+        AppState.currentGame = game;
+    } catch (e) {
+        toast('Failed to load game', true);
+        return;
+    }
     AppState.currentPly = 0;
 
     document.getElementById('gv-white').textContent = game.white || '?';
@@ -138,16 +142,12 @@ async function doSavePosition() {
     const tags = _saveTagState.tags.slice();
     const notes = document.getElementById('save-pos-notes').value.trim();
 
-    const res = await fetch(API + '/positions/', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({fen, title: title || null, notes: notes || null, tags})
-    });
-    if (res.ok) {
+    try {
+        await ApiClient.post('/positions/', {fen, title: title || null, notes: notes || null, tags});
         toast('Position saved!');
         hideSavePositionModal();
-    } else {
-        const err = await res.json();
-        toast(err.detail || 'Error saving', true);
+    } catch (e) {
+        toast(e.data?.detail || e.message || 'Error saving', true);
     }
 }
 
@@ -168,13 +168,13 @@ async function deleteCurrentGame() {
     if (!g) return;
     const label = `${g.white || '?'} vs ${g.black || '?'}`;
     if (!confirm(`Delete this game (${label})? This cannot be undone.`)) return;
-    const res = await fetch(API + '/games/' + g.id, { method: 'DELETE' });
-    if (res.ok) {
+    try {
+        await ApiClient.delete('/games/' + g.id);
         toast('Game deleted');
         AppState.currentGame = null;
         backToGames();
         if (typeof loadGames === 'function') loadGames();
-    } else {
+    } catch (e) {
         toast('Failed to delete game', true);
     }
 }

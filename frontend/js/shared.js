@@ -269,16 +269,16 @@ async function saveBoardPosition(boardId, positionType) {
         var el = document.getElementById('detail-title');
         title = 'From ' + (el ? el.textContent : 'position');
     }
-    var res = await fetch(API + '/positions/', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen: fen, title: title, position_type: positionType })
-    });
     var savedCat = Object.values(CATEGORIES).find(c => c.positionType === positionType);
-    if (res.ok) toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : positionType));
-    else {
-        var err = await res.json();
-        if (res.status === 409) toast('Position already saved', 'warn');
-        else toast(err.detail || 'Error saving', 'error');
+    try {
+        await ApiClient.post('/positions/', { fen: fen, title: title, position_type: positionType });
+        toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : positionType));
+    } catch (e) {
+        if (e.status === 409) {
+            toast('Position already saved', 'warn');
+        } else {
+            toast(e.data?.detail || e.message || 'Error saving', 'error');
+        }
     }
 }
 // Load staunty piece sprites for mini boards
@@ -327,9 +327,12 @@ function renderStarIcon(starred) {
 }
 
 async function toggleStar(positionId, callback) {
-    var res = await fetch(API + '/positions/' + positionId + '/star', { method: 'PATCH' });
-    if (!res.ok) { toast('Failed to toggle star', 'error'); return; }
-    var data = await res.json();
+    try {
+        var data = await ApiClient.patch('/positions/' + positionId + '/star');
+    } catch (e) {
+        toast('Failed to toggle star', 'error');
+        return;
+    }
     // Update in-memory list
     if (AppState.allPositions) {
         var pos = AppState.allPositions.find(function(p) { return p.id === positionId; });

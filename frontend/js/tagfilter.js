@@ -18,9 +18,7 @@
     async function fetchSuggestions(q) {
         if (!q || !q.trim()) return [];
         try {
-            const res = await fetch(API + '/tags/?q=' + encodeURIComponent(q.trim()) + '&limit=15');
-            if (!res.ok) return [];
-            return await res.json();
+            return await ApiClient.get('/tags/', { q: q.trim(), limit: 15 });
         } catch (e) {
             return [];
         }

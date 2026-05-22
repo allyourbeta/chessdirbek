@@ -208,7 +208,7 @@ async function loadPuzzleNavigation(puzzleId) {
         url += '?' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     }
     
-    const nav = await (await fetch(url)).json();
+    const nav = await ApiClient.get(url.replace(API, ''));
     
     document.getElementById('puzzle-current-index').textContent = nav.current_index;
     document.getElementById('puzzle-total-count').textContent = nav.total_count;

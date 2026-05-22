@@ -145,12 +145,9 @@ async function _streamImport(resultEl, pgn, tags, collIds, force) {
     showPreparationFeedback();
     preparationInterval = setInterval(showPreparationFeedback, 1000);
     
-    const res = await fetch(API + '/games/import/stream', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({pgn_text: pgn, tags, collection_ids: collIds, force}),
-        signal: _importAbort.signal,
-    });
+    const res = await ApiClient.streamPost('/games/import/stream', {
+        pgn_text: pgn, tags, collection_ids: collIds, force
+    }, _importAbort.signal);
     if (!res.ok || !res.body) {
         if (preparationInterval) clearInterval(preparationInterval);
         throw new Error('Stream failed: ' + res.status);

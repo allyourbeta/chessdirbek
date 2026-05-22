@@ -73,23 +73,20 @@ var BulkAdd = (function () {
             progressBar.style.width = ((j + 1) / fens.length * 100) + '%';
 
             try {
-                var res = await fetch(API + '/positions/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                try {
+                    await ApiClient.post('/positions/', {
                         fen: fens[j],
                         title: 'Untitled',
                         position_type: posType,
                         tags: tags,
-                    }),
-                });
-                if (res.ok) {
+                    });
                     imported++;
-                } else if (res.status === 409) {
-                    duplicates++;
-                } else {
-                    var err = await res.json();
-                    errors.push({ fen: fens[j], error: err.detail || 'Error' });
+                } catch (apiErr) {
+                    if (apiErr.status === 409) {
+                        duplicates++;
+                    } else {
+                        errors.push({ fen: fens[j], error: apiErr.data?.detail || apiErr.message || 'Error' });
+                    }
                 }
             } catch (e) {
                 errors.push({ fen: fens[j], error: e.message });

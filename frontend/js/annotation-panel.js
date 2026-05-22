@@ -47,8 +47,7 @@ const AnnotationPanel = (function () {
         _setTextarea('');
         _setStatus('');
 
-        fetch(API + '/annotations/?fen=' + encodeURIComponent(fen))
-            .then(function (r) { return r.json(); })
+        ApiClient.get('/annotations/', { fen })
             .then(function (data) {
                 if (myVersion !== _loadVersion) return;
                 _loadedText = data.note_text || '';
@@ -118,15 +117,7 @@ const AnnotationPanel = (function () {
         _isSaving = true;
         _setStatus('Saving...');
 
-        fetch(API + '/annotations/', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fen: fen, note_text: text }),
-        })
-            .then(function (r) {
-                if (!r.ok) throw new Error('save failed');
-                return r.json();
-            })
+        ApiClient.put('/annotations/', { fen: fen, note_text: text })
             .then(function () {
                 _loadedText = text;
                 _isDirty = false;

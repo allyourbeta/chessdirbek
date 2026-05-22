@@ -75,12 +75,8 @@
     
     UI.saveInlineVerdict = async function(gameId, verdict) {
         try {
-            const r = await fetch(`${API}/practice/${gameId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_verdict: verdict })
-            });
-            if (r.ok) {
+            const r = await ApiClient.put(`/practice/${gameId}`, { user_verdict: verdict });
+            if (r !== undefined) {
                 // Show brief confirmation
                 const display = document.getElementById(`verdict-display-${gameId}`);
                 if (display) {
@@ -162,12 +158,7 @@
             
             // Actually delete from backend
             deletedGames.push({ gameId, rowHtml, rowIndex, listEl });
-            const r = await fetch(`${API}/practice/${gameId}`, { method: 'DELETE' });
-            if (!r.ok) {
-                // If delete failed, restore the row
-                UI.undoDelete(gameId);
-                toast('Delete failed', true);
-            }
+            await ApiClient.delete(`/practice/${gameId}`);
         }, 300);
     };
     

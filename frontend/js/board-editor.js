@@ -189,13 +189,8 @@ var BoardEditor = (function () {
         var fen = _getFen();
         var title = document.getElementById('editor-pos-title').value.trim();
         var tags = _editorTagState.tags.slice();
-        var res = await fetch(API + '/positions/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fen: fen, title: title, position_type: posType, tags: tags }),
-        });
-        if (res.ok) {
-            var data = await res.json();
+        try {
+            var data = await ApiClient.post('/positions/', { fen: fen, title: title, position_type: posType, tags: tags });
             var savedCat = Object.values(CATEGORIES).find(c => c.positionType === posType);
             toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : posType));
             var catKey = TYPE_TO_CATEGORY[posType];
@@ -204,11 +199,12 @@ var BoardEditor = (function () {
             } else {
                 Router.navigate({ view: 'positionDetail', id: data.id, positionType: posType });
             }
-        } else if (res.status === 409) {
-            toast('Position already saved', 'warn');
-        } else {
-            var err = await res.json();
-            toast(err.detail || 'Error saving', 'error');
+        } catch (e) {
+            if (e.status === 409) {
+                toast('Position already saved', 'warn');
+            } else {
+                toast(e.data?.detail || e.message || 'Error saving', 'error');
+            }
         }
     }
     function search(searchType) {

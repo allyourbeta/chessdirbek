@@ -28,9 +28,7 @@ async function loadOpeningTree(fen) {
     el.innerHTML = '<div style="color:var(--text-muted);font-size:12px">Loading...</div>';
 
     try {
-        const res = await fetch(API + '/opening-tree/?fen=' + encodeURIComponent(fen));
-        if (!res.ok) { el.innerHTML = '<div style="color:var(--red);font-size:12px">Error loading tree</div>'; return; }
-        _treeData = await res.json();
+        _treeData = await ApiClient.get('/opening-tree/', { fen });
         renderOpeningTree();
     } catch (e) {
         el.innerHTML = '<div style="color:var(--red);font-size:12px">Error loading tree</div>';

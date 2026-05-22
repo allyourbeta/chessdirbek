@@ -74,14 +74,16 @@ function editFeaturedPosition() {
 async function deleteFeaturedPosition() {
     const id = AppState.featuredCategoryId;
     if (!id || !confirm('Delete this position?')) return;
-    const res = await fetch(API + '/positions/' + id, { method: 'DELETE' });
-    if (res.ok) {
+    await ApiClient.delete('/positions/' + id);
+    try {
         toast('Position deleted');
         if (AppState.currentCategory) {
             loadCategoryPositions(AppState.currentCategory).then(function() { 
                 loadRandomCategoryFeatured(); 
             });
         }
+    } catch (e) {
+        toast('Delete failed', true);
     }
 }
 
@@ -97,7 +99,7 @@ function toggleFeaturedStar() {
 function forkCategoryFeatured() {
     const id = AppState.featuredCategoryId;
     if (!id) return;
-    fetch(API + '/positions/' + id).then(function(r) { return r.json(); }).then(function(pos) {
+    ApiClient.get('/positions/' + id).then(function(pos) {
         // Pre-populate the form with data from the source position
         // but do NOT set edit-id — this creates a new position, not an edit.
         document.getElementById('edit-id').value = '';

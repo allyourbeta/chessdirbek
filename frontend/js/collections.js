@@ -1,7 +1,6 @@
 async function loadCollectionsView() {
     try {
-        const res = await fetch(API + '/collections/');
-        AppState.allCollections = await res.json();
+        AppState.allCollections = await ApiClient.get('/collections/');
     } catch (e) {
         AppState.allCollections = [];
     }
@@ -112,38 +111,27 @@ async function saveCollection() {
     if (!name) { toast('Name is required', true); return; }
 
     const body = { name, description: description || null };
-    let res;
-    if (id) {
-        res = await fetch(API + '/collections/' + id, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body),
-        });
-    } else {
-        res = await fetch(API + '/collections/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body),
-        });
-    }
-    if (res.ok) {
+    try {
+        if (id) {
+            await ApiClient.put('/collections/' + id, body);
+        } else {
+            await ApiClient.post('/collections/', body);
+        }
         toast(id ? 'Collection updated' : 'Collection created');
         hideCollectionModal();
         loadCollectionsView();
-    } else {
-        let msg = 'Failed to save';
-        try { msg = (await res.json()).detail || msg; } catch (e) {}
-        toast(msg, true);
+    } catch (e) {
+        toast(e.data?.detail || e.message || 'Failed to save', true);
     }
 }
 
 async function deleteCollection(id) {
     if (!confirm('Delete this collection? (Games will not be deleted.)')) return;
-    const res = await fetch(API + '/collections/' + id, { method: 'DELETE' });
-    if (res.ok) {
+    try {
+        await ApiClient.delete('/collections/' + id);
         toast('Collection deleted');
         loadCollectionsView();
-    } else {
+    } catch (e) {
         toast('Failed to delete', true);
     }
 }

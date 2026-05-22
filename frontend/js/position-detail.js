@@ -1,5 +1,5 @@
 async function loadPositionDetail(id) {
-    const pos = await (await fetch(API + '/positions/' + id)).json();
+    const pos = await ApiClient.get('/positions/' + id);
     AppState.currentDetailId = id;
     AppState.currentDetailFen = pos.fen;
     AppState.currentDetailType = pos.position_type || 'tabiya';
@@ -146,18 +146,17 @@ function startTitleEdit() {
 async function _saveTitleToBackend(title) {
     var id = AppState.currentDetailId;
     if (!id) return;
-    var r = await fetch(API + '/positions/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title }),
-    });
-    if (r.ok) toast('\u2713 Title saved');
-    else toast('Failed to save title', 'error');
+    try {
+        await ApiClient.put('/positions/' + id, { title });
+        toast('\u2713 Title saved');
+    } catch (e) {
+        toast('Failed to save title', 'error');
+    }
 }
 
 function editPosition() {
     if (!AppState.currentDetailId) return;
-    fetch(API + '/positions/' + AppState.currentDetailId).then(r => r.json()).then(pos => {
+    ApiClient.get('/positions/' + AppState.currentDetailId).then(pos => {
         document.getElementById('edit-id').value = pos.id;
         document.getElementById('fen-input').value = pos.fen;
         document.getElementById('pos-title').value = pos.title || '';
@@ -204,17 +203,13 @@ async function _autoSaveDetailNotes() {
     const notes = el.value;
     if (notes === el._lastSaved) return;
     console.log('[NOTES] Saving notes for position', id);
-    const r = await fetch(API + '/positions/' + id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes: notes || null }),
-    });
-    if (r.ok) {
+    try {
+        await ApiClient.put('/positions/' + id, { notes: notes || null });
         el._lastSaved = notes;
         console.log('[NOTES] Save succeeded');
         topBanner('Notes saved', 1500);
-    } else {
-        console.error('[NOTES] Save failed', r.status);
+    } catch (e) {
+        console.error('[NOTES] Save failed', e);
         toast('Failed to save notes', true);
     }
 }
@@ -224,9 +219,12 @@ async function deleteFromDetail() {
     if (!id || !confirm('Delete this position?')) return;
     const pos = AppState.allPositions.find(p => p.id === id);
     const viewToReturn = (pos && TYPE_TO_CATEGORY[pos.position_type]) || 'tabiya';
-    if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
+    try {
+        await ApiClient.delete('/positions/' + id);
         topBanner('Position deleted');
         Router.navigate({ view: viewToReturn });
+    } catch (e) {
+        toast('Delete failed', true);
     }
 }
 
@@ -239,14 +237,15 @@ async function randomFromDetail() {
     if (id) u += '&exclude_id=' + id;
     if (tags.length) u += '&' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     try {
-        const res = await fetch(u);
-        if (res.status === 404) { toast('No other positions', 'warn'); return; }
-        if (!res.ok) { toast('Error', 'error'); return; }
-        const pos = await res.json();
+        const pos = await ApiClient.get(u.replace(API, ''));
         const params = tags.length ? { tags: tags.slice() } : {};
         Router.navigate({ view: 'positionDetail', id: pos.id, positionType: posType, params });
     } catch (e) {
-        toast('Error', 'error');
+        if (e.status === 404) {
+            toast('No other positions', 'warn');
+        } else {
+            toast('Error', 'error');
+        }
     }
 }
 

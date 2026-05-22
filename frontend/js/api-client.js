@@ -35,11 +35,26 @@ const ApiClient = (function () {
         return data;
     }
 
+    async function streamRequest(method, path, body, signal) {
+        const opts = { method: method, headers: {} };
+        if (body !== undefined) {
+            opts.headers = { 'Content-Type': 'application/json' };
+            opts.body = JSON.stringify(body);
+        }
+        if (signal) {
+            opts.signal = signal;
+        }
+        return await fetch(_url(path), opts);
+    }
+
     return {
         get: function (path, params) { return request('GET', path, undefined, { params: params }); },
         post: function (path, body, options) { return request('POST', path, body, options); },
         put: function (path, body) { return request('PUT', path, body); },
+        patch: function (path, body) { return request('PATCH', path, body); },
         delete: function (path) { return request('DELETE', path); },
+        request: request,
+        streamPost: function (path, body, signal) { return streamRequest('POST', path, body, signal); },
     };
 })();
 

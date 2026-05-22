@@ -11,7 +11,7 @@ async function loadCategoryPositions(categoryKey) {
         u += '&' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     }
     
-    const positions = await (await fetch(u)).json();
+    const positions = await ApiClient.get(u.replace(API, ''));
     AppState.allPositions = positions;
     renderCategoryList(categoryKey);
 }
@@ -99,12 +99,15 @@ function showDetail(id) {
 
 async function deleteFromList(id) {
     if (!confirm('Delete this position?')) return;
-    if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
+    try {
+        await ApiClient.delete('/positions/' + id);
         toast('Position deleted');
         // Reload current category
         if (AppState.currentCategory) {
             loadCategoryPositions(AppState.currentCategory);
         }
+    } catch (e) {
+        toast('Delete failed', true);
     }
 }
 
@@ -124,7 +127,7 @@ async function loadPositions() {
     if (tags.length) {
         u += '?' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     }
-    AppState.allPositions = await (await fetch(u)).json();
+    AppState.allPositions = await ApiClient.get(u.replace(API, ''));
     renderPositionsList();
 }
 

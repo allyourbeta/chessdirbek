@@ -1,8 +1,6 @@
 async function startBatchReview(collectionId, collectionName) {
     try {
-        const res = await fetch(API + '/games/?collection_id=' + collectionId);
-        if (!res.ok) { toast('Failed to load collection games', true); return; }
-        const games = await res.json();
+        const games = await ApiClient.get('/games/', { collection_id: collectionId });
         if (!games.length) { toast('No games in this collection', true); return; }
         AppState.batchMode = true;
         AppState.batchCollectionId = collectionId;

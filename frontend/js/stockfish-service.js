@@ -107,7 +107,10 @@ const StockfishService = (function () {
                     moves: sanMoves,
                 };
                 _currentLines[parsed.pv - 1] = entry;
-                _onUpdate(_currentLines.slice());
+                // Only call callback if we're still analyzing (not destroyed)
+                if (_state === 'analyzing' && _onUpdate) {
+                    _onUpdate(_currentLines.slice());
+                }
             }
         }
     }
@@ -117,7 +120,17 @@ const StockfishService = (function () {
     function init(multiPV) {
         if (_state === 'ready' || _state === 'analyzing') return Promise.resolve();
         if (_state === 'loading') return _initPromise || Promise.resolve();
+        
+        // Ensure any existing worker is cleaned up
+        if (_worker) {
+            _worker.terminate();
+            _worker = null;
+        }
+        
         _state = 'loading';
+        _currentLines = [];
+        _onUpdate = null;
+        
         _initPromise = new Promise(function (resolve, reject) {
             _initResolve = resolve;
             _initReject = reject;
@@ -158,6 +171,9 @@ const StockfishService = (function () {
         _initResolve = null;
         _initReject = null;
         _initPromise = null;
+        _currentLines = [];
+        _onUpdate = null;
+        _currentFen = '';
         _state = 'destroyed';
     }
 

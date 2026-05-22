@@ -3,9 +3,9 @@ const Practice = (function () {
     let active = null;
     let pendingSave = null;
     let forcedVerdict = null;
-    let _playWorker = null;
     let _playChess = null;
     let _playBoardId = null;
+    let _practiceGeneration = 0;
 
     async function loadLevels() {
         if (engineLevels) return engineLevels;
@@ -17,29 +17,7 @@ const Practice = (function () {
     function getActive() { return active; }
     function getPendingSave() { return pendingSave; }
 
-    function _createPlayWorker(level) {
-        return new Promise(function (resolve, reject) {
-            var w = new Worker('/vendor/stockfish/stockfish.wasm.js');
-            var phase = 'uci';
-            w.onmessage = function (e) {
-                var line = typeof e.data === 'string' ? e.data : '';
-                if (phase === 'uci' && line.includes('uciok')) {
-                    phase = 'ready';
-                    var lvl = engineLevels && engineLevels[level];
-                    w.postMessage('setoption name Skill Level value ' + (lvl ? lvl.skill : 10));
-                    w.postMessage('setoption name Use NNUE value true');
-                    w.postMessage('isready');
-                } else if (phase === 'ready' && line === 'readyok') {
-                    phase = 'done'; w.onmessage = null; resolve(w);
-                }
-            };
-            w.postMessage('uci');
-            setTimeout(function () {
-                if (phase !== 'done') { w.terminate(); reject(new Error('timeout')); }
-            }, 10000);
-        });
-    }
-    function _destroyPlayWorker() { if (_playWorker) { _playWorker.terminate(); _playWorker = null; } }
+    function _destroyPlayWorker() { PracticeEngineService.destroy(); }
     function _getDepth(level) { var l = engineLevels && engineLevels[level]; return l ? l.depth : 10; }
 
     async function startFromDetail() {
@@ -50,9 +28,10 @@ const Practice = (function () {
         var level = levelSel ? levelSel.value : 'medium';
         var turnColor = AppState.currentDetailFen.split(' ')[1] === 'b' ? 'black' : 'white';
         var userColor = colorSel && colorSel.value ? colorSel.value : turnColor;
+        _practiceGeneration += 1;
         active = { rootPositionId: AppState.currentDetailId, startFen: AppState.currentDetailFen,
-            userColor: userColor, level: level, startingEval: null };
-        try { _playWorker = await _createPlayWorker(level); }
+            userColor: userColor, level: level, startingEval: null, generation: _practiceGeneration };
+        try { await PracticeEngineService.start(level, engineLevels); }
         catch (_) { toast('Failed to start Stockfish', true); active = null; return; }
         _playBoardId = 'detail-board';
         _playChess = new Chess(AppState.currentDetailFen);
@@ -155,29 +134,37 @@ const Practice = (function () {
     }
 
     function _makeEngineMove() {
-        if (!active || !_playWorker || !_playChess || _playChess.game_over()) {
+        if (!active || !PracticeEngineService.isRunning() || !_playChess || _playChess.game_over()) {
             if (_playChess && _playChess.game_over()) _onGameOver();
             return;
         }
         var fen = _playChess.fen(), depth = _getDepth(active.level);
-        var handler = function (e) {
-            var l = e.data;
-            if (typeof l !== 'string' || !l.startsWith('bestmove')) return;
-            _playWorker.removeEventListener('message', handler);
-            var uci = l.split(' ')[1];
-            if (!uci || uci === '(none)') return;
-            _playChess.move({ from: uci.substring(0, 2), to: uci.substring(2, 4),
-                promotion: uci.length > 4 ? uci[4] : undefined });
-            BoardManager.setPosition(_playBoardId, _playChess.fen());
-            MoveNavigator.push('detail-nav', _playChess.fen());
-            EngineUI.setPosition(_playChess.fen());
-            AnnotationPanel.setPosition(_playChess.fen());
-            _updatePracticeMoveList();
-            if (_playChess.game_over()) _onGameOver();
-        };
-        _playWorker.addEventListener('message', handler);
-        _playWorker.postMessage('position fen ' + fen);
-        _playWorker.postMessage('go depth ' + depth);
+        var moveGeneration = active.generation;
+        
+        PracticeEngineService.getMove(fen, depth)
+            .then(function (uci) {
+                // Protect against stale move from old practice session
+                if (!active || active.generation !== moveGeneration || !_playChess) {
+                    console.log('Ignoring stale engine move from previous session');
+                    return;
+                }
+                if (!uci || uci === '(none)') return;
+                _playChess.move({ from: uci.substring(0, 2), to: uci.substring(2, 4),
+                    promotion: uci.length > 4 ? uci[4] : undefined });
+                BoardManager.setPosition(_playBoardId, _playChess.fen());
+                MoveNavigator.push('detail-nav', _playChess.fen());
+                EngineUI.setPosition(_playChess.fen());
+                AnnotationPanel.setPosition(_playChess.fen());
+                _updatePracticeMoveList();
+                if (_playChess.game_over()) _onGameOver();
+            })
+            .catch(function (err) {
+                // Don't log engine session invalidation errors as they're expected during teardown
+                if (err.message !== 'Engine session invalidated') {
+                    console.error('Engine move failed:', err);
+                }
+                if (_playChess && _playChess.game_over()) _onGameOver();
+            });
     }
 
     function _onGameOver() {
@@ -221,6 +208,7 @@ const Practice = (function () {
 
     function _teardown() {
         _setPlayingUI(false); _destroyPlayWorker();
+        _practiceGeneration += 1; // Invalidate any pending engine moves
         if (_playBoardId && AppState.currentDetailFen) {
             MoveNavigator.create('detail-nav', {
                 fens: [AppState.currentDetailFen], startIndex: 0,

@@ -89,6 +89,7 @@ const EngineUI = (function () {
         if (!btn) return;
 
         if (_engineOn) {
+            // Hide engine - destroy worker completely
             StockfishService.destroy();
             _engineOn = false;
             btn.textContent = 'Show Engine';
@@ -96,14 +97,18 @@ const EngineUI = (function () {
             if (sel) sel.style.display = 'none';
             if (bar) bar.style.display = 'none';
             if (output) output.style.display = 'none';
+            // Clear any stale analysis output
+            if (output) output.innerHTML = '';
             return;
         }
 
+        // Show engine - create fresh worker
         if (StockfishService.state === 'uninitialized' || StockfishService.state === 'destroyed') {
             btn.textContent = 'Loading...';
             btn.disabled = true;
             StockfishService.init().then(function () {
-                if (!_containerId) return;
+                // Check if EngineUI is still mounted and container exists
+                if (!_containerId || !btn) return;
                 btn.textContent = 'Hide Engine';
                 btn.disabled = false;
                 _engineOn = true;
@@ -111,8 +116,10 @@ const EngineUI = (function () {
                 if (bar) bar.style.display = '';
                 if (output) output.style.display = '';
                 if (_currentFen) _startAnalysis();
-            }).catch(function () {
+            }).catch(function (error) {
+                // Check if elements still exist before updating
                 if (!btn || !_containerId) return;
+                console.error('Stockfish init failed:', error);
                 btn.textContent = 'Show Engine';
                 btn.disabled = false;
             });
@@ -195,10 +202,70 @@ const EngineUI = (function () {
         _currentFen = null;
     }
 
+    function show() {
+        if (!_containerId) return false;
+        if (_engineOn) return true;
+        
+        var btn = document.getElementById('engine-toggle-btn');
+        if (btn && btn.textContent === 'Show Engine') {
+            _toggleEngine();
+            return true;
+        }
+        return false;
+    }
+
+    function hide() {
+        if (!_containerId) return false;
+        if (!_engineOn) return true;
+        
+        var btn = document.getElementById('engine-toggle-btn');
+        if (btn && btn.textContent === 'Hide Engine') {
+            _toggleEngine();
+            return true;
+        }
+        return false;
+    }
+
+    function destroy() {
+        StockfishService.destroy();
+        _engineOn = false;
+        var btn = document.getElementById('engine-toggle-btn');
+        if (btn) {
+            btn.textContent = 'Show Engine';
+            btn.disabled = false;
+        }
+        var sel = document.getElementById('engine-lines-select');
+        var bar = document.getElementById('engine-eval-bar');
+        var output = document.getElementById('engine-output');
+        if (sel) sel.style.display = 'none';
+        if (bar) bar.style.display = 'none';
+        if (output) output.style.display = 'none';
+    }
+
+    function analyzeCurrentPosition() {
+        if (_engineOn && _currentFen) {
+            _startAnalysis();
+        }
+    }
+
+    function teardown() {
+        destroy();
+    }
+
+    function isEngineOn() {
+        return _engineOn;
+    }
+
     return {
         mount: mount,
         setPosition: setPosition,
         unmount: unmount,
+        show: show,
+        hide: hide,
+        destroy: destroy,
+        analyzeCurrentPosition: analyzeCurrentPosition,
+        teardown: teardown,
+        isEngineOn: isEngineOn,
     };
 })();
 

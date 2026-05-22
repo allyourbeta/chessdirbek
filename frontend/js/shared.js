@@ -136,8 +136,10 @@ function _focusFenInputForAddPosition() {
 }
 
 function renderRoute(route) {
+    EngineUI.teardown();
     EngineUI.unmount();
     AnnotationPanel.unmount();
+    if (window.PracticeEngineService) PracticeEngineService.destroy();
     const params = (route && route.params) || {};
     switch (route.view) {
         case 'tactics':
@@ -304,7 +306,10 @@ window.pieceKey = pieceKey;
 window.toast = toast;
 window.showView = showView;
 window.saveBoardPosition = saveBoardPosition;
-window.addEventListener('beforeunload', function () { StockfishService.destroy(); });
+window.addEventListener('beforeunload', function () { 
+    EngineUI.teardown(); 
+    if (window.PracticeEngineService) PracticeEngineService.destroy();
+});
 function toggleNewMenu() {
     var menu = document.getElementById('new-dropdown-menu');
     if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';

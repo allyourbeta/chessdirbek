@@ -64,33 +64,23 @@ async function doPositionSearch() {
     status.textContent = 'Searching...';
     results.innerHTML = '';
 
-    let res;
+    let data;
     try {
-        res = await fetch(API + '/games/search-position', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ fen, search_type: searchType }),
-        });
+        data = await ApiClient.post('/games/search-position', { fen, search_type: searchType });
     } catch (e) {
-        status.textContent = 'Search failed';
-        return;
-    }
-
-    if (!res.ok) {
-        let msg = 'Search failed';
-        try { msg = (await res.json()).detail || msg; } catch (e) {}
+        const msg = e.data?.detail || 'Search failed';
         status.textContent = msg;
         return;
     }
 
-    let data = await res.json();
-
     if (scopeVal) {
         const scopeId = parseInt(scopeVal, 10);
-        const gamesRes = await fetch(API + '/games/?collection_id=' + scopeId);
-        if (gamesRes.ok) {
-            const scopedIds = new Set((await gamesRes.json()).map(g => g.id));
+        try {
+            const scopedGames = await ApiClient.get('/games/', { collection_id: scopeId });
+            const scopedIds = new Set(scopedGames.map(g => g.id));
             data = data.filter(r => scopedIds.has(r.game_id));
+        } catch (_) {
+            // Ignore scoping errors
         }
     }
 

@@ -27,9 +27,7 @@ const PracticeViewer = (function () {
 
     async function _load(id) {
         try {
-            const r = await fetch(`${API}/practice/${id}`);
-            if (!r.ok) { toast('Failed to load practice game', true); return; }
-            _game = await r.json();
+            _game = await ApiClient.get(`/practice/${id}`);
         } catch (_) {
             toast('Failed to load practice game', true); return;
         }
@@ -39,8 +37,7 @@ const PracticeViewer = (function () {
 
         // Fetch root position FEN so we can anchor the replay.
         try {
-            const rp = await fetch(`${API}/positions/${_game.root_position_id}`);
-            const pos = rp.ok ? await rp.json() : null;
+            const pos = await ApiClient.get(`/positions/${_game.root_position_id}`);
             _rootFen = pos ? pos.fen : null;
         } catch (_) { _rootFen = null; }
 
@@ -144,17 +141,9 @@ const PracticeViewer = (function () {
         if (notes === _lastSavedNotes) return;
         
         try {
-            const r = await fetch(`${API}/practice/${_game.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ notes }),
-            });
-            
-            if (r.ok) {
-                _lastSavedNotes = notes;
-                _game = await r.json();
-                _showSaveIndicator();
-            }
+            _game = await ApiClient.put(`/practice/${_game.id}`, { notes });
+            _lastSavedNotes = notes;
+            _showSaveIndicator();
         } catch (_) {
             // Silent failure for auto-save
         }
@@ -263,9 +252,13 @@ const PracticeViewer = (function () {
     async function remove() {
         if (!_game) return;
         if (!confirm('Delete this practice game?')) return;
-        const r = await fetch(`${API}/practice/${_game.id}`, { method: 'DELETE' });
-        if (r.ok) { toast('Practice game deleted'); Navigation.cancelToFallback({ view: 'practice' }); }
-        else toast('Delete failed', true);
+        try {
+            await ApiClient.delete(`/practice/${_game.id}`);
+            toast('Practice game deleted');
+            Navigation.cancelToFallback({ view: 'practice' });
+        } catch (_) {
+            toast('Delete failed', true);
+        }
     }
 
     // Keyboard nav — only when view is active and focus isn't in an input.

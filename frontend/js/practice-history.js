@@ -21,9 +21,9 @@ const PracticeHistory = (function () {
             if (currentFilters.engine_level) statsParams.append('engine_level', currentFilters.engine_level);
 
             const [stats, gamesData, tree] = await Promise.all([
-                fetch(API + '/practice/stats/' + positionId + '?' + statsParams).then(r => r.json()),
-                fetch(API + '/practice/?' + params).then(r => r.json()),
-                fetch(API + '/practice/tree/' + positionId).then(r => r.json()),
+                ApiClient.get(`/practice/stats/${positionId}`, Object.fromEntries(statsParams.entries())),
+                ApiClient.get(`/practice/`, Object.fromEntries(params.entries())),
+                ApiClient.get(`/practice/tree/${positionId}`),
             ]);
 
             const games = gamesData.games || gamesData;
@@ -82,7 +82,7 @@ const PracticeHistory = (function () {
     }
 
     async function editVerdict(id) {
-        const game = await (await fetch(API + '/practice/' + id)).json();
+        const game = await ApiClient.get(`/practice/${id}`);
         const userColor = game.user_color;
         const options = ['1-0 (White wins)', '0-1 (Black wins)', '½-½ (Draw)', '— (Abandoned)'];
         const v = prompt('Select verdict:\n' + options.join('\n'), '');
@@ -93,25 +93,25 @@ const PracticeHistory = (function () {
         else if (v.includes('½-½')) verdict = 'draw';
         else if (v.includes('—')) verdict = 'abandoned';
         else { toast('Invalid verdict', true); return; }
-        const r = await fetch(API + '/practice/' + id, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_verdict: verdict }),
-        });
-        if (r.ok) {
+        try {
+            await ApiClient.put(`/practice/${id}`, { user_verdict: verdict });
             toast('Verdict updated');
             if (AppState.currentDetailId) load(AppState.currentDetailId);
-        } else { toast('Update failed', true); }
+        } catch (_) {
+            toast('Update failed', true);
+        }
     }
 
     async function deleteGame(id) {
         if (!confirm('Delete this practice game?')) return;
-        const r = await fetch(API + '/practice/' + id, { method: 'DELETE' });
-        if (r.ok) {
+        try {
+            await ApiClient.delete(`/practice/${id}`);
             toast('Practice game deleted');
             if (AppState.currentDetailId) load(AppState.currentDetailId);
             const cur = Router.current();
             if (cur && cur.view === 'practice') Practice.loadPracticeTab();
+        } catch (_) {
+            toast('Delete failed', true);
         }
     }
 

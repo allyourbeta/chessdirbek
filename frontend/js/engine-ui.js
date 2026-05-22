@@ -89,7 +89,7 @@ const EngineUI = (function () {
         if (!btn) return;
 
         if (_engineOn) {
-            StockfishService.stop();
+            StockfishService.destroy();
             _engineOn = false;
             btn.textContent = 'Show Engine';
             btn.disabled = false;
@@ -174,7 +174,7 @@ const EngineUI = (function () {
     function unmount() {
         if (!_containerId) return;
 
-        StockfishService.stop();
+        StockfishService.destroy();
         _engineOn = false;
 
         var btn = document.getElementById('engine-toggle-btn');

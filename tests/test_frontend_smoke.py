@@ -51,3 +51,51 @@ def test_static_helper_contracts_are_present():
     assert "formatMoveCountFromPlies" in move_counts
     assert "formatAverageMoveCountFromPlies" in move_counts
     assert "terminate()" in stockfish
+
+
+def test_games_page_structure():
+    """Games page contains structure for rendering game rows."""
+    html = client.get("/games").text
+    assert "view-games" in html  # Main games view container
+    assert "tag-filters" in html or "filters" in html  # Filter controls 
+    assert "No games" in html or "game" in html  # Either empty state or games present
+
+
+def test_eco_opening_label_integration():
+    """ECO opening display integration is present in relevant JS files."""
+    games_js = (FRONTEND / "js" / "games.js").read_text()
+    game_viewer_js = (FRONTEND / "js" / "game-viewer.js").read_text()
+    
+    # Check that games.js uses ECO lookup
+    assert "EcoOpenings" in games_js
+    
+    # Check that game viewer uses ECO lookup  
+    assert "EcoOpenings.labelFor" in game_viewer_js
+
+
+def test_practice_move_count_display():
+    """Practice save modal uses proper move count conversion from plies."""
+    practice_ui = (FRONTEND / "js" / "practice-ui.js").read_text()
+    
+    # Check that practice UI uses MoveCounts helper for move display
+    assert "MoveCounts.formatMoveCountFromPlies" in practice_ui
+    assert "showSaveModal" in practice_ui
+
+
+def test_engine_destruction_path():
+    """Engine has destruction/termination capability."""
+    stockfish = (FRONTEND / "js" / "stockfish-service.js").read_text()
+    engine_ui = (FRONTEND / "js" / "engine-ui.js").read_text()
+    
+    # Check destruction methods exist
+    assert "destroy(" in stockfish or "terminate(" in stockfish
+    assert "unmount" in engine_ui or "destroy" in engine_ui
+
+
+def test_editor_cancel_button_structure():
+    """Editor pages contain cancel button structure.""" 
+    html = client.get("/add").text
+    
+    # Check for cancel-related elements
+    assert "cancel" in html.lower() or "Cancel" in html
+    assert "Navigation.cancelToFallback" in html or "history.back" in html

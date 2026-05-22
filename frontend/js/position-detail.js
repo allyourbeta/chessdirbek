@@ -102,8 +102,12 @@ function toggleCollapsible(id) {
 }
 
 function copyFen() {
-    var el = document.getElementById('detail-fen');
-    if (el) navigator.clipboard.writeText(el.textContent).then(function () { toast('FEN copied'); });
+    var fen = BoardManager.getCurrentFen();
+    if (fen) {
+        navigator.clipboard.writeText(fen).then(function () { toast('FEN copied'); });
+    } else {
+        toast('No position to copy', true);
+    }
 }
 
 function _initCollapsibleCards(notes) {

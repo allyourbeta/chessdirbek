@@ -289,12 +289,15 @@ const Practice = (function () {
     function loadPracticeHistory(posId, append) { return PracticeHistory.load(posId, append); }
     async function loadPracticeTab() { await loadLevels(); PracticeUI.populateLevelSelect(engineLevels); PracticeUI.renderPositionsList(await ApiClient.get('/practice/positions')); }
 
+    function getPlayChess() { return _playChess; }
+
     return {
         startFromDetail: startFromDetail, confirmSave: confirmSave, discard: discard, isActive: isActive,
         loadPracticeHistory: loadPracticeHistory, loadPracticeTab: loadPracticeTab, loadLevels: loadLevels, getLevels: getLevels,
         editVerdict: id => PracticeHistory.editVerdict(id), deleteGame: id => PracticeHistory.deleteGame(id),
         guessVerdict: guessVerdict, getActive: getActive, getPendingSave: getPendingSave, resign: resign, stopAndAbandon: stopAndAbandon,
         applyFilters: () => PracticeHistory.applyFilters(), clearFilters: () => PracticeHistory.clearFilters(), showMore: () => PracticeHistory.showMore(),
+        getPlayChess: getPlayChess,
     };
 })();
 window.Practice = Practice;

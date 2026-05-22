@@ -114,7 +114,8 @@ function showSavePositionModal() {
     const g = AppState.currentGame;
     if (!g) return;
     const ply = AppState.currentPly;
-    const fen = g.fens[ply];
+    // Use getCurrentFen to get actual visible position, fallback to indexed FEN
+    const fen = BoardManager.getCurrentFen() || g.fens[ply];
     const title = NamingService.generateGamePositionName(g, ply, g.moves_san);
 
     document.getElementById('save-pos-fen').value = fen;

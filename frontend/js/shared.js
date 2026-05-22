@@ -258,7 +258,8 @@ function showView(name) {
     _activateView(name, labels[name]);
 }
 async function saveBoardPosition(boardId, positionType) {
-    var fen = BoardManager.getPosition(boardId);
+    // Use getCurrentFen to get actual visible position, fallback to specific board
+    var fen = BoardManager.getCurrentFen() || BoardManager.getPosition(boardId);
     if (!fen) { toast('No position on board', true); return; }
     var title;
     if (AppState.currentGame) {

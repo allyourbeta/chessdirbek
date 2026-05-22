@@ -237,6 +237,71 @@ const BoardManager = {
         board._analysisOrigin = fen;
         board._analysisHistory = [fen];
     },
+
+    // Shared helper to get current FEN from any active context
+    getCurrentFen() {
+        // Determine the active view/context and return the current FEN
+        const activeView = document.querySelector('.view.active');
+        if (!activeView) return null;
+
+        const viewId = activeView.id;
+
+        // Practice mode - use chess.js instance if available, otherwise MoveNavigator
+        if (viewId === 'view-practice') {
+            if (window.Practice && window.Practice.isActive()) {
+                // Get from practice Chess.js instance via Practice module
+                const playChess = window.Practice.getPlayChess && window.Practice.getPlayChess();
+                if (playChess) return playChess.fen();
+            }
+            // Fall back to MoveNavigator for detail view
+            return MoveNavigator.getFen('detail-nav') || AppState.currentDetailFen;
+        }
+
+        // Game viewer - use MoveNavigator
+        if (viewId === 'view-game-viewer') {
+            return MoveNavigator.getFen('game-nav') || this.getPosition('game-board');
+        }
+
+        // Practice game viewer
+        if (viewId === 'view-practice-viewer') {
+            return this.getPosition('pv-board');
+        }
+
+        // Board editor - get from editor's internal state
+        if (viewId === 'view-editor') {
+            if (window.BoardEditor && window.BoardEditor._getFen) {
+                return window.BoardEditor._getFen();
+            }
+            return this.getPosition('editor-board');
+        }
+
+        // Position detail view
+        if (viewId === 'view-detail') {
+            return MoveNavigator.getFen('detail-nav') || AppState.currentDetailFen;
+        }
+
+        // Search view
+        if (viewId === 'view-search') {
+            return this.getPosition('search-board') || AppState.searchFen;
+        }
+
+        // Add position / category views - use form board
+        if (viewId === 'view-add' || viewId === 'view-category') {
+            return this.getPosition('board') || AppState.boardFen;
+        }
+
+        // Default fallback
+        return AppState.boardFen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    },
+
+    // Update the displayed FEN element if it exists
+    updateDisplayedFen() {
+        const fen = this.getCurrentFen();
+        const fenEl = document.getElementById('detail-fen');
+        if (fenEl && fen) {
+            fenEl.textContent = fen;
+        }
+    },
 };
 
 window.parseFenBoard = parseFenBoard;

@@ -21,7 +21,9 @@ async function loadGameDetail(id) {
     document.getElementById('gv-result').textContent = game.result || '*';
     document.getElementById('gv-event').textContent = game.event || '';
     document.getElementById('gv-date').textContent = game.date_played || '';
-    const ecoStr = [game.eco, game.opening].filter(Boolean).join(' - ');
+    const ecoStr = (window.EcoOpenings && typeof EcoOpenings.labelFor === 'function')
+        ? EcoOpenings.labelFor(game.eco, game.opening)
+        : [game.eco, game.opening].filter(Boolean).join(' - ');
     document.getElementById('gv-opening').textContent = ecoStr;
     document.getElementById('gv-tags').innerHTML = game.tags.map(t => `<span class="tag">#${t.name}</span>`).join('');
 

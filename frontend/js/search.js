@@ -108,7 +108,10 @@ function renderSearchResults(data) {
         const w = r.white || '?';
         const b = r.black || '?';
         const res = r.result || '*';
-        const eco = r.eco ? `<span class="text-muted" style="font-size:12px">${r.eco}</span>` : '';
+        const ecoLabel = (window.EcoOpenings && typeof EcoOpenings.nameFor === 'function' && r.eco)
+            ? `${r.eco} — ${EcoOpenings.nameFor(r.eco)}`
+            : (r.eco || '');
+        const eco = ecoLabel ? `<span class="text-muted" style="font-size:12px">${ecoLabel}</span>` : '';
         const evt = r.event ? `<span class="text-muted" style="font-size:12px">${escapeSearchHtml(r.event)}</span>` : '';
         const moveNum = Math.ceil(r.half_move / 2);
         const moveLabel = r.half_move === 0 ? 'start' : ('after ' + moveNum + (r.half_move % 2 === 1 ? '.' : '...'));

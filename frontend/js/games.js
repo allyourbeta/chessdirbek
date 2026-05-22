@@ -1,9 +1,3 @@
-
-function _fullMoveCountFromPlies(plyCount) {
-    const n = Number(plyCount) || 0;
-    return Math.ceil(n / 2);
-}
-
 function _buildGameQuery(extra) {
     const params = [];
     (AppState.gameTagFilters || []).forEach(t => params.push('tags=' + encodeURIComponent(t)));
@@ -143,7 +137,7 @@ function renderGamesList() {
             <td class="col-result">${res}</td>
             <td class="col-opening">${opening}</td>
             <td class="col-date">${date}</td>
-            <td class="col-moves">${_fullMoveCountFromPlies(g.move_count)}</td>
+            <td class="col-moves">${MoveCounts.fullMoveCountFromPlies(g.move_count)}</td>
         </tr>`;
     }).join('');
     el.innerHTML = `<table class="games-table">

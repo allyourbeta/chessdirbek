@@ -16,26 +16,6 @@ const PracticeUI = (function () {
         return '—';
     }
 
-
-    function fullMoveCountFromPlies(plyCount) {
-        const n = Number(plyCount) || 0;
-        return Math.ceil(n / 2);
-    }
-
-    function formatMoveCountFromPlies(plyCount, includePlyDetail = false) {
-        const plies = Number(plyCount) || 0;
-        const moves = fullMoveCountFromPlies(plies);
-        const moveLabel = moves === 1 ? 'move' : 'moves';
-        if (!includePlyDetail) return `${moves} ${moveLabel}`;
-        const plyLabel = plies === 1 ? 'ply' : 'plies';
-        return `${moves} ${moveLabel} (${plies} ${plyLabel})`;
-    }
-
-    function formatAverageMoveCountFromPlies(avgPlies) {
-        const plies = Number(avgPlies) || 0;
-        return `${(plies / 2).toFixed(1)} moves`;
-    }
-
     function resultClass(verdict) {
         if (verdict === 'win') return 'correct';
         if (verdict === 'loss') return 'incorrect';
@@ -48,7 +28,7 @@ const PracticeUI = (function () {
         const body = document.getElementById('practice-save-body');
         const verdict = Practice.guessVerdict();
         const suggestedResult = formatResult(verdict, active.userColor);
-        body.innerHTML = '<p style="margin-bottom:8px"><strong>' + formatMoveCountFromPlies(pending.moveCount, true) + '</strong> as ' + active.userColor + ' vs Stockfish (' + active.level + ')</p>' +
+        body.innerHTML = '<p style="margin-bottom:8px"><strong>' + MoveCounts.formatMoveCountFromPlies(pending.moveCount, true) + '</strong> as ' + active.userColor + ' vs Stockfish (' + active.level + ')</p>' +
             '<p class="text-muted" style="font-size:12px;margin-bottom:12px">Suggested result: <strong>' + suggestedResult + '</strong>' +
             (verdict !== '?' ? ' <span style="margin-left:6px">(' + verdict + ')</span>' : '') + '</p>' +
             '<label>Notes (optional)</label><textarea id="practice-save-notes" placeholder="Your reflections on this game..."></textarea>';
@@ -89,7 +69,7 @@ const PracticeUI = (function () {
                 vs Stockfish: <strong>${s.wins}/${decided}</strong> wins (${wr}%)
             </div>
             <div class="text-muted" style="font-size:12px;margin-bottom:8px">
-                Avg ${formatAverageMoveCountFromPlies(s.avg_move_count)}, avg final eval
+                Avg ${MoveCounts.formatAverageMoveCountFromPlies(s.avg_move_count)}, avg final eval
                 ${s.avg_final_eval != null ? s.avg_final_eval.toFixed(2) : '—'}
             </div>`;
         if (s.by_engine_level && s.by_engine_level.length > 1) {
@@ -127,7 +107,7 @@ const PracticeUI = (function () {
             const result = formatResult(v, g.user_color);
             const date = g.created_at ? new Date(g.created_at).toLocaleDateString() : '';
             return `<div class="pos-item" style="padding:8px 12px;margin-bottom:8px;font-size:12px;cursor:pointer;border:1px solid var(--grey-100);border-radius:4px" onclick="PracticeViewer.open(${g.id})" title="Click to review this game">
-                <span style="flex:1">${date} &mdash; ${g.user_color} vs Stockfish, ${formatMoveCountFromPlies(g.move_count, true)} &middot; 
+                <span style="flex:1">${date} &mdash; ${g.user_color} vs Stockfish, ${MoveCounts.formatMoveCountFromPlies(g.move_count, true)} &middot;
                     <span id="verdict-display-${g.id}" class="${vcls}" style="cursor:pointer;position:relative;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color 0.2s" onmouseover="this.style.textDecorationColor='currentColor'" onmouseout="this.style.textDecorationColor='transparent'" onclick="event.stopPropagation();PracticeUI.showInlineVerdictEdit(${g.id}, '${g.user_color}')" title="Click to edit verdict">
                         <strong>${result}</strong>
                     </span>
@@ -200,7 +180,11 @@ const PracticeUI = (function () {
     return {
         showSaveModal, hideSaveModal, renderHistory,
         renderPositionsList, populateLevelSelect,
-        formatResult, fullMoveCountFromPlies, formatMoveCountFromPlies, formatAverageMoveCountFromPlies, resultClass,
+        formatResult,
+        fullMoveCountFromPlies: MoveCounts.fullMoveCountFromPlies,
+        formatMoveCountFromPlies: MoveCounts.formatMoveCountFromPlies,
+        formatAverageMoveCountFromPlies: MoveCounts.formatAverageMoveCountFromPlies,
+        resultClass,
     };
 })();
 

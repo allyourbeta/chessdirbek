@@ -103,6 +103,7 @@ const EngineUI = (function () {
             btn.textContent = 'Loading...';
             btn.disabled = true;
             StockfishService.init().then(function () {
+                if (!_containerId) return;
                 btn.textContent = 'Hide Engine';
                 btn.disabled = false;
                 _engineOn = true;
@@ -110,6 +111,10 @@ const EngineUI = (function () {
                 if (bar) bar.style.display = '';
                 if (output) output.style.display = '';
                 if (_currentFen) _startAnalysis();
+            }).catch(function () {
+                if (!btn || !_containerId) return;
+                btn.textContent = 'Show Engine';
+                btn.disabled = false;
             });
             return;
         }

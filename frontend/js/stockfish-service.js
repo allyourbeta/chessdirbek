@@ -5,6 +5,7 @@ const StockfishService = (function () {
     let _onUpdate = null;
     let _initResolve = null;
     let _initReject = null;
+    let _initPromise = null;
 
     function _send(cmd) {
         if (_worker) _worker.postMessage(cmd);
@@ -84,6 +85,7 @@ const StockfishService = (function () {
                     _initResolve();
                     _initResolve = null;
                     _initReject = null;
+                    _initPromise = null;
                 }
                 return;
             }
@@ -114,20 +116,16 @@ const StockfishService = (function () {
 
     function init(multiPV) {
         if (_state === 'ready' || _state === 'analyzing') return Promise.resolve();
-        if (_state === 'loading') {
-            return new Promise(function (resolve, reject) {
-                _initResolve = resolve;
-                _initReject = reject;
-            });
-        }
+        if (_state === 'loading') return _initPromise || Promise.resolve();
         _state = 'loading';
-        return new Promise(function (resolve, reject) {
+        _initPromise = new Promise(function (resolve, reject) {
             _initResolve = resolve;
             _initReject = reject;
             _worker = new Worker('/vendor/stockfish/stockfish.wasm.js');
             _worker.onmessage = _onMessage;
             _send('uci');
         });
+        return _initPromise;
     }
 
     function analyze(fen, options) {
@@ -156,6 +154,10 @@ const StockfishService = (function () {
             _worker.terminate();
             _worker = null;
         }
+        if (_initReject) _initReject(new Error('Stockfish worker destroyed'));
+        _initResolve = null;
+        _initReject = null;
+        _initPromise = null;
         _state = 'destroyed';
     }
 

@@ -93,7 +93,7 @@ const PracticeUI = (function () {
             const hasFilters = document.getElementById('practice-verdict-filter')?.value || 
                               document.getElementById('practice-level-filter')?.value;
             if (hasFilters) {
-                el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No games match these filters. Try adjusting your filters or <a href="#" onclick="Practice.clearFilters();return false">clear filters</a>.</div>';
+                el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No games match these filters. Try adjusting your filters or <a href="#" data-action="practice-clear-filters">clear filters</a>.</div>';
             } else {
                 el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No practice games yet. Start practicing to see your history here.</div>';
             }
@@ -106,13 +106,13 @@ const PracticeUI = (function () {
             const vcls = resultClass(v);
             const result = formatResult(v, g.user_color);
             const date = g.created_at ? new Date(g.created_at).toLocaleDateString() : '';
-            return `<div class="pos-item" style="padding:8px 12px;margin-bottom:8px;font-size:12px;cursor:pointer;border:1px solid var(--grey-100);border-radius:4px" onclick="PracticeViewer.open(${g.id})" title="Click to review this game">
+            return `<div class="pos-item" style="padding:8px 12px;margin-bottom:8px;font-size:12px;cursor:pointer;border:1px solid var(--grey-100);border-radius:4px" data-practice-game-id="${g.id}" title="Click to review this game">
                 <span style="flex:1">${Html.escape(date)} &mdash; ${Html.escape(g.user_color)} vs Stockfish, ${MoveCounts.formatMoveCountFromPlies(g.move_count, true)} &middot;
-                    <span id="verdict-display-${g.id}" class="${vcls}" style="cursor:pointer;position:relative;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color 0.2s" onmouseover="this.style.textDecorationColor='currentColor'" onmouseout="this.style.textDecorationColor='transparent'" onclick="event.stopPropagation();PracticeUI.showInlineVerdictEdit(${g.id}, '${g.user_color}')" title="Click to edit verdict">
+                    <span id="verdict-display-${g.id}" class="${vcls}" style="cursor:pointer;position:relative;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color 0.2s" data-user-color="${g.user_color}" title="Click to edit verdict">
                         <strong>${result}</strong>
                     </span>
                 </span>
-                <button id="delete-btn-${g.id}" class="btn btn-sm btn-ghost" style="color:var(--text-muted);transition:color 0.2s" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'" onclick="event.stopPropagation();PracticeUI.showInlineDelete(${g.id})" aria-label="Delete practice game">
+                <button id="delete-btn-${g.id}" class="btn btn-sm btn-ghost" style="color:var(--text-muted);transition:color 0.2s" aria-label="Delete practice game">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -153,7 +153,7 @@ const PracticeUI = (function () {
         el.innerHTML = summaries.map(s => {
             const wr = (s.win_rate * 100).toFixed(0);
             const last = s.last_played ? new Date(s.last_played).toLocaleDateString() : '—';
-            return `<div class="pos-item" onclick="Router.navigate({view:'positionDetail',id:${s.position_id}})">
+            return `<div class="pos-item" data-position-id="${s.position_id}">
                 ${renderMiniBoard(s.fen)}
                 <div class="title">${Html.escape(s.title || 'Untitled')}</div>
                 <div class="text-muted" style="font-size:12px">${s.total_games} games &middot; ${wr}% win &middot; ${last}</div>

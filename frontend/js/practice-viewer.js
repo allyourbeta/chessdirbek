@@ -195,7 +195,7 @@ const PracticeViewer = (function () {
             const ply = 1;
             html += `<tr><td style="color:var(--text-muted);padding:2px 8px 2px 0;width:30px;text-align:right">${moveNum}...</td>` +
                 `<td></td>` +
-                `<td class="move-cell" data-ply="${ply}" onclick="PracticeViewer.goTo(${ply})" style="padding:4px 8px;cursor:pointer;border-radius:4px">${_sans[0]}</td></tr>`;
+                `<td class="move-cell" data-ply="${ply}" style="padding:4px 8px;cursor:pointer;border-radius:4px">${_sans[0]}</td></tr>`;
             i = 1;
             moveNum++;
         }
@@ -206,8 +206,8 @@ const PracticeViewer = (function () {
             const b = _sans[i + 1] || '';
             html += `<tr>
                 <td style="color:var(--text-muted);padding:2px 8px 2px 0;width:30px;text-align:right">${moveNum}.</td>
-                <td class="move-cell" data-ply="${wPly}" onclick="PracticeViewer.goTo(${wPly})" style="padding:4px 8px;cursor:pointer;border-radius:4px">${w}</td>
-                <td class="move-cell" data-ply="${bPly}" onclick="PracticeViewer.goTo(${bPly})" style="padding:4px 8px;cursor:pointer;border-radius:4px">${b}</td>
+                <td class="move-cell" data-ply="${wPly}" style="padding:4px 8px;cursor:pointer;border-radius:4px">${w}</td>
+                <td class="move-cell" data-ply="${bPly}" style="padding:4px 8px;cursor:pointer;border-radius:4px">${b}</td>
             </tr>`;
             moveNum++;
             i += 2;

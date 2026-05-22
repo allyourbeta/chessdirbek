@@ -111,9 +111,9 @@ function renderGamesList() {
         const opening = Html.escape(_gameOpening(g));
         const date = Html.escape(_gameDate(g));
         const checked = AppState.selectedGameIds.has(g.id) ? 'checked' : '';
-        return `<tr onclick="openGame(${g.id})">
-            <td class="col-select" onclick="event.stopPropagation()">
-                <input type="checkbox" class="game-select" data-id="${g.id}" onclick="toggleGameSelect(${g.id}, this.checked)" ${checked}>
+        return `<tr data-game-id="${g.id}">
+            <td class="col-select">
+                <input type="checkbox" class="game-select" data-id="${g.id}" ${checked}>
             </td>
             <td class="col-players">${w}${we} <span class="text-muted">vs</span> ${b}${be}</td>
             <td class="col-result">${res}</td>
@@ -153,9 +153,9 @@ function renderPager() {
     const start = total ? page * size + 1 : 0;
     const end = Math.min(total, (page + 1) * size);
     pager.innerHTML = `
-        <button class="btn btn-sm" onclick="gamesPrevPage()" ${page <= 0 ? 'disabled' : ''}>&larr; Prev</button>
+        <button class="btn btn-sm games-prev-btn" ${page <= 0 ? 'disabled' : ''}>&larr; Prev</button>
         <span>${start}–${end} of ${total}</span>
-        <button class="btn btn-sm" onclick="gamesNextPage()" ${page + 1 >= totalPages ? 'disabled' : ''}>Next &rarr;</button>
+        <button class="btn btn-sm games-next-btn" ${page + 1 >= totalPages ? 'disabled' : ''}>Next &rarr;</button>
     `;
 }
 

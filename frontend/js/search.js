@@ -101,7 +101,7 @@ function renderSearchResults(data) {
         const evt = r.event ? `<span class="text-muted" style="font-size:12px">${Html.escape(r.event)}</span>` : '';
         const moveNum = Math.ceil(r.half_move / 2);
         const moveLabel = r.half_move === 0 ? 'start' : ('after ' + moveNum + (r.half_move % 2 === 1 ? '.' : '...'));
-        return `<div class="pos-item" onclick="openSearchResult(${r.game_id}, ${r.half_move})">
+        return `<div class="pos-item" data-game-id="${r.game_id}" data-half-move="${r.half_move}">
             <div style="flex:1">
                 <div style="font-size:14px;font-weight:500">${Html.escape(w)} vs ${Html.escape(b)} <span class="text-muted">${res}</span></div>
                 <div style="margin-top:4px">${eco} ${evt}</div>

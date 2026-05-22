@@ -60,7 +60,7 @@ function renderOpeningTree() {
         const bPct = m.games > 0 ? Math.round(m.black_wins / m.games * 100) : 0;
         const fenEsc = m.fen.replace(/'/g, "\\'");
 
-        html += '<tr class="tree-row" style="cursor:pointer;border-bottom:1px solid var(--border)" onclick="onTreeMoveClick(\'' + fenEsc + '\')">';
+        html += '<tr class="tree-row" style="cursor:pointer;border-bottom:1px solid var(--border)" data-fen="' + fenEsc + '">';
         html += `<td style="padding:4px 8px;color:var(--accent);font-weight:500">${m.san}</td>`;
         html += `<td style="text-align:right;padding:4px 6px">${m.games}</td>`;
         html += `<td style="text-align:right;padding:4px 6px;color:var(--text-muted)">${wPct}%</td>`;

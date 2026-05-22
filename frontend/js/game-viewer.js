@@ -72,8 +72,8 @@ function renderMoveList() {
 
         html += '<tr>';
         html += `<td style="color:var(--text-muted);padding:2px 8px 2px 0;width:30px;text-align:right">${moveNum}.</td>`;
-        html += `<td class="move-cell" data-ply="${i + 1}" onclick="goToPly(${i + 1})" style="padding:4px 8px;cursor:pointer;border-radius:4px">${wMove}</td>`;
-        html += `<td class="move-cell" data-ply="${i + 2}" onclick="goToPly(${i + 2})" style="padding:4px 8px;cursor:pointer;border-radius:4px">${bMove}</td>`;
+        html += `<td class="move-cell" data-ply="${i + 1}" style="padding:4px 8px;cursor:pointer;border-radius:4px">${wMove}</td>`;
+        html += `<td class="move-cell" data-ply="${i + 2}" style="padding:4px 8px;cursor:pointer;border-radius:4px">${bMove}</td>`;
         html += '</tr>';
 
         if (wComment || bComment) {

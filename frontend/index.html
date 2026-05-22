@@ -23,28 +23,28 @@
 <header>
   <h1><img src="/icon-192.png" alt="Chessdirbek" class="header-logo"></h1>
   <nav>
-    <button onclick="Router.navigate({view:'tactics'})">Tactics</button>
-    <button onclick="Router.navigate({view:'tabiya'})">Tabiya</button>
-    <button onclick="Router.navigate({view:'endings'})">Endings</button>
-    <button onclick="Router.navigate({view:'strategy'})">Strategy</button>
-    <button onclick="Router.navigate({view:'games'})">Games</button>
-    <button onclick="Router.navigate({view:'search'})">Search</button>
+    <button data-nav="tactics">Tactics</button>
+    <button data-nav="tabiya">Tabiya</button>
+    <button data-nav="endings">Endings</button>
+    <button data-nav="strategy">Strategy</button>
+    <button data-nav="games">Games</button>
+    <button data-nav="search">Search</button>
   </nav>
   <div class="nav-right">
     <div class="nav-dropdown" id="new-dropdown">
-      <button class="nav-new-btn" onclick="toggleNewMenu()">+ New ▾</button>
+      <button class="nav-new-btn" data-action="toggle-new-menu">+ New ▾</button>
       <div class="nav-dropdown-menu" id="new-dropdown-menu" style="display:none">
-        <button onclick="Router.navigate({view:'addPosition', params:{type:'puzzle'}}); closeNewMenu()">+ New Tactic</button>
-        <button onclick="Router.navigate({view:'addPosition', params:{type:'tabiya'}}); closeNewMenu()">+ New Tabiya</button>
-        <button onclick="Router.navigate({view:'addPosition', params:{type:'endgame'}}); closeNewMenu()">+ New Ending</button>
-        <button onclick="Router.navigate({view:'addPosition', params:{type:'strategy'}}); closeNewMenu()">+ New Strategy</button>
+        <button data-nav-new="puzzle">+ New Tactic</button>
+        <button data-nav-new="tabiya">+ New Tabiya</button>
+        <button data-nav-new="endgame">+ New Ending</button>
+        <button data-nav-new="strategy">+ New Strategy</button>
         <div class="nav-dropdown-divider"></div>
-        <button onclick="Router.navigate({view:'bulkAdd'}); closeNewMenu()">Bulk Add</button>
-        <button onclick="Router.navigate({view:'editor'}); closeNewMenu()">Editor</button>
-        <button onclick="Router.navigate({view:'gameImport'}); closeNewMenu()">Import PGN</button>
+        <button data-nav-new="bulkAdd">Bulk Add</button>
+        <button data-nav-new="editor">Editor</button>
+        <button data-nav-new="gameImport">Import PGN</button>
       </div>
     </div>
-    <button class="mute-btn" onclick="toggleMute()" id="mute-btn" title="Toggle sound">&#x1f50a;</button>
+    <button class="mute-btn" data-action="toggle-mute" id="mute-btn" title="Toggle sound">&#x1f50a;</button>
   </div>
 </header>
 <div id="notification-banner" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1000;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:16px;font-weight:500;text-align:center;min-width:300px;max-width:500px"></div>
@@ -54,15 +54,15 @@
       <div class="collection-featured">
         <div id="cat-featured-board" class="board-wrap board-wrap--fluid"></div>
         <div class="featured-board-controls">
-          <button class="btn btn-md btn-ghost" onclick="flipCategoryFeaturedBoard()">Flip</button>
-          <button class="btn btn-md btn-ghost" onclick="shuffleCategoryFeatured()">Shuffle</button>
-          <button class="btn btn-md btn-ghost" onclick="showDetail(AppState.featuredCategoryId)">Details →</button>
-          <button class="btn btn-md btn-ghost" onclick="forkCategoryFeatured()" title="Fork — copy into a new position">⑂ Fork</button>
+          <button class="btn btn-md btn-ghost" data-action="flip-category-featured-board">Flip</button>
+          <button class="btn btn-md btn-ghost" data-action="shuffle-category-featured">Shuffle</button>
+          <button class="btn btn-md btn-ghost" data-action="show-featured-detail">Details →</button>
+          <button class="btn btn-md btn-ghost" data-action="fork-category-featured" title="Fork — copy into a new position">⑂ Fork</button>
         </div>
         <div class="featured-info">
           <div class="featured-title-row">
             <h3 id="cat-featured-title" class="featured-title"></h3>
-            <button class="star-toggle" id="cat-featured-star" onclick="event.stopPropagation();toggleFeaturedStar()" title="Toggle star"></button>
+            <button class="star-toggle" id="cat-featured-star" data-action="toggle-featured-star" title="Toggle star"></button>
           </div>
           <div id="cat-featured-tags" class="featured-tags"></div>
         </div>
@@ -89,11 +89,11 @@
           <label>FEN</label>
           <input type="text" id="fen-input" placeholder="Paste FEN here...">
           <div class="btn-row">
-            <button class="btn btn-primary btn-md" onclick="savePosition()">Save Position</button>
-            <button class="btn btn-md" onclick="loadFen()">Load Board</button>
-            <button class="btn btn-md" onclick="setStartPos()">Starting Position</button>
-            <button class="btn btn-md" onclick="flipBoard()">Flip Board</button>
-            <button class="btn btn-md" onclick="openEditorFromForm()">Editor</button>
+            <button class="btn btn-primary btn-md" data-action="save-position">Save Position</button>
+            <button class="btn btn-md" data-action="load-fen">Load Board</button>
+            <button class="btn btn-md" data-action="set-start-pos">Starting Position</button>
+            <button class="btn btn-md" data-action="flip-board">Flip Board</button>
+            <button class="btn btn-md" data-action="open-editor-from-form">Editor</button>
           </div>
         </div>
       </div>
@@ -109,8 +109,8 @@
         <label>Analysis Notes</label>
         <textarea id="pos-stockfish" placeholder="Paste analysis notes here..." style="margin-top:8px"></textarea>
         <div class="btn-row">
-          <button class="btn" onclick="clearForm()">Clear</button>
-          <button class="btn btn-danger" id="delete-btn" style="display:none" onclick="deletePosition()">Delete</button>
+          <button class="btn" data-action="clear-form">Clear</button>
+          <button class="btn btn-danger" id="delete-btn" style="display:none" data-action="delete-position">Delete</button>
         </div>
       </div>
     </div>
@@ -120,23 +120,23 @@
       <h2>Games</h2>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="text" id="game-search-input" placeholder="Search players, events..." style="width:200px" onkeyup="onGameSearch()">
-        <select id="game-result-filter" class="select-input" onchange="onResultFilterChange(this)">
+        <select id="game-result-filter" class="select-input" data-change="result-filter">
           <option value="">All Results</option>
           <option value="1-0">White wins (1-0)</option>
           <option value="1/2-1/2">Draw (1/2-1/2)</option>
           <option value="0-1">Black wins (0-1)</option>
         </select>
-        <select id="game-collection-filter" class="select-input" onchange="onCollectionFilterChange(this)"></select>
-        <button class="btn btn-primary btn-sm" onclick="Router.navigate({view:'gameImport'})">Import PGN</button>
+        <select id="game-collection-filter" class="select-input" data-change="collection-filter"></select>
+        <button class="btn btn-primary btn-sm" data-nav="gameImport">Import PGN</button>
       </div>
     </div>
     <div id="game-tag-filters" class="tag-row" style="margin-bottom:16px"></div>
     <div id="bulk-bar" class="batch-nav" style="display:none;margin-bottom:12px">
       <label style="font-size:13px;display:flex;align-items:center;gap:6px;margin:0">
-        <input type="checkbox" onclick="toggleSelectAllGames(this.checked)" style="width:auto"> Select all
+        <input type="checkbox" data-action="toggle-select-all-games" style="width:auto"> Select all
       </label>
       <span id="bulk-count" class="batch-progress"></span>
-      <button class="btn btn-sm btn-danger" onclick="deleteSelectedGames()">Delete selected</button>
+      <button class="btn btn-sm btn-danger" data-action="delete-selected-games">Delete selected</button>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
       <div id="games-list"></div>
@@ -146,10 +146,10 @@
     <div class="board-area">
       <div>
         <div id="batch-nav" class="batch-nav" style="display:none">
-          <button class="btn btn-sm" onclick="batchPrevGame()">&larr; Previous Game</button>
+          <button class="btn btn-sm" data-action="batch-prev-game">&larr; Previous Game</button>
           <span class="batch-progress" id="batch-progress"></span>
-          <button class="btn btn-sm" onclick="batchNextGame()">Next Game &rarr;</button>
-          <button class="btn btn-sm" onclick="exitBatchMode()" style="margin-left:8px">Exit Review</button>
+          <button class="btn btn-sm" data-action="batch-next-game">Next Game &rarr;</button>
+          <button class="btn btn-sm" data-action="exit-batch-mode" style="margin-left:8px">Exit Review</button>
         </div>
         <div style="display:flex;gap:8px;align-items:stretch">
           <div id="game-board" class="board-wrap"></div>
@@ -157,13 +157,13 @@
         <div class="board-controls">
           <div class="control-group">
             <span id="gv-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
-            <button class="btn btn-sm" onclick="gvFlip()">Flip</button>
-            <button class="btn btn-sm" onclick="undoGameBoard()">Undo</button>
-            <button class="btn btn-sm" onclick="resetGameBoard()">Reset</button>
+            <button class="btn btn-sm" data-action="gv-flip">Flip</button>
+            <button class="btn btn-sm" data-action="undo-game-board">Undo</button>
+            <button class="btn btn-sm" data-action="reset-game-board">Reset</button>
           </div>
           <div class="control-group">
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','tabiya')">+ Tabiya</button>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('game-board','puzzle')">+ Tactic</button>
+            <button class="btn btn-success btn-sm" data-save-board="game-board" data-position-type="tabiya">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" data-save-board="game-board" data-position-type="puzzle">+ Tactic</button>
           </div>
         </div>
         <div id="game-annotation-container" style="margin-top:8px"></div>
@@ -181,12 +181,12 @@
         <div id="gv-moves" class="moves-panel"></div>
         <div id="gv-tags" style="margin-bottom:12px"></div>
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="showSavePositionModal()">Save with Notes</button>
-          <button class="btn btn-sm" id="opening-tree-btn" onclick="toggleOpeningTree()">Opening Explorer</button>
+          <button class="btn btn-sm" data-action="show-save-position-modal">Save with Notes</button>
+          <button class="btn btn-sm" id="opening-tree-btn" data-action="toggle-opening-tree">Opening Explorer</button>
         </div>
         <div class="btn-row" style="margin-top:var(--sp-2)">
-          <button class="btn btn-sm" onclick="backToGames()">Back to Games</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteCurrentGame()">Delete</button>
+          <button class="btn btn-sm" data-action="back-to-games">Back to Games</button>
+          <button class="btn btn-danger btn-sm" data-action="delete-current-game">Delete</button>
         </div>
         <div id="opening-tree-panel" class="tree-panel" style="display:none">
           <div class="tree-panel-header">Opening Explorer</div>
@@ -196,7 +196,7 @@
     </div>
   </div>
   <div id="view-collections" class="view">
-    <div class="view-header"><h2>Collections</h2><button class="btn btn-primary btn-sm" onclick="showCollectionModal()">New Collection</button></div>
+    <div class="view-header"><h2>Collections</h2><button class="btn btn-primary btn-sm" data-action="show-collection-modal">New Collection</button></div>
     <div id="collections-list" class="pos-list"></div>
   </div>
   <div id="view-search" class="view">
@@ -206,12 +206,12 @@
         <div id="search-board" class="board-wrap"></div>
         <div class="board-controls">
           <div class="control-group">
-            <button class="btn btn-sm" onclick="searchFlipBoard()">Flip</button>
-            <button class="btn btn-sm" onclick="searchSetStart()">Starting Position</button>
+            <button class="btn btn-sm" data-action="search-flip-board">Flip</button>
+            <button class="btn btn-sm" data-action="search-set-start">Starting Position</button>
           </div>
           <div class="control-group">
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','tabiya')">+ Tabiya</button>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('search-board','puzzle')">+ Tactic</button>
+            <button class="btn btn-success btn-sm" data-save-board="search-board" data-position-type="tabiya">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" data-save-board="search-board" data-position-type="puzzle">+ Tactic</button>
           </div>
         </div>
       </div>
@@ -220,9 +220,9 @@
         <label>FEN</label>
         <input type="text" id="search-fen" placeholder="Paste FEN or use current board...">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="searchLoadFen()">Load FEN to board</button>
-          <button class="btn btn-sm" onclick="searchUseBoard()">Use current board</button>
-          <button class="btn btn-sm" onclick="BoardEditor.openFromSearch()">Open Editor</button>
+          <button class="btn btn-sm" data-action="search-load-fen">Load FEN to board</button>
+          <button class="btn btn-sm" data-action="search-use-board">Use current board</button>
+          <button class="btn btn-sm" data-action="open-board-editor-from-search">Open Editor</button>
         </div>
         <label style="margin-top:12px">Search Type</label>
         <div class="radio-group">
@@ -231,7 +231,7 @@
         </div>
         <label style="margin-top:12px">Scope</label>
         <select id="search-scope" class="select-input" style="width:100%"></select>
-        <div class="btn-row" style="margin-top:16px"><button class="btn btn-primary" onclick="doPositionSearch()">Search</button></div>
+        <div class="btn-row" style="margin-top:16px"><button class="btn btn-primary" data-action="do-position-search">Search</button></div>
         <div id="search-status" class="text-muted" style="font-size:12px;margin-top:8px"></div>
       </div>
     </div>
@@ -240,16 +240,16 @@
   <div id="view-import" class="view">
     <div class="view-header">
       <h2>Import PGN</h2>
-      <button class="btn btn-sm" onclick="Navigation.cancelToFallback({view:'games'})">Back to Games</button>
+      <button class="btn btn-sm" data-nav-cancel="games">Back to Games</button>
     </div>
     <div class="panel" style="max-width:720px">
       <label>PGN Text</label>
       <textarea id="import-pgn" style="min-height:200px" placeholder="Paste one or more PGN games..."></textarea>
       <div class="btn-row" style="margin-top:8px;align-items:center">
         <label for="import-pgn-file" class="btn btn-sm" style="margin:0;cursor:pointer">Upload .pgn file</label>
-        <input type="file" id="import-pgn-file" accept=".pgn,text/plain" onchange="handlePgnFile(this)" style="display:none">
+        <input type="file" id="import-pgn-file" accept=".pgn,text/plain" data-change="pgn-file" style="display:none">
         <span id="import-file-name" class="text-muted" style="font-size:12px"></span>
-        <button class="btn btn-sm" onclick="clearImportFile()" style="margin-left:auto">Clear file</button>
+        <button class="btn btn-sm" data-action="clear-import-file" style="margin-left:auto">Clear file</button>
       </div>
       <label style="margin-top:12px">Tags</label>
       <div id="import-tags-container"></div>
@@ -260,9 +260,9 @@
       <label style="margin-top:8px;font-size:13px;display:flex;align-items:center;gap:6px"><input type="checkbox" id="import-force" style="width:auto"> Force re-import (skip duplicate check)</label>
       <div id="import-result" style="margin-top:12px"></div>
       <div class="btn-row">
-        <button class="btn btn-primary" id="import-go-btn" onclick="doImport()">Import</button>
-        <button class="btn btn-danger" id="import-cancel-btn" onclick="cancelImport()" style="display:none">Cancel Import</button>
-        <button class="btn" onclick="Navigation.cancelToFallback({view:'games'})">Back</button>
+        <button class="btn btn-primary" id="import-go-btn" data-action="do-import">Import</button>
+        <button class="btn btn-danger" id="import-cancel-btn" data-action="cancel-import" style="display:none">Cancel Import</button>
+        <button class="btn" data-nav-cancel="games">Back</button>
       </div>
     </div>
   </div>
@@ -274,22 +274,22 @@
         <div class="board-controls">
           <div class="control-group" id="detail-move-nav-wrap">
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
-            <button class="btn btn-sm" onclick="flipDetailBoard()">Flip</button>
+            <button class="btn btn-sm" data-action="flip-detail-board">Flip</button>
           </div>
           <div class="control-group" title="Save the current board position without interrupting practice">
             <span class="text-muted" style="font-size:12px">Save current:</span>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','tabiya')">+ Tabiya</button>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','puzzle')">+ Tactic</button>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','endgame')">+ Ending</button>
-            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','strategy')">+ Strategy</button>
+            <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="tabiya">+ Tabiya</button>
+            <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="puzzle">+ Tactic</button>
+            <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="endgame">+ Ending</button>
+            <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="strategy">+ Strategy</button>
           </div>
           <div class="control-group">
-            <button class="btn btn-sm" id="detail-random-btn" onclick="randomFromDetail()">Shuffle</button>
+            <button class="btn btn-sm" id="detail-random-btn" data-action="random-from-detail">Shuffle</button>
           </div>
         </div>
         <div class="fen-bar" style="margin-top:var(--sp-2)">
           <code id="detail-fen" class="fen-display" style="flex:1"></code>
-          <button class="btn btn-sm" onclick="event.stopPropagation();copyFen()" title="Copy FEN">Copy</button>
+          <button class="btn btn-sm" data-action="copy-fen" title="Copy FEN">Copy</button>
         </div>
         <div id="detail-annotation-container" style="margin-top:var(--sp-2)"></div>
         <div id="detail-engine-container" style="margin-top:var(--sp-2)"></div>
@@ -298,15 +298,15 @@
         <!-- Header Card -->
         <div class="card">
           <div class="detail-title-row">
-            <h2 id="detail-title" style="cursor:pointer" onclick="startTitleEdit()" title="Click to rename">Position</h2>
-            <button class="star-toggle" id="detail-star" onclick="event.stopPropagation();toggleDetailStar()" title="Toggle star"></button>
+            <h2 id="detail-title" style="cursor:pointer" data-action="start-title-edit" title="Click to rename">Position</h2>
+            <button class="star-toggle" id="detail-star" data-action="toggle-detail-star" title="Toggle star"></button>
           </div>
           <div id="detail-tags"></div>
         </div>
 
         <!-- Notes Card -->
         <div class="card collapsible-card" id="notes-card">
-          <div class="collapsible-header" onclick="toggleCollapsible('notes-card')">
+          <div class="collapsible-header" data-collapsible="notes-card">
             <span class="collapse-arrow">&#9654;</span>
             <label style="margin:0;cursor:pointer" id="notes-card-label">Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(click to add)</span></label>
           </div>
@@ -331,11 +331,11 @@
             Puzzle <span id="puzzle-current-index">1</span> of <span id="puzzle-total-count">1</span>
           </div>
           <div class="btn-row" style="margin:0">
-            <button class="btn" id="prev-puzzle-btn" onclick="navigatePuzzle('previous')" style="display:none">← Previous</button>
-            <button class="btn" onclick="editPosition()">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteFromDetail()">Delete</button>
-            <button class="btn" id="detail-back-btn" onclick="Navigation.cancelToFallback({view:TYPE_TO_CATEGORY[AppState.currentDetailType] || 'tabiya'})">Back</button>
-            <button class="btn btn-primary" id="next-puzzle-btn" onclick="navigatePuzzle('next')" style="display:none">Next →</button>
+            <button class="btn" id="prev-puzzle-btn" data-navigate-puzzle="previous" style="display:none">← Previous</button>
+            <button class="btn" data-action="edit-position">Edit</button>
+            <button class="btn btn-danger btn-sm" data-action="delete-from-detail">Delete</button>
+            <button class="btn" id="detail-back-btn" data-action="detail-back">Back</button>
+            <button class="btn btn-primary" id="next-puzzle-btn" data-navigate-puzzle="next" style="display:none">Next →</button>
           </div>
         </div>
 
@@ -348,7 +348,7 @@
               <option value="white">White</option>
               <option value="black">Black</option>
             </select>
-            <button class="btn btn-primary btn-sm" onclick="Practice.startFromDetail()">Start practice</button>
+            <button class="btn btn-primary btn-sm" data-action="practice-start-from-detail">Start practice</button>
           </div>
         </div>
 
@@ -357,28 +357,28 @@
           <div class="card-header">Practice History</div>
           <div id="practice-filter-info" style="display:none;margin-bottom:8px;font-size:13px;color:var(--text-muted)">
             <span id="practice-filter-text"></span>
-            <button class="btn btn-sm" onclick="Practice.clearFilters()" style="margin-left:8px">Clear filters</button>
+            <button class="btn btn-sm" data-action="practice-clear-filters" style="margin-left:8px">Clear filters</button>
           </div>
           <div id="aggregate-stats-section" class="stats-panel">
             <h4 style="margin:0;margin-bottom:8px;font-size:14px;font-weight:600">Aggregate Stats</h4>
             <div id="practice-stats" style="font-size:13px"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:12px;margin-bottom:8px;flex-wrap:wrap">
-            <select id="practice-verdict-filter" class="select-input" onchange="Practice.applyFilters()" style="min-width:100px">
+            <select id="practice-verdict-filter" class="select-input" data-change="practice-filters" style="min-width:100px">
               <option value="">All verdicts</option>
               <option value="win">Wins</option>
               <option value="draw">Draws</option>
               <option value="loss">Losses</option>
               <option value="abandoned">Abandoned</option>
             </select>
-            <select id="practice-level-filter" class="select-input" onchange="Practice.applyFilters()" style="min-width:100px">
+            <select id="practice-level-filter" class="select-input" data-change="practice-filters" style="min-width:100px">
               <option value="">All levels</option>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
               <option value="max">Max</option>
             </select>
-            <select id="practice-sort" class="select-input" onchange="Practice.applyFilters()" style="min-width:120px">
+            <select id="practice-sort" class="select-input" data-change="practice-filters" style="min-width:120px">
               <option value="recent">Most recent</option>
               <option value="oldest">Oldest</option>
               <option value="longest">Longest game</option>
@@ -387,7 +387,7 @@
           </div>
           <div id="practice-recent-list" class="pos-list" style="max-height:300px;overflow-y:auto"></div>
           <div id="practice-pagination" style="margin-top:12px;text-align:center;display:none">
-            <button class="btn btn-sm" onclick="Practice.showMore()">Show more</button>
+            <button class="btn btn-sm" data-action="practice-show-more">Show more</button>
           </div>
         </div>
 
@@ -402,7 +402,7 @@
   <div id="view-bulk-add" class="view">
     <div class="view-header">
       <h2 id="bulk-add-title">Bulk Add Positions</h2>
-      <button class="btn btn-sm" onclick="Navigation.cancelToFallback({view:'tabiya'})">Back</button>
+      <button class="btn btn-sm" data-nav-cancel="tabiya">Back</button>
     </div>
     <div class="panel" style="max-width:720px">
       <label>Position Type</label>
@@ -429,15 +429,15 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
       </div>
       <div id="bulk-results" style="display:none;margin-top:12px"></div>
       <div class="btn-row" style="margin-top:12px">
-        <button class="btn btn-primary" id="bulk-import-btn" onclick="BulkAdd.run()">Import</button>
-        <button class="btn" onclick="Navigation.cancelToFallback({view:TYPE_TO_CATEGORY[BulkAdd.currentType()] || 'tabiya'})">Cancel</button>
+        <button class="btn btn-primary" id="bulk-import-btn" data-action="bulk-add-run">Import</button>
+        <button class="btn" data-action="bulk-add-cancel">Cancel</button>
       </div>
     </div>
   </div>
   <div id="view-editor" class="view">
     <div class="view-header">
       <h2 id="editor-title">Board Editor</h2>
-      <button class="btn btn-md" onclick="Navigation.cancelToFallback({view:'tactics'})">Back</button>
+      <button class="btn btn-md" data-nav-cancel="tactics">Back</button>
     </div>
     <div class="card" style="padding:var(--sp-4)">
       <div class="board-area">
@@ -498,11 +498,11 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
         <div id="pv-board" class="board-wrap"></div>
         <div id="pv-annotation-container" style="margin-top:8px"></div>
         <div id="pv-nav-btns" class="nav-btns">
-          <button class="btn btn-sm" onclick="PracticeViewer.first()">|&lt;</button>
-          <button class="btn btn-sm" onclick="PracticeViewer.prev()">&lt;</button>
-          <button class="btn btn-sm" onclick="PracticeViewer.next()">&gt;</button>
-          <button class="btn btn-sm" onclick="PracticeViewer.last()">&gt;|</button>
-          <button class="btn btn-sm" onclick="PracticeViewer.flip()" style="margin-left:8px">Flip</button>
+          <button class="btn btn-sm" data-practice-viewer="first">|&lt;</button>
+          <button class="btn btn-sm" data-practice-viewer="prev">&lt;</button>
+          <button class="btn btn-sm" data-practice-viewer="next">&gt;</button>
+          <button class="btn btn-sm" data-practice-viewer="last">&gt;|</button>
+          <button class="btn btn-sm" data-practice-viewer="flip" style="margin-left:8px">Flip</button>
         </div>
       </div>
       <div class="panel">
@@ -513,9 +513,9 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
         <label style="margin-top:12px">Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span></label>
         <textarea id="pv-notes" placeholder="Reflections on this game... (saves automatically)"></textarea>
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="PracticeViewer.editVerdict()">Edit verdict</button>
-          <button class="btn btn-danger btn-sm" onclick="PracticeViewer.remove()">Delete</button>
-          <button class="btn btn-sm" onclick="Navigation.cancelToFallback({view:'practice'})">Back</button>
+          <button class="btn btn-sm" data-practice-viewer="edit-verdict">Edit verdict</button>
+          <button class="btn btn-danger btn-sm" data-practice-viewer="remove">Delete</button>
+          <button class="btn btn-sm" data-nav-cancel="practice">Back</button>
         </div>
       </div>
     </div>
@@ -553,7 +553,10 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/annotation-panel.js"></script>
 <script src="/js/practice-viewer.js"></script>
 <script src="/js/sound.js"></script>
-<script src="/js/dom-actions.js"></script>
+<script src="/js/event-delegation.js"></script>
+<script src="/js/action-handlers.js"></script>
+<script src="/js/practice-viewer-actions.js"></script>
+<script src="/js/dynamic-click-handlers.js"></script>
 <script src="/js/board-editor.js"></script>
 <script type="module" src="/js/main.js"></script>
 <script>
@@ -566,7 +569,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').t
     <label>Title</label><input type="text" id="save-pos-title">
     <label>Tags</label><div id="save-pos-tags-container"></div>
     <label>Notes</label><textarea id="save-pos-notes" placeholder="Your notes about this position..."></textarea>
-    <div class="btn-row"><button class="btn btn-primary" id="save-pos-confirm-btn">Save</button><button class="btn" id="save-pos-cancel-btn">Cancel</button></div>
+    <div class="btn-row"><button class="btn btn-primary" data-action="save-pos-confirm">Save</button><button class="btn" data-action="save-pos-cancel">Cancel</button></div>
   </div>
 </div>
 <div id="collection-modal" class="modal-overlay" style="display:none">
@@ -575,7 +578,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').t
     <input type="hidden" id="collection-edit-id" value="">
     <label>Name</label><input type="text" id="collection-name" placeholder="e.g. Smith-Morra Games">
     <label>Description</label><textarea id="collection-description" placeholder="Optional description..."></textarea>
-    <div class="btn-row"><button class="btn btn-primary" id="collection-save-btn">Save</button><button class="btn" id="collection-cancel-btn">Cancel</button></div>
+    <div class="btn-row"><button class="btn btn-primary" data-action="collection-save">Save</button><button class="btn" data-action="collection-cancel">Cancel</button></div>
   </div>
 </div>
 <div id="practice-save-modal" class="modal-overlay" style="display:none">
@@ -583,12 +586,12 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').t
     <h2>Save Practice Game?</h2>
     <div id="practice-save-body"></div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="Practice.confirmSave()">Save</button>
-      <button class="btn btn-success btn-sm" onclick="Practice.confirmSave('win')">Save as 1-0/0-1</button>
-      <button class="btn btn-sm" onclick="Practice.confirmSave('draw')">Save as ½-½</button>
-      <button class="btn btn-danger btn-sm" onclick="Practice.confirmSave('loss')">Save as 0-1/1-0</button>
-      <button class="btn btn-ghost btn-sm" onclick="Practice.confirmSave('abandoned')">—</button>
-      <button class="btn btn-danger" onclick="Practice.discard()">Discard</button>
+      <button class="btn btn-primary" data-practice-save="default">Save</button>
+      <button class="btn btn-success btn-sm" data-practice-save="win">Save as 1-0/0-1</button>
+      <button class="btn btn-sm" data-practice-save="draw">Save as ½-½</button>
+      <button class="btn btn-danger btn-sm" data-practice-save="loss">Save as 0-1/1-0</button>
+      <button class="btn btn-ghost btn-sm" data-practice-save="abandoned">—</button>
+      <button class="btn btn-danger" data-action="practice-discard">Discard</button>
     </div>
   </div>
 </div>

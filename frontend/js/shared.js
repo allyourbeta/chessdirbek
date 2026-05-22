@@ -81,7 +81,7 @@ function showProminentNotification(msg, type = 'info', minDuration = 3000) {
         banner.style.border = '1px solid var(--border)';
     }
     if (minDuration >= 3000) {
-        banner.innerHTML = msg + ' <button onclick="hideProminentNotification()" style="margin-left:16px;padding:4px 8px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:4px;color:inherit;cursor:pointer">Dismiss</button>';
+        banner.innerHTML = msg + ' <button data-action="hide-notification" style="margin-left:16px;padding:4px 8px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:4px;color:inherit;cursor:pointer">Dismiss</button>';
     }
     if (minDuration > 0) {
         notificationTimeout = setTimeout(() => {

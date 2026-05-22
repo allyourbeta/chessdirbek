@@ -119,8 +119,8 @@
         confirmDiv.style.cssText = 'display:inline-flex;gap:4px;align-items:center';
         confirmDiv.innerHTML = `
             <span style="font-size:11px;color:var(--danger)">Delete?</span>
-            <button class="btn btn-sm" style="padding:2px 6px;font-size:11px;background:var(--danger);color:white" onclick="event.stopPropagation();PracticeUI.confirmDelete(${gameId})">Yes</button>
-            <button class="btn btn-sm btn-ghost" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();PracticeUI.cancelDelete(${gameId})">No</button>
+            <button class="btn btn-sm" style="padding:2px 6px;font-size:11px;background:var(--danger);color:white" data-confirm-delete="${gameId}">Yes</button>
+            <button class="btn btn-sm btn-ghost" style="padding:2px 6px;font-size:11px" data-cancel-delete="${gameId}">No</button>
         `;
         
         btn.parentNode.insertBefore(confirmDiv, btn.nextSibling);
@@ -191,7 +191,7 @@
         `;
         notification.innerHTML = `
             <span>Practice game deleted</span>
-            <button class="btn btn-sm" style="background:var(--primary);color:white" onclick="PracticeUI.undoDelete(${gameId})">Undo</button>
+            <button class="btn btn-sm" style="background:var(--primary);color:white" data-undo-delete="${gameId}">Undo</button>
         `;
         
         document.body.appendChild(notification);

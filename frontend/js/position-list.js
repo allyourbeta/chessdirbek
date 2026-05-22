@@ -82,8 +82,11 @@ function renderCategoryList(categoryKey) {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';
         const starHtml = p.starred ? '<span class="pos-item-star">' + STAR_SVG_FILLED + '</span>' : '';
-        return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}" onclick="showDetail(${p.id})">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${p.title || 'Untitled'}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" onclick="event.stopPropagation();deleteFromList(${p.id})" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+        return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${p.title || 'Untitled'}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
+    
+    // Set up event delegation for the position list
+    _setupPositionListEvents(el);
 }
 
 function showDetail(id) {
@@ -131,6 +134,29 @@ function renderPositionsList() {
         renderCategoryList('tactics');
     } else {
         renderCategoryList('tabiya');
+    }
+}
+
+function _setupPositionListEvents(container) {
+    // Remove existing event listener to prevent duplicates
+    container.removeEventListener('click', _handlePositionListClick);
+    // Add event delegation for position list clicks
+    container.addEventListener('click', _handlePositionListClick);
+}
+
+function _handlePositionListClick(event) {
+    const target = event.target.closest('.pos-item-delete, .pos-item');
+    if (!target) return;
+
+    if (target.classList.contains('pos-item-delete')) {
+        // Handle delete button click
+        event.stopPropagation();
+        const positionId = parseInt(target.dataset.deleteId, 10);
+        if (positionId) deleteFromList(positionId);
+    } else if (target.classList.contains('pos-item')) {
+        // Handle position item click
+        const positionId = parseInt(target.dataset.posId, 10);
+        if (positionId) showDetail(positionId);
     }
 }
 

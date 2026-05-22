@@ -16,19 +16,60 @@ function renderCollectionsView() {
     }
     el.innerHTML = AppState.allCollections.map(c => {
         const desc = c.description ? `<div class="text-muted" style="font-size:12px;margin-top:4px">${escapeHtml(c.description)}</div>` : '';
-        return `<div class="pos-item">
-            <div style="flex:1;cursor:pointer" onclick="openCollection(${c.id})">
+        return `<div class="pos-item" data-collection-id="${c.id}">
+            <div class="collection-main" style="flex:1;cursor:pointer">
                 <div style="font-size:14px;font-weight:500">${escapeHtml(c.name)}</div>
                 ${desc}
                 <div class="text-muted" style="font-size:12px;margin-top:4px">${c.game_count} game(s)</div>
             </div>
             <div class="btn-row" style="margin:0">
-                <button class="btn btn-sm" onclick="event.stopPropagation();startBatchReview(${c.id}, '${escapeJs(c.name)}')">Start Review</button>
-                <button class="btn btn-sm" onclick="event.stopPropagation();editCollection(${c.id})">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteCollection(${c.id})">Delete</button>
+                <button class="btn btn-sm collection-review-btn" data-collection-name="${escapeHtml(c.name)}">Start Review</button>
+                <button class="btn btn-sm collection-edit-btn">Edit</button>
+                <button class="btn btn-sm btn-danger collection-delete-btn">Delete</button>
             </div>
         </div>`;
     }).join('');
+    
+    // Set up event delegation for collections list
+    _setupCollectionsEvents(el);
+}
+
+function _setupCollectionsEvents(container) {
+    // Remove existing event listener to prevent duplicates
+    container.removeEventListener('click', _handleCollectionsClick);
+    // Add event delegation for collections list clicks
+    container.addEventListener('click', _handleCollectionsClick);
+}
+
+function _handleCollectionsClick(event) {
+    const target = event.target.closest('.collection-review-btn, .collection-edit-btn, .collection-delete-btn, .collection-main');
+    if (!target) return;
+
+    const collectionItem = target.closest('.pos-item');
+    if (!collectionItem) return;
+    
+    const collectionId = parseInt(collectionItem.dataset.collectionId, 10);
+    if (!collectionId) return;
+
+    if (target.classList.contains('collection-review-btn')) {
+        // Handle start review button click
+        event.stopPropagation();
+        const collectionName = target.dataset.collectionName;
+        if (typeof startBatchReview === 'function') {
+            startBatchReview(collectionId, collectionName);
+        }
+    } else if (target.classList.contains('collection-edit-btn')) {
+        // Handle edit button click
+        event.stopPropagation();
+        editCollection(collectionId);
+    } else if (target.classList.contains('collection-delete-btn')) {
+        // Handle delete button click
+        event.stopPropagation();
+        deleteCollection(collectionId);
+    } else if (target.classList.contains('collection-main')) {
+        // Handle collection main area click
+        openCollection(collectionId);
+    }
 }
 
 function escapeHtml(s) {

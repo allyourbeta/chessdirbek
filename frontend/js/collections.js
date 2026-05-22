@@ -15,15 +15,15 @@ function renderCollectionsView() {
         return;
     }
     el.innerHTML = AppState.allCollections.map(c => {
-        const desc = c.description ? `<div class="text-muted" style="font-size:12px;margin-top:4px">${escapeHtml(c.description)}</div>` : '';
+        const desc = c.description ? `<div class="text-muted" style="font-size:12px;margin-top:4px">${Html.escape(c.description)}</div>` : '';
         return `<div class="pos-item" data-collection-id="${c.id}">
             <div class="collection-main" style="flex:1;cursor:pointer">
-                <div style="font-size:14px;font-weight:500">${escapeHtml(c.name)}</div>
+                <div style="font-size:14px;font-weight:500">${Html.escape(c.name)}</div>
                 ${desc}
                 <div class="text-muted" style="font-size:12px;margin-top:4px">${c.game_count} game(s)</div>
             </div>
             <div class="btn-row" style="margin:0">
-                <button class="btn btn-sm collection-review-btn" data-collection-name="${escapeHtml(c.name)}">Start Review</button>
+                <button class="btn btn-sm collection-review-btn" data-collection-name="${Html.escape(c.name)}">Start Review</button>
                 <button class="btn btn-sm collection-edit-btn">Edit</button>
                 <button class="btn btn-sm btn-danger collection-delete-btn">Delete</button>
             </div>
@@ -72,10 +72,6 @@ function _handleCollectionsClick(event) {
     }
 }
 
-function escapeHtml(s) {
-    if (!s) return '';
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 function escapeJs(s) {
     if (!s) return '';

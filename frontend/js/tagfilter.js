@@ -70,7 +70,7 @@
         function renderChips() {
             chipsEl.innerHTML = state.tags.length
                 ? state.tags.map((t, i) =>
-                    `<span class="tagfilter-chip">#${escapeHtml(t)}<span class="tagfilter-chip-x" data-i="${i}" title="Remove">&times;</span></span>`
+                    `<span class="tagfilter-chip">#${Html.escape(t)}<span class="tagfilter-chip-x" data-i="${i}" title="Remove">&times;</span></span>`
                 ).join('')
                 : '';
             chipsEl.querySelectorAll('.tagfilter-chip-x').forEach(x => {
@@ -92,7 +92,7 @@
         function renderDropdown() {
             if (!suggestions.length) { hideDropdown(); return; }
             dropdown.innerHTML = suggestions.map((s, i) =>
-                `<div class="tagfilter-option ${i === highlight ? 'active' : ''}" data-name="${escapeAttr(s.name)}">#${escapeHtml(s.name)}</div>`
+                `<div class="tagfilter-option ${i === highlight ? 'active' : ''}" data-name="${Html.escape(s.name)}">#${Html.escape(s.name)}</div>`
             ).join('');
             dropdown.style.display = 'block';
             dropdown.querySelectorAll('.tagfilter-option').forEach(opt => {
@@ -188,11 +188,6 @@
         };
     }
 
-    function escapeHtml(s) {
-        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-    function escapeAttr(s) { return escapeHtml(s).replace(/'/g, '&#39;'); }
 
     window.TagFilter = { mount };
 })();

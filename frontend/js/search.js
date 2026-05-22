@@ -14,14 +14,10 @@ function renderSearchScope() {
     if (!el) return;
     el.innerHTML = '<option value="">All games</option>' +
         (AppState.allCollections || []).map(c =>
-            `<option value="${c.id}">${escapeSearchHtml(c.name)}</option>`
+            `<option value="${c.id}">${Html.escape(c.name)}</option>`
         ).join('');
 }
 
-function escapeSearchHtml(s) {
-    if (!s) return '';
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 function searchFlipBoard() {
     BoardManager.flip('search-board');
@@ -102,12 +98,12 @@ function renderSearchResults(data) {
             ? `${r.eco} — ${EcoOpenings.nameFor(r.eco)}`
             : (r.eco || '');
         const eco = ecoLabel ? `<span class="text-muted" style="font-size:12px">${ecoLabel}</span>` : '';
-        const evt = r.event ? `<span class="text-muted" style="font-size:12px">${escapeSearchHtml(r.event)}</span>` : '';
+        const evt = r.event ? `<span class="text-muted" style="font-size:12px">${Html.escape(r.event)}</span>` : '';
         const moveNum = Math.ceil(r.half_move / 2);
         const moveLabel = r.half_move === 0 ? 'start' : ('after ' + moveNum + (r.half_move % 2 === 1 ? '.' : '...'));
         return `<div class="pos-item" onclick="openSearchResult(${r.game_id}, ${r.half_move})">
             <div style="flex:1">
-                <div style="font-size:14px;font-weight:500">${escapeSearchHtml(w)} vs ${escapeSearchHtml(b)} <span class="text-muted">${res}</span></div>
+                <div style="font-size:14px;font-weight:500">${Html.escape(w)} vs ${Html.escape(b)} <span class="text-muted">${res}</span></div>
                 <div style="margin-top:4px">${eco} ${evt}</div>
                 <div class="text-muted" style="font-size:12px;margin-top:4px">match: ${moveLabel}</div>
             </div>

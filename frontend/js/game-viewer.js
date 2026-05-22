@@ -25,7 +25,7 @@ async function loadGameDetail(id) {
         ? EcoOpenings.labelFor(game.eco, game.opening)
         : [game.eco, game.opening].filter(Boolean).join(' - ');
     document.getElementById('gv-opening').textContent = ecoStr;
-    document.getElementById('gv-tags').innerHTML = game.tags.map(t => `<span class="tag">#${t.name}</span>`).join('');
+    document.getElementById('gv-tags').innerHTML = game.tags.map(t => `<span class="tag">#${Html.escape(t.name)}</span>`).join('');
 
     renderMoveList();
     BoardManager.create('game-board', game.fens[0], {
@@ -78,8 +78,8 @@ function renderMoveList() {
 
         if (wComment || bComment) {
             html += '<tr><td></td><td colspan="2" style="padding:2px 8px;font-size:11px;color:var(--text-muted);font-style:italic">';
-            if (wComment) html += wComment + ' ';
-            if (bComment) html += bComment;
+            if (wComment) html += Html.escape(wComment) + ' ';
+            if (bComment) html += Html.escape(bComment);
             html += '</td></tr>';
         }
     }

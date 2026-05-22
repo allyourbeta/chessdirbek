@@ -7,17 +7,35 @@ from backend.services import compute_position_index, extract_auto_tags
 
 
 def get_or_create_tags(db: Session, tag_names: list[str]) -> list[Tag]:
-    tags = []
+    # Normalize and filter tag names
+    normalized_names = []
     for name in tag_names:
         name = name.strip().lower().lstrip("#")
-        if not name:
-            continue
-        tag = db.query(Tag).filter(Tag.name == name).first()
-        if not tag:
+        if name:
+            normalized_names.append(name)
+    
+    if not normalized_names:
+        return []
+    
+    # Batch query existing tags to avoid N+1 queries
+    existing_tags = (
+        db.query(Tag)
+        .filter(Tag.name.in_(normalized_names))
+        .all()
+    )
+    existing_by_name = {tag.name: tag for tag in existing_tags}
+    
+    # Create missing tags and preserve order
+    tags = []
+    for name in normalized_names:
+        if name in existing_by_name:
+            tags.append(existing_by_name[name])
+        else:
             tag = Tag(name=name)
             db.add(tag)
-            db.flush()
-        tags.append(tag)
+            db.flush()  # Flush to get ID for potential duplicates in same transaction
+            existing_by_name[name] = tag  # Cache for potential duplicates in same call
+            tags.append(tag)
     return tags
 
 

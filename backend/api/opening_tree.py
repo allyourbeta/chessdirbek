@@ -23,6 +23,11 @@ def get_opening_tree(fen: str = Query(...), db: Session = Depends(get_db)):
 
     move_stats: dict[str, dict] = {}
 
+    # Batch load all games to avoid N+1 queries
+    game_ids = list({m.game_id for m in matches})
+    games = db.query(Game).filter(Game.id.in_(game_ids)).all() if game_ids else []
+    games_by_id = {g.id: g for g in games}
+
     for m in matches:
         next_idx = (
             db.query(PositionIndex)
@@ -35,7 +40,7 @@ def get_opening_tree(fen: str = Query(...), db: Session = Depends(get_db)):
         if not next_idx:
             continue
 
-        game = db.query(Game).filter(Game.id == m.game_id).first()
+        game = games_by_id.get(m.game_id)
         if not game:
             continue
 

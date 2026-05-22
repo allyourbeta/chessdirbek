@@ -276,9 +276,12 @@
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
             <button class="btn btn-sm" onclick="flipDetailBoard()">Flip</button>
           </div>
-          <div class="control-group">
+          <div class="control-group" title="Save the current board position without interrupting practice">
+            <span class="text-muted" style="font-size:12px">Save current:</span>
             <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','tabiya')">+ Tabiya</button>
             <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','puzzle')">+ Tactic</button>
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','endgame')">+ Ending</button>
+            <button class="btn btn-success btn-sm" onclick="saveBoardPosition('detail-board','strategy')">+ Strategy</button>
           </div>
           <div class="control-group">
             <button class="btn btn-sm" id="detail-random-btn" onclick="randomFromDetail()">Shuffle</button>

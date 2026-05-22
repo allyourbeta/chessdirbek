@@ -108,7 +108,7 @@ const PracticeViewer = (function () {
         document.getElementById('pv-title').textContent =
             `You (${youColor}) vs ${sfLabel} (${sfColor})`;
         document.getElementById('pv-meta').textContent =
-            `${date} · ${g.move_count} moves · starting eval ${_fmtEval(g.starting_eval)} · final eval ${_fmtEval(g.final_eval)}`;
+            `${date} · ${PracticeUI.formatMoveCountFromPlies(g.move_count, true)} · starting eval ${_fmtEval(g.starting_eval)} · final eval ${_fmtEval(g.final_eval)}`;
         const verdictLabel = verdict || 'unknown';
         document.getElementById('pv-verdict').innerHTML =
             `Result: <span class="${vcls}"><strong>${result}</strong></span>` +

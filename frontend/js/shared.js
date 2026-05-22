@@ -125,6 +125,16 @@ function _applyPositionFilters(params) {
     const tags = Array.isArray(params.tags) ? params.tags.slice() : [];
     AppState.positionTagFilters = tags;
 }
+
+function _focusFenInputForAddPosition() {
+    const fenInput = document.getElementById('fen-input');
+    if (!fenInput) return;
+    // Wait until the add-position view is active and the board/layout work has settled.
+    requestAnimationFrame(function() {
+        fenInput.focus({ preventScroll: true });
+    });
+}
+
 function renderRoute(route) {
     EngineUI.unmount();
     AnnotationPanel.unmount();
@@ -170,6 +180,7 @@ function renderRoute(route) {
             document.getElementById('form-title').textContent = addCat ? addCat.addLabel : 'New Position';
             BoardManager.setPosition('board', AppState.boardFen);
             _initFormTagFilter();
+            _focusFenInputForAddPosition();
             break;
         case 'games':
             _applyGameFilters(params);

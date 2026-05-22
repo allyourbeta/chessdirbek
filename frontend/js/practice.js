@@ -61,7 +61,12 @@ const Practice = (function () {
         MoveNavigator.create('detail-nav', {
             fens: [AppState.currentDetailFen], startIndex: 0,
             containerId: 'detail-move-nav',
-            onNavigate: function (fen) { EngineUI.setPosition(fen); AnnotationPanel.setPosition(fen); },
+            onNavigate: function (fen) {
+                EngineUI.setPosition(fen);
+                AnnotationPanel.setPosition(fen);
+                var fenEl = document.getElementById('detail-fen');
+                if (fenEl) fenEl.textContent = fen;
+            },
         });
         _setPlayingUI(true);
         toast('Practice: ' + userColor + ' vs Stockfish (' + level + ')');
@@ -101,6 +106,15 @@ const Practice = (function () {
         } else if (!playing && pc) { pc.remove(); }
     }
 
+    function _syncPracticePosition(fen) {
+        if (!fen) return;
+        BoardManager.setPosition(_playBoardId, fen);
+        EngineUI.setPosition(fen);
+        AnnotationPanel.setPosition(fen);
+        var fenEl = document.getElementById('detail-fen');
+        if (fenEl) fenEl.textContent = fen;
+    }
+
     function _updatePracticeMoveList() {
         var el = document.getElementById('practice-move-list');
         if (!el || !_playChess || !active) return;
@@ -131,10 +145,9 @@ const Practice = (function () {
         if (piece.type === 'p' && event.squareTo[1] === (piece.color === 'w' ? '8' : '1')) promo = 'q';
         var move = _playChess.move({ from: event.squareFrom, to: event.squareTo, promotion: promo });
         if (!move) return false;
-        BoardManager.setPosition(_playBoardId, _playChess.fen());
-        MoveNavigator.push('detail-nav', _playChess.fen());
-        EngineUI.setPosition(_playChess.fen());
-        AnnotationPanel.setPosition(_playChess.fen());
+        var currentFen = _playChess.fen();
+        _syncPracticePosition(currentFen);
+        MoveNavigator.push('detail-nav', currentFen);
         _updatePracticeMoveList();
         if (_playChess.game_over()) { _onGameOver(); return true; }
         setTimeout(_makeEngineMove, 200);
@@ -213,15 +226,26 @@ const Practice = (function () {
                 fens: [AppState.currentDetailFen], startIndex: 0,
                 boardId: 'detail-board', containerId: 'detail-move-nav',
                 keyScope: 'view-detail',
-                onNavigate: function (f) { EngineUI.setPosition(f); },
+                onNavigate: function (f) {
+                    EngineUI.setPosition(f);
+                    AnnotationPanel.setPosition(f);
+                    var fenEl = document.getElementById('detail-fen');
+                    if (fenEl) fenEl.textContent = f;
+                },
             });
             BoardManager.create(_playBoardId, AppState.currentDetailFen, {
                 flipped: false, mode: 'analysis',
                 onPositionChange: function (f) {
                     MoveNavigator.push('detail-nav', f);
                     EngineUI.setPosition(f);
+                    AnnotationPanel.setPosition(f);
+                    var fenEl = document.getElementById('detail-fen');
+                    if (fenEl) fenEl.textContent = f;
                 } });
             EngineUI.setPosition(AppState.currentDetailFen);
+            AnnotationPanel.setPosition(AppState.currentDetailFen);
+            var fenEl = document.getElementById('detail-fen');
+            if (fenEl) fenEl.textContent = AppState.currentDetailFen;
         }
         _playChess = null; _playBoardId = null;
     }

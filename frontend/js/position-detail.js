@@ -6,6 +6,13 @@ async function loadPositionDetail(id) {
     // Honor the saved per-position orientation (default 'white' if missing).
     const flipped = pos.orientation === 'black';
     AppState.detailFlipped = flipped;
+
+    // A practice move list belongs to the currently active practice game, not
+    // merely to the detail page. Clear stale moves whenever a new position is
+    // loaded so a previous game cannot visually leak into the next position.
+    if (window.Practice && typeof Practice.clearMoveList === 'function') {
+        Practice.clearMoveList();
+    }
     
     document.getElementById('detail-title').textContent = pos.title || 'Untitled';
     document.getElementById('detail-star').innerHTML = renderStarIcon(pos.starred);

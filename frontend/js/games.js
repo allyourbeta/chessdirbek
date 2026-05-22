@@ -82,6 +82,8 @@ function _esc(s) {
 }
 
 const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let _warnedMissingEcoOpenings = false;
+
 function _gameDate(g) {
     if (!g.date_played) return '';
     // PGN dates are "YYYY.MM.DD" with "??" or "0" for unknown parts.
@@ -99,17 +101,14 @@ function _gameDate(g) {
 }
 
 function _gameOpening(g) {
-    const eco = String(g.eco || '').trim().toUpperCase();
-    const openingFromPgn = String(g.opening || '').trim();
-    const openingFromEco = window.EcoOpenings ? window.EcoOpenings.nameFor(eco) : '';
-    const openingName = openingFromPgn || openingFromEco;
-
-    if (eco && openingName) {
-        // Use an em dash to make the ECO code scannable while filling the
-        // column with useful opening information.
-        return `${eco} — ${openingName}`;
+    if (window.EcoOpenings && typeof EcoOpenings.labelFor === 'function') {
+        return EcoOpenings.labelFor(g.eco, g.opening);
     }
-    return eco || openingName || '';
+    if (!_warnedMissingEcoOpenings) {
+        console.warn('EcoOpenings.labelFor is unavailable; falling back to raw ECO/opening labels.');
+        _warnedMissingEcoOpenings = true;
+    }
+    return [g.eco, g.opening].filter(Boolean).join(' — ');
 }
 
 function renderGamesList() {

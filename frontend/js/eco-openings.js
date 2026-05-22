@@ -75,6 +75,12 @@
         nameFor: function (eco) {
             const code = normalizeEco(eco);
             return code ? (EXACT[code] || '') : '';
+        },
+        labelFor: function (eco, pgnOpeningName) {
+            const code = normalizeEco(eco);
+            const openingName = String(pgnOpeningName || '').trim() || (code ? (EXACT[code] || '') : '');
+            if (code && openingName) return `${code} — ${openingName}`;
+            return code || openingName || '';
         }
     };
 })();

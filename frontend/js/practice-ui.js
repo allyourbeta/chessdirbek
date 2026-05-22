@@ -28,7 +28,7 @@ const PracticeUI = (function () {
         const body = document.getElementById('practice-save-body');
         const verdict = Practice.guessVerdict();
         const suggestedResult = formatResult(verdict, active.userColor);
-        body.innerHTML = '<p style="margin-bottom:8px"><strong>' + MoveCounts.formatMoveCountFromPlies(pending.moveCount, true) + '</strong> as ' + active.userColor + ' vs Stockfish (' + active.level + ')</p>' +
+        body.innerHTML = '<p style="margin-bottom:8px"><strong>' + MoveCounts.formatMoveCountFromPlies(pending.moveCount, true) + '</strong> as ' + Html.escape(active.userColor) + ' vs Stockfish (' + Html.escape(active.level) + ')</p>' +
             '<p class="text-muted" style="font-size:12px;margin-bottom:12px">Suggested result: <strong>' + suggestedResult + '</strong>' +
             (verdict !== '?' ? ' <span style="margin-left:6px">(' + verdict + ')</span>' : '') + '</p>' +
             '<label>Notes (optional)</label><textarea id="practice-save-notes" placeholder="Your reflections on this game..."></textarea>';
@@ -107,7 +107,7 @@ const PracticeUI = (function () {
             const result = formatResult(v, g.user_color);
             const date = g.created_at ? new Date(g.created_at).toLocaleDateString() : '';
             return `<div class="pos-item" style="padding:8px 12px;margin-bottom:8px;font-size:12px;cursor:pointer;border:1px solid var(--grey-100);border-radius:4px" onclick="PracticeViewer.open(${g.id})" title="Click to review this game">
-                <span style="flex:1">${date} &mdash; ${g.user_color} vs Stockfish, ${MoveCounts.formatMoveCountFromPlies(g.move_count, true)} &middot;
+                <span style="flex:1">${Html.escape(date)} &mdash; ${Html.escape(g.user_color)} vs Stockfish, ${MoveCounts.formatMoveCountFromPlies(g.move_count, true)} &middot;
                     <span id="verdict-display-${g.id}" class="${vcls}" style="cursor:pointer;position:relative;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color 0.2s" onmouseover="this.style.textDecorationColor='currentColor'" onmouseout="this.style.textDecorationColor='transparent'" onclick="event.stopPropagation();PracticeUI.showInlineVerdictEdit(${g.id}, '${g.user_color}')" title="Click to edit verdict">
                         <strong>${result}</strong>
                     </span>
@@ -155,7 +155,7 @@ const PracticeUI = (function () {
             const last = s.last_played ? new Date(s.last_played).toLocaleDateString() : '—';
             return `<div class="pos-item" onclick="Router.navigate({view:'positionDetail',id:${s.position_id}})">
                 ${renderMiniBoard(s.fen)}
-                <div class="title">${s.title || 'Untitled'}</div>
+                <div class="title">${Html.escape(s.title || 'Untitled')}</div>
                 <div class="text-muted" style="font-size:12px">${s.total_games} games &middot; ${wr}% win &middot; ${last}</div>
             </div>`;
         }).join('');

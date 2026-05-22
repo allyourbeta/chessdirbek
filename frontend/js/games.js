@@ -64,11 +64,6 @@ async function loadCollections() {
     renderImportCollections();
 }
 
-function _esc(s) {
-    return String(s == null ? '' : s)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let _warnedMissingEcoOpenings = false;
 
@@ -108,13 +103,13 @@ function renderGamesList() {
         return;
     }
     const rows = AppState.allGames.map(g => {
-        const w = _esc(g.white || '?');
-        const b = _esc(g.black || '?');
+        const w = Html.escape(g.white || '?');
+        const b = Html.escape(g.black || '?');
         const we = g.white_elo ? `<span class="elo">[${g.white_elo}]</span>` : '';
         const be = g.black_elo ? `<span class="elo">[${g.black_elo}]</span>` : '';
-        const res = _esc(g.result || '*');
-        const opening = _esc(_gameOpening(g));
-        const date = _esc(_gameDate(g));
+        const res = Html.escape(g.result || '*');
+        const opening = Html.escape(_gameOpening(g));
+        const date = Html.escape(_gameDate(g));
         const checked = AppState.selectedGameIds.has(g.id) ? 'checked' : '';
         return `<tr onclick="openGame(${g.id})">
             <td class="col-select" onclick="event.stopPropagation()">
@@ -226,7 +221,7 @@ async function deleteSelectedGames() {
 function renderCollectionFilter() {
     const el = document.getElementById('game-collection-filter');
     el.innerHTML = '<option value="">All Collections</option>' +
-        AppState.allCollections.map(c => `<option value="${c.id}" ${AppState.gameCollectionFilter == c.id ? 'selected' : ''}>${c.name} (${c.game_count})</option>`).join('');
+        AppState.allCollections.map(c => `<option value="${c.id}" ${AppState.gameCollectionFilter == c.id ? 'selected' : ''}>${Html.escape(c.name)} (${c.game_count})</option>`).join('');
 }
 
 function onCollectionFilterChange(sel) {

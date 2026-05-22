@@ -43,7 +43,7 @@ function renderImportCollections() {
     const el = document.getElementById('import-collection-select');
     if (!el) return;
     el.innerHTML = '<option value="">None</option>' +
-        AppState.allCollections.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        AppState.allCollections.map(c => `<option value="${c.id}">${Html.escape(c.name)}</option>`).join('');
 }
 
 function handlePgnFile(input) {
@@ -79,7 +79,7 @@ function _renderImportResult(resultEl, data) {
     if (data.failed > 0) html += `<p style="color:var(--red)">${data.failed} failed</p>`;
     if (data.errors && data.errors.length) {
         html += `<details><summary style="cursor:pointer;color:var(--text-muted)">Errors</summary>` +
-                `<pre style="font-size:12px;color:var(--red);margin-top:8px">${data.errors.join('\n')}</pre></details>`;
+                `<pre style="font-size:12px;color:var(--red);margin-top:8px">${Html.escape(data.errors.join('\n'))}</pre></details>`;
     }
     resultEl.innerHTML = html;
 }
@@ -228,7 +228,7 @@ async function doImport() {
         if (e.name === 'AbortError') {
             resultEl.innerHTML = '<p style="color:var(--red)">Import cancelled. No games were saved.</p>';
         } else {
-            resultEl.innerHTML = `<p style="color:var(--red)">Import error: ${e.message || e}</p>`;
+            resultEl.innerHTML = `<p style="color:var(--red)">Import error: ${Html.escape(e.message || e)}</p>`;
         }
     } finally {
         _showImportUI(false);

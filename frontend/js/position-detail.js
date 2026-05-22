@@ -22,7 +22,7 @@ async function loadPositionDetail(id) {
     notesEl._lastSaved = pos.notes || '';
     notesEl.oninput = _onDetailNotesInput;
     notesEl.onblur = _autoSaveDetailNotes;
-    document.getElementById('detail-tags').innerHTML = pos.tags.map(t => `<span class="tag">#${t.name}</span>`).join('');
+    document.getElementById('detail-tags').innerHTML = pos.tags.map(t => `<span class="tag">#${Html.escape(t.name)}</span>`).join('');
     _initCollapsibleCards(pos.notes);
     
     if (pos.position_type === 'puzzle') {

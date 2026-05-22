@@ -58,6 +58,26 @@ var BoardEditor = (function () {
             onChange: function() {},
             placeholder: 'Add tags...'
         });
+        _bindActions();
+    }
+    function _bindActions() {
+        var view = document.getElementById('view-editor');
+        if (!view || view.dataset.boundEditorActions) return;
+        view.dataset.boundEditorActions = '1';
+        view.addEventListener('click', function (event) {
+            var btn = event.target.closest('[data-editor-action]');
+            if (!btn || !view.contains(btn)) return;
+            var action = btn.dataset.editorAction;
+            if (action === 'clear') clear();
+            else if (action === 'start') startPos();
+            else if (action === 'flip') flip();
+            else if (action === 'copy') copyFen();
+            else if (action === 'cancel') cancel();
+            else if (action === 'save-context') saveContext();
+            else if (action === 'save') save(btn.dataset.positionType);
+            else if (action === 'turn') setTurn(btn.dataset.turn);
+            else if (action === 'search') search(btn.dataset.searchType);
+        });
     }
     function _onSquareClick(square) {
         if (_activeTool === 'eraser') {

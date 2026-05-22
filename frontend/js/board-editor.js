@@ -210,6 +210,13 @@ var BoardEditor = (function () {
         if (fen) params.fen = fen;
         Router.navigate({ view: 'editor', params: params });
     }
+    function cancel() {
+        if (_positionType) {
+            Navigation.cancelToFallback({ view: TYPE_TO_CATEGORY[_positionType] || 'tabiya' });
+            return;
+        }
+        Navigation.cancelToFallback({ view: 'tactics' });
+    }
     return {
         init: init,
         selectTool: selectTool,
@@ -222,6 +229,7 @@ var BoardEditor = (function () {
         saveContext: saveContext,
         search: search,
         openFromSearch: openFromSearch,
+        cancel: cancel,
     };
 })();
 

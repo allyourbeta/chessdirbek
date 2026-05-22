@@ -127,7 +127,7 @@ var BulkAdd = (function () {
         return d.innerHTML;
     }
 
-    return { init: init, run: run };
+    return { init: init, run: run, currentType: _getType };
 })();
 
 window.BulkAdd = BulkAdd;

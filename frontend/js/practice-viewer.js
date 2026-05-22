@@ -264,7 +264,7 @@ const PracticeViewer = (function () {
         if (!_game) return;
         if (!confirm('Delete this practice game?')) return;
         const r = await fetch(`${API}/practice/${_game.id}`, { method: 'DELETE' });
-        if (r.ok) { toast('Practice game deleted'); history.back(); }
+        if (r.ok) { toast('Practice game deleted'); Navigation.cancelToFallback({ view: 'practice' }); }
         else toast('Delete failed', true);
     }
 

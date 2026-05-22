@@ -131,7 +131,10 @@ const Router = (function () {
         opts = opts || {};
         const url = build(route);
         if (opts.replace) history.replaceState(route, '', url);
-        else history.pushState(route, '', url);
+        else {
+            history.pushState(route, '', url);
+            if (window.Navigation) Navigation.recordPush();
+        }
         render(route);
     }
 
@@ -153,6 +156,7 @@ const Router = (function () {
     }
 
     function _onPopState(e) {
+        if (window.Navigation) Navigation.recordPop();
         const route = (e && e.state) || parse(location.pathname, location.search);
         render(route);
     }
@@ -162,6 +166,7 @@ const Router = (function () {
         const route = parse(location.pathname, location.search);
         // Replace so the initial entry has a state object attached.
         history.replaceState(route, '', build(route));
+        if (window.Navigation) Navigation.reset();
         render(route);
     }
 

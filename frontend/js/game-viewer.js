@@ -158,9 +158,7 @@ function backToGames() {
         AppState.batchIndex = 0;
         if (typeof updateBatchNav === 'function') updateBatchNav();
     }
-    // Prefer history.back() so user returns to their filtered list state.
-    if (history.length > 1) history.back();
-    else Router.navigate({ view: 'games' });
+    Navigation.cancelToFallback({ view: 'games' });
 }
 
 async function deleteCurrentGame() {

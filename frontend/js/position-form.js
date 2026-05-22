@@ -38,11 +38,8 @@ async function savePosition() {
         orientation,
         tags
     };
-    let res;
-    if (editId) res = await fetch(API + '/positions/' + editId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    else res = await fetch(API + '/positions/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (res.ok) {
-        const saved = await res.json();
+    try {
+        const saved = editId ? await ApiClient.put('/positions/' + editId, body) : await ApiClient.post('/positions/', body);
         toast(editId ? 'Position updated!' : 'Position saved!');
         clearForm();
         const viewToGo = TYPE_TO_CATEGORY[savedType] || 'tabiya';
@@ -50,14 +47,13 @@ async function savePosition() {
             { view: viewToGo, params: { featured: saved.id } },
             { replace: true }
         );
-    } else {
-        const err = await res.json();
-        const errorMsg = err.detail || 'Error saving';
+    } catch (err) {
+        const errorMsg = err.message || 'Error saving';
         toast(errorMsg, true);
         const formTitle = document.getElementById('form-title');
-        if (formTitle && err.detail && err.detail.includes('already exists')) {
+        if (formTitle && errorMsg.includes('already exists')) {
             formTitle.style.color = 'var(--danger, red)';
-            formTitle.textContent = err.detail;
+            formTitle.textContent = errorMsg;
             setTimeout(() => {
                 formTitle.style.color = '';
                 var addCat = Object.values(CATEGORIES).find(c => c.positionType === savedType);
@@ -70,10 +66,14 @@ async function savePosition() {
 async function deletePosition() {
     const id = document.getElementById('edit-id').value;
     if (!id || !confirm('Delete this position?')) return;
-    if ((await fetch(API + '/positions/' + id, { method: 'DELETE' })).ok) {
+    try {
+        await ApiClient.delete('/positions/' + id);
         topBanner('Position deleted');
         clearForm();
         Router.navigate({ view: TYPE_TO_CATEGORY[AppState.addPositionType] || 'tabiya' });
+    } catch (e) {
+        console.error(e);
+        toast('Delete failed', true);
     }
 }
 
@@ -281,17 +281,10 @@ function openEditorFromForm() {
     Router.navigate({ view: 'editor', params: { positionType: posType } });
 }
 
-window.savePosition = savePosition;
-window.deletePosition = deletePosition;
-window.openEditorFromForm = openEditorFromForm;
-window.loadFen = loadFen;
-window.setStartPos = setStartPos;
-window.flipBoard = flipBoard;
-window.clearForm = clearForm;
-window.setupAutoLoad = setupAutoLoad;
-window.setupAutoGrowTextareas = setupAutoGrowTextareas;
-window.setupKeyboardSave = setupKeyboardSave;
-window.setupUrlParams = setupUrlParams;
+Object.assign(window, {
+    savePosition, deletePosition, openEditorFromForm, loadFen, setStartPos, flipBoard, clearForm,
+    setupAutoLoad, setupAutoGrowTextareas, setupKeyboardSave, setupUrlParams,
+});
 window._formTagState = _formTagState;
 window._initFormTagFilter = _initFormTagFilter;
 window._applyFormOrientation = _applyFormOrientation;

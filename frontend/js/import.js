@@ -60,15 +60,13 @@ function handlePgnFile(input) {
 async function _createNewCollectionIfNeeded(collIds) {
     const newCollName = document.getElementById('import-new-coll').value.trim();
     if (!newCollName) return;
-    const cr = await fetch(API + '/collections/', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name: newCollName})
-    });
-    if (cr.ok) {
-        const nc = await cr.json();
+    try {
+        const nc = await ApiClient.post('/collections/', {name: newCollName});
         collIds.push(nc.id);
         await loadCollections();
-    } else if (cr.status !== 409) {
+    } catch (e) {
+        if (e.status === 409) return;
+        console.error(e);
         toast('Failed to create collection', true);
     }
 }
@@ -243,7 +241,7 @@ async function cancelImport() {
     if (!_importJobId) { return; }
     if (!confirm('Cancel this import? All games will be rolled back.')) return;
     try {
-        await fetch(API + '/games/import/cancel/' + _importJobId, {method: 'POST'});
+        await ApiClient.post('/games/import/cancel/' + _importJobId, {});
     } catch (_) {}
     // Abort the stream so the reader exits promptly.
     if (_importAbort) { try { _importAbort.abort(); } catch (_) {} }

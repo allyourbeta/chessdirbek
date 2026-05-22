@@ -9,7 +9,7 @@ const Practice = (function () {
 
     async function loadLevels() {
         if (engineLevels) return engineLevels;
-        engineLevels = await (await fetch(API + '/practice/engine-levels')).json();
+        engineLevels = await ApiClient.get('/practice/engine-levels');
         return engineLevels;
     }
     function getLevels() { return engineLevels; }
@@ -256,60 +256,45 @@ const Practice = (function () {
         forcedVerdict = 'loss'; _captureEndOfGame();
     }
     function stopAndAbandon() { forcedVerdict = 'abandoned'; }
-
     function guessVerdict() {
         if (!pendingSave || !active || !_playChess) return '?';
         if (_playChess.in_checkmate()) {
             var loser = _playChess.turn(), uw = active.userColor === 'white';
             return ((loser === 'w' && !uw) || (loser === 'b' && uw)) ? 'win' : 'loss';
-        }
-        return (_playChess.in_draw() || _playChess.in_stalemate()) ? 'draw' : '?';
+        } return (_playChess.in_draw() || _playChess.in_stalemate()) ? 'draw' : '?';
     }
 
     async function confirmSave(userVerdict) {
         if (!pendingSave || !active) { PracticeUI.hideSaveModal(); _teardown(); return; }
         var notesEl = document.getElementById('practice-save-notes');
-        var r = await fetch(API + '/practice/', { method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ root_position_id: active.rootPositionId,
-                pgn_text: pendingSave.pgn, user_color: active.userColor,
-                final_fen: pendingSave.finalFen, move_count: pendingSave.moveCount,
-                engine_name: 'Stockfish', engine_level: active.level,
-                starting_eval: null, final_eval: pendingSave.finalEval,
-                user_verdict: userVerdict || null,
-                notes: notesEl ? notesEl.value.trim() || null : null }) });
-        if (r.ok) topBanner('Practice game saved');
-        else toast('Save failed', true);
+        try {
+            await ApiClient.post('/practice/', {
+                root_position_id: active.rootPositionId, pgn_text: pendingSave.pgn, user_color: active.userColor,
+                final_fen: pendingSave.finalFen, move_count: pendingSave.moveCount, engine_name: 'Stockfish',
+                engine_level: active.level, starting_eval: null, final_eval: pendingSave.finalEval,
+                user_verdict: userVerdict || null, notes: notesEl ? notesEl.value.trim() || null : null,
+            });
+            topBanner('Practice game saved');
+        } catch (e) {
+            console.error(e);
+            toast('Save failed', true);
+        }
         active = null; pendingSave = null; forcedVerdict = null;
         PracticeUI.hideSaveModal(); _teardown();
         if (AppState.currentDetailId) loadPracticeHistory(AppState.currentDetailId);
     }
 
-    function discard() {
-        active = null; pendingSave = null; forcedVerdict = null;
-        PracticeUI.hideSaveModal(); _teardown();
-        toast('Practice game discarded');
-    }
+    function discard() { active = null; pendingSave = null; forcedVerdict = null; PracticeUI.hideSaveModal(); _teardown(); toast('Practice game discarded'); }
 
     function loadPracticeHistory(posId, append) { return PracticeHistory.load(posId, append); }
-
-    async function loadPracticeTab() {
-        await loadLevels(); PracticeUI.populateLevelSelect(engineLevels);
-        var s = await (await fetch(API + '/practice/positions')).json();
-        PracticeUI.renderPositionsList(s);
-    }
+    async function loadPracticeTab() { await loadLevels(); PracticeUI.populateLevelSelect(engineLevels); PracticeUI.renderPositionsList(await ApiClient.get('/practice/positions')); }
 
     return {
-        startFromDetail: startFromDetail, confirmSave: confirmSave, discard: discard,
-        isActive: isActive, loadPracticeHistory: loadPracticeHistory,
-        loadPracticeTab: loadPracticeTab, loadLevels: loadLevels, getLevels: getLevels,
-        editVerdict: function (id) { return PracticeHistory.editVerdict(id); },
-        deleteGame: function (id) { return PracticeHistory.deleteGame(id); },
-        guessVerdict: guessVerdict, getActive: getActive, getPendingSave: getPendingSave,
-        resign: resign, stopAndAbandon: stopAndAbandon,
-        applyFilters: function () { return PracticeHistory.applyFilters(); },
-        clearFilters: function () { return PracticeHistory.clearFilters(); },
-        showMore: function () { return PracticeHistory.showMore(); },
+        startFromDetail: startFromDetail, confirmSave: confirmSave, discard: discard, isActive: isActive,
+        loadPracticeHistory: loadPracticeHistory, loadPracticeTab: loadPracticeTab, loadLevels: loadLevels, getLevels: getLevels,
+        editVerdict: id => PracticeHistory.editVerdict(id), deleteGame: id => PracticeHistory.deleteGame(id),
+        guessVerdict: guessVerdict, getActive: getActive, getPendingSave: getPendingSave, resign: resign, stopAndAbandon: stopAndAbandon,
+        applyFilters: () => PracticeHistory.applyFilters(), clearFilters: () => PracticeHistory.clearFilters(), showMore: () => PracticeHistory.showMore(),
     };
 })();
 window.Practice = Practice;

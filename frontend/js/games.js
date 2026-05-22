@@ -1,29 +1,17 @@
-function _buildGameQuery(extra) {
-    const params = [];
-    (AppState.gameTagFilters || []).forEach(t => params.push('tags=' + encodeURIComponent(t)));
-    if (AppState.gameCollectionFilter) params.push('collection_id=' + AppState.gameCollectionFilter);
-    if (AppState.gameResultFilter) params.push('result=' + encodeURIComponent(AppState.gameResultFilter));
-    if (AppState.gameSearch) params.push('search=' + encodeURIComponent(AppState.gameSearch));
-    if (extra) Object.entries(extra).forEach(([k, v]) => params.push(k + '=' + encodeURIComponent(v)));
-    return params.join('&');
-}
-
 async function loadGames() {
     const offset = AppState.gamePage * AppState.gamePageSize;
-    const qs = _buildGameQuery({ limit: AppState.gamePageSize, offset });
     try {
-        const res = await fetch(API + '/games/?' + qs);
-        AppState.allGames = await res.json();
+        AppState.allGames = await ApiClient.get('/games/', Object.assign(_currentGamesParams(), { limit: AppState.gamePageSize, offset }));
     } catch (e) {
+        console.error(e);
         AppState.allGames = [];
     }
     // Fetch total count in parallel for pagination
     try {
-        const countQs = _buildGameQuery();
-        const cr = await fetch(API + '/games/count?' + countQs);
-        const cd = await cr.json();
+        const cd = await ApiClient.get('/games/count', _currentGamesParams());
         AppState.gameTotalCount = cd.count || 0;
     } catch (e) {
+        console.error(e);
         AppState.gameTotalCount = AppState.allGames.length;
     }
     AppState.selectedGameIds = new Set();
@@ -71,7 +59,7 @@ function mountGameTagFilter() {
 }
 
 async function loadCollections() {
-    AppState.allCollections = await (await fetch(API + '/collections/')).json();
+    AppState.allCollections = await ApiClient.get('/collections/');
     renderCollectionFilter();
     renderImportCollections();
 }
@@ -226,9 +214,9 @@ async function deleteSelectedGames() {
     let ok = 0, fail = 0;
     for (const id of ids) {
         try {
-            const r = await fetch(API + '/games/' + id, { method: 'DELETE' });
-            if (r.ok) ok++; else fail++;
-        } catch (e) { fail++; }
+            await ApiClient.delete('/games/' + id);
+            ok++;
+        } catch (e) { console.error(e); fail++; }
     }
     AppState.selectedGameIds = new Set();
     toast(`Deleted ${ok} game(s)` + (fail ? `, ${fail} failed` : ''), fail > 0);

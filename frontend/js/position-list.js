@@ -52,6 +52,9 @@ function mountCategoryTagFilter(categoryKey) {
             renderCategoryList(categoryKey);
         });
     }
+
+    // Mount selection controls
+    _setupSelectionControls(categoryKey);
 }
 
 function renderCategoryList(categoryKey) {
@@ -106,8 +109,10 @@ function renderCategoryList(categoryKey) {
     el.innerHTML = positions.map(p => {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';
+        const isSelected = SelectionManager && SelectionManager.isSelected(p.id);
+        const selectedClass = isSelected ? ' pos-item--selected' : '';
         const starHtml = StarControl.renderPositionStar(p);
-        return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+        return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
     
     // Set up event delegation for the position list
@@ -187,8 +192,95 @@ function _handlePositionListClick(event) {
     } else if (target.classList.contains('pos-item')) {
         // Handle position item click
         const positionId = parseInt(target.dataset.posId, 10);
-        if (positionId) showDetail(positionId);
+        if (!positionId) return;
+        
+        if (SelectionManager && SelectionManager.isActive()) {
+            // In select mode, toggle selection
+            SelectionManager.togglePosition(positionId);
+        } else {
+            // In normal mode, open position
+            showDetail(positionId);
+        }
     }
+}
+
+function _setupSelectionControls(categoryKey) {
+    const selectToggle = document.getElementById('select-mode-toggle');
+    const bulkActionBar = document.getElementById('bulk-action-bar');
+    const selectionCount = document.getElementById('selection-count');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const bulkStarBtn = document.getElementById('bulk-star-btn');
+    const bulkUnstarBtn = document.getElementById('bulk-unstar-btn');
+    const clearSelectionBtn = document.getElementById('clear-selection-btn');
+
+    if (!selectToggle || !bulkActionBar || !SelectionManager) return;
+
+    // Update UI when selection state changes
+    SelectionManager.onStateChange(function(state) {
+        // Update select toggle button text
+        selectToggle.textContent = state.active ? 'Done' : 'Select';
+        
+        // Show/hide bulk action bar - show immediately when entering select mode
+        if (state.active) {
+            bulkActionBar.style.display = '';
+            selectionCount.textContent = state.selectedCount === 0 
+                ? 'Select Mode — 0 selected' 
+                : `${state.selectedCount} selected`;
+        } else {
+            bulkActionBar.style.display = 'none';
+        }
+
+        // Re-render list to update selection visual state
+        renderCategoryList(categoryKey);
+    });
+
+    // Select mode toggle
+    selectToggle.addEventListener('click', function() {
+        SelectionManager.toggleActive();
+    });
+
+    // Select all visible positions
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            _selectAllVisiblePositions(categoryKey);
+        });
+    }
+
+    // Bulk action buttons
+    if (bulkStarBtn) {
+        bulkStarBtn.addEventListener('click', function() {
+            SelectionManager.bulkStar();
+        });
+    }
+
+    if (bulkUnstarBtn) {
+        bulkUnstarBtn.addEventListener('click', function() {
+            SelectionManager.bulkUnstar();
+        });
+    }
+
+    if (clearSelectionBtn) {
+        clearSelectionBtn.addEventListener('click', function() {
+            SelectionManager.clear();
+        });
+    }
+}
+
+function _selectAllVisiblePositions(categoryKey) {
+    const category = CATEGORIES[categoryKey];
+    if (!category || !AppState.allPositions) return;
+    
+    // Get currently visible positions (after filters)
+    let positions = AppState.allPositions.filter(p => p.position_type === category.positionType);
+    
+    // Apply starred filter if enabled
+    if (AppState.starredFilter) {
+        positions = positions.filter(p => p.starred);
+    }
+    
+    // Extract IDs and select them all
+    const visibleIds = positions.map(p => p.id);
+    SelectionManager.selectAll(visibleIds);
 }
 
 window.loadCategoryPositions = loadCategoryPositions;

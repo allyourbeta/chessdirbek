@@ -80,6 +80,18 @@
           <div id="cat-tag-filters" class="tag-row" style="margin-bottom:8px"></div>
           <div class="filter-row" style="display:flex;gap:12px;align-items:center">
             <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px"></button>
+            <button id="select-mode-toggle" class="btn btn-sm btn-ghost" title="Select multiple positions">Select</button>
+          </div>
+          <div id="bulk-action-bar" style="display:none;margin-top:8px;padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:4px;">
+            <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;">
+              <span id="selection-count" style="font-size:13px;color:var(--text-muted)">0 selected</span>
+              <div style="display:flex;gap:8px;">
+                <button id="select-all-btn" class="btn btn-sm btn-ghost">Select All</button>
+                <button id="bulk-star-btn" class="btn btn-sm btn-ghost">Star</button>
+                <button id="bulk-unstar-btn" class="btn btn-sm btn-ghost">Unstar</button>
+                <button id="clear-selection-btn" class="btn btn-sm btn-ghost">Clear</button>
+              </div>
+            </div>
           </div>
         </div>
         <div id="cat-list" class="pos-list"></div>
@@ -570,6 +582,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/practice-viewer-actions.js"></script>
 <script src="/js/dynamic-click-handlers.js"></script>
 <script src="/js/star-control.js"></script>
+<script src="/js/selection-manager.js"></script>
 <script src="/js/board-editor.js"></script>
 <script type="module" src="/js/main.js"></script>
 <script>

@@ -113,6 +113,30 @@
   opacity: 1;
 }
 
+/* Selected card styling */
+.pos-item--selected {
+  border: 2px solid var(--primary-500);
+  background: rgba(76, 99, 182, 0.04);
+  box-shadow: 0 2px 8px rgba(76, 99, 182, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.pos-item--selected::before {
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 18px;
+  height: 18px;
+  background: var(--primary-500);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
 /* ------------------------------------------------------------------
    Mini board thumbnails
    ------------------------------------------------------------------ */

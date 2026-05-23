@@ -23,8 +23,8 @@ async function loadPositionDetail(id) {
     notesEl._lastSaved = pos.notes || '';
     notesEl.oninput = _onDetailNotesInput;
     notesEl.onblur = _autoSaveDetailNotes;
-    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
-    document.getElementById('detail-tags').innerHTML = pos.tags.map(t => `<span class="tag">#${Html.escape(t.name)}</span>`).join('');
+    // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
+    document.getElementById('detail-tags').innerHTML = TagRenderer.renderChips(pos.tags);
     _initCollapsibleCards(pos.notes);
     
     if (pos.position_type === 'puzzle') {
@@ -104,12 +104,7 @@ function toggleCollapsible(id) {
 }
 
 function copyFen() {
-    var fen = BoardManager.getCurrentFen();
-    if (fen) {
-        navigator.clipboard.writeText(fen).then(function () { toast('FEN copied'); });
-    } else {
-        toast('No position to copy', true);
-    }
+    FenActions.copyCurrentFen();
 }
 
 function _initCollapsibleCards(notes) {

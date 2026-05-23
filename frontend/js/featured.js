@@ -49,9 +49,8 @@ function loadCategoryFeaturedById(id) {
     document.getElementById('cat-featured-title').textContent = pos.title || 'Untitled';
     // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
     document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pos.starred);
-    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names (SHOULD BE FIXED)
-    document.getElementById('cat-featured-tags').innerHTML =
-        pos.tags.map(function(t) { return '<span class="tag">#' + Html.escape(t.name) + '</span>'; }).join('');
+    // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
+    document.getElementById('cat-featured-tags').innerHTML = TagRenderer.renderChips(pos.tags);
     document.getElementById('cat-featured-title').onclick = function() {
         showDetail(pos.id);
     };

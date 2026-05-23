@@ -65,7 +65,6 @@ async function loadCollections() {
 }
 
 const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-let _warnedMissingEcoOpenings = false;
 
 function _gameDate(g) {
     if (!g.date_played) return '';
@@ -84,21 +83,14 @@ function _gameDate(g) {
 }
 
 function _gameOpening(g) {
-    if (window.EcoOpenings && typeof EcoOpenings.labelFor === 'function') {
-        return EcoOpenings.labelFor(g.eco, g.opening);
-    }
-    if (!_warnedMissingEcoOpenings) {
-        console.warn('EcoOpenings.labelFor is unavailable; falling back to raw ECO/opening labels.');
-        _warnedMissingEcoOpenings = true;
-    }
-    return [g.eco, g.opening].filter(Boolean).join(' — ');
+    return EcoOpenings.labelFor(g.eco, g.opening);
 }
 
 function renderGamesList() {
     const el = document.getElementById('games-list');
     if (!AppState.allGames.length && AppState.gameTotalCount === 0) {
-        // SAFE_INNER_HTML: Static template with no dynamic content
-        el.innerHTML = '<div class="empty-state"><p>No games yet</p><p>Import PGN games to get started.</p></div>';
+        // SAFE_INNER_HTML: Template with escaped content via EmptyStates.render()
+        el.innerHTML = EmptyStates.render('No games yet', 'Import PGN games to get started.');
         updateBulkBar();
         renderPager();
         return;

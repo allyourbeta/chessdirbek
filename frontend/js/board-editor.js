@@ -162,10 +162,7 @@ var BoardEditor = (function () {
     }
     function copyFen() {
         var fen = _getFen();
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(fen);
-            toast('FEN copied');
-        }
+        FenActions.copyFen(fen);
     }
     function _updateSaveButtons() {
         var singleEl = document.getElementById('editor-save-single');

@@ -46,7 +46,7 @@ window.NamingService = (function() {
         if (ply === 0) {
             moveDesc = 'starting position';
         } else {
-            const moveNum = Math.ceil(ply / 2);
+            const moveNum = MoveCounts.fullMoveCountFromPlies(ply);
             const movePrefix = ply % 2 === 1 ? '' : '...';
             const move = movesSan[ply - 1];
             moveDesc = `after ${moveNum}.${movePrefix}${move}`;

@@ -25,12 +25,10 @@ async function loadGameDetail(id) {
     document.getElementById('gv-result').textContent = game.result || '*';
     document.getElementById('gv-event').textContent = game.event || '';
     document.getElementById('gv-date').textContent = game.date_played || '';
-    const ecoStr = (window.EcoOpenings && typeof EcoOpenings.labelFor === 'function')
-        ? EcoOpenings.labelFor(game.eco, game.opening)
-        : [game.eco, game.opening].filter(Boolean).join(' - ');
+    const ecoStr = EcoOpenings.labelFor(game.eco, game.opening);
     document.getElementById('gv-opening').textContent = ecoStr;
-    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
-    document.getElementById('gv-tags').innerHTML = game.tags.map(t => `<span class="tag">#${Html.escape(t.name)}</span>`).join('');
+    // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
+    document.getElementById('gv-tags').innerHTML = TagRenderer.renderChips(game.tags);
 
     renderMoveList();
     BoardManager.create('game-board', game.fens[0], {

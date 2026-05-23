@@ -40,6 +40,7 @@ async function loadOpeningTree(fen) {
 function renderOpeningTree() {
     const el = document.getElementById('opening-tree-content');
     if (!_treeData || !_treeData.moves.length) {
+        // INTENTIONAL_UNIQUE_EMPTY_STATE: Opening tree widget with minimal custom styling, different from standard empty-state
         // SAFE_INNER_HTML: Static template with no dynamic content
         el.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:8px">No games found for this position.</div>';
         return;

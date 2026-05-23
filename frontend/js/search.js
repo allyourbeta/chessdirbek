@@ -89,8 +89,8 @@ async function doPositionSearch() {
 function renderSearchResults(data) {
     const el = document.getElementById('search-results');
     if (!data.length) {
-        // SAFE_INNER_HTML: Static template with no dynamic content
-        el.innerHTML = '<div class="empty-state"><p>No matches</p><p>Try a different position or search type.</p></div>';
+        // SAFE_INNER_HTML: Template with escaped content via EmptyStates.render()
+        el.innerHTML = EmptyStates.render('No matches', 'Try a different position or search type.');
         return;
     }
     // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for player names and events
@@ -98,12 +98,10 @@ function renderSearchResults(data) {
         const w = r.white || '?';
         const b = r.black || '?';
         const res = r.result || '*';
-        const ecoLabel = (window.EcoOpenings && typeof EcoOpenings.nameFor === 'function' && r.eco)
-            ? `${r.eco} — ${EcoOpenings.nameFor(r.eco)}`
-            : (r.eco || '');
+        const ecoLabel = EcoOpenings.labelFor(r.eco, null);
         const eco = ecoLabel ? `<span class="text-muted" style="font-size:12px">${ecoLabel}</span>` : '';
         const evt = r.event ? `<span class="text-muted" style="font-size:12px">${Html.escape(r.event)}</span>` : '';
-        const moveNum = Math.ceil(r.half_move / 2);
+        const moveNum = MoveCounts.fullMoveCountFromPlies(r.half_move);
         const moveLabel = r.half_move === 0 ? 'start' : ('after ' + moveNum + (r.half_move % 2 === 1 ? '.' : '...'));
         return `<div class="pos-item" data-game-id="${r.game_id}" data-half-move="${r.half_move}">
             <div style="flex:1">

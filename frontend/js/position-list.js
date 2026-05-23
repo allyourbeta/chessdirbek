@@ -59,8 +59,8 @@ function renderCategoryList(categoryKey) {
     
     if (!positions.length) {
         const emptySingular = category.label.toLowerCase().slice(0, -1); // Remove 's' from plural
-        // SAFE_INNER_HTML: Static template with controlled variable interpolation
-        el.innerHTML = `<div class="empty-state"><p>No ${emptySingular} positions yet</p><p>Click "Add New" to save your first ${emptySingular} position.</p></div>`;
+        // SAFE_INNER_HTML: Template with escaped content via EmptyStates.render()
+        el.innerHTML = EmptyStates.render(`No ${emptySingular} positions yet`, `Click "Add New" to save your first ${emptySingular} position.`);
         return;
     }
     

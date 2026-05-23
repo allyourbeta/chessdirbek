@@ -52,6 +52,7 @@ const PracticeUI = (function () {
 
     function _renderStats(el, s) {
         if (!s || !s.total_games) {
+            // INTENTIONAL_UNIQUE_EMPTY_STATE: Stats widget with custom small text styling, different from standard empty-state
             // SAFE_INNER_HTML: Static template with no dynamic content
             el.innerHTML = '<p class="text-muted" style="font-size:13px">No practice games yet</p>';
             return;
@@ -99,6 +100,7 @@ const PracticeUI = (function () {
                 // SAFE_INNER_HTML: Static template with hardcoded action handler
                 el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No games match these filters. Try adjusting your filters or <a href="#" data-action="practice-clear-filters">clear filters</a>.</div>';
             } else {
+                // INTENTIONAL_UNIQUE_EMPTY_STATE: History section with conditional filter logic and custom styling, different from standard empty-state
                 // SAFE_INNER_HTML: Static template with no dynamic content
                 el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted)">No practice games yet. Start practicing to see your history here.</div>';
             }
@@ -156,8 +158,8 @@ const PracticeUI = (function () {
         const el = document.getElementById('practice-positions-list');
         if (!el) return;
         if (!summaries || !summaries.length) {
-            // SAFE_INNER_HTML: Static template with no dynamic content
-            el.innerHTML = `<div class="empty-state"><p>No practice games yet</p><p>Open a saved position and click "Practice this position".</p></div>`;
+            // SAFE_INNER_HTML: Template with escaped content via EmptyStates.render()
+            el.innerHTML = EmptyStates.render('No practice games yet', 'Open a saved position and click "Practice this position".');
             return;
         }
         // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for user-controlled titles

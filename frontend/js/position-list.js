@@ -110,7 +110,7 @@ function renderCategoryList(categoryKey) {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';
         const isSelected = SelectionManager && SelectionManager.isSelected(p.id);
-        const selectedClass = isSelected ? ' pos-item--selected selected-panel' : '';
+        const selectedClass = isSelected ? ' pos-item--selected' : '';
         const starHtml = StarControl.renderPositionStar(p);
         return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
@@ -220,12 +220,33 @@ function _setupSelectionControls(categoryKey) {
         // Update select toggle button text
         selectToggle.textContent = state.active ? 'Done' : 'Select';
         
+        // Hide star filter when in select mode (it's confusing)
+        const starToggle = document.getElementById('starred-filter-toggle');
+        if (starToggle) {
+            starToggle.style.display = state.active ? 'none' : '';
+        }
+        
         // Show/hide bulk action bar - show immediately when entering select mode
         if (state.active) {
             bulkActionBar.style.display = '';
             selectionCount.textContent = state.selectedCount === 0 
-                ? 'Select Mode — 0 selected' 
+                ? 'Select positions' 
                 : `${state.selectedCount} selected`;
+                
+            // Update "All" button text based on current selection
+            if (selectAllBtn) {
+                const category = CATEGORIES[categoryKey];
+                if (category) {
+                    let visiblePositions = AppState.allPositions.filter(p => p.position_type === category.positionType);
+                    if (AppState.starredFilter) {
+                        visiblePositions = visiblePositions.filter(p => p.starred);
+                    }
+                    const visibleIds = visiblePositions.map(p => p.id);
+                    const allSelected = visibleIds.length > 0 && 
+                                       visibleIds.every(id => state.selectedIds.includes(id));
+                    selectAllBtn.textContent = allSelected ? 'None' : 'All';
+                }
+            }
         } else {
             bulkActionBar.style.display = 'none';
         }
@@ -242,7 +263,7 @@ function _setupSelectionControls(categoryKey) {
     // Select all visible positions
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', function() {
-            _selectAllVisiblePositions(categoryKey);
+            _toggleAllVisiblePositions(categoryKey);
         });
     }
 
@@ -266,7 +287,7 @@ function _setupSelectionControls(categoryKey) {
     }
 }
 
-function _selectAllVisiblePositions(categoryKey) {
+function _toggleAllVisiblePositions(categoryKey) {
     const category = CATEGORIES[categoryKey];
     if (!category || !AppState.allPositions) return;
     
@@ -278,9 +299,29 @@ function _selectAllVisiblePositions(categoryKey) {
         positions = positions.filter(p => p.starred);
     }
     
-    // Extract IDs and select them all
+    // Extract IDs 
     const visibleIds = positions.map(p => p.id);
-    SelectionManager.selectAll(visibleIds);
+    const currentSelected = SelectionManager.getSelectedIds();
+    
+    // Check if all visible are selected
+    const allSelected = visibleIds.length > 0 && 
+                       visibleIds.every(id => currentSelected.includes(id));
+    
+    if (allSelected) {
+        // If all are selected, deselect all visible ones
+        visibleIds.forEach(id => {
+            if (SelectionManager.isSelected(id)) {
+                SelectionManager.togglePosition(id);
+            }
+        });
+    } else {
+        // Otherwise, select all visible ones
+        visibleIds.forEach(id => {
+            if (!SelectionManager.isSelected(id)) {
+                SelectionManager.togglePosition(id);
+            }
+        });
+    }
 }
 
 window.loadCategoryPositions = loadCategoryPositions;

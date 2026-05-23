@@ -69,6 +69,8 @@
 }
 .pos-item-body {
   padding: var(--sp-3) var(--sp-4);
+  position: relative;
+  z-index: 2;
 }
 .pos-item .title {
   font-size: var(--fs-16);
@@ -101,6 +103,7 @@
   padding: 4px 6px;
   opacity: 0;
   transition: opacity .15s;
+  z-index: 5;
 }
 .pos-item:hover .pos-item-delete {
   opacity: 1;
@@ -113,57 +116,124 @@
   opacity: 1;
 }
 
-/* Selected card styling */
+/* Selected card styling - Individual cards with blue overlay */
 .pos-item--selected {
   border: 2px solid var(--primary-500);
-  background: rgba(76, 99, 182, 0.04);
-  box-shadow: 0 2px 8px rgba(76, 99, 182, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
 }
+
+/* Blue overlay effect for selected cards */
+.pos-item--selected::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(76, 99, 182, 0.12), rgba(76, 99, 182, 0.18));
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* Checkmark badge for selected cards */
 .pos-item--selected::before {
   content: "✓";
   position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 18px;
-  height: 18px;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
   background: var(--primary-500);
   color: white;
   border-radius: 50%;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Select mode styling */
+/* Select mode styling - Enhanced visibility */
 .select-mode-active {
-  background: #f0f8ff !important;
+  position: relative;
 }
 
+/* Select mode visual indicator banner */
+.select-mode-active::before {
+  content: "Select Mode Active";
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary-500);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 100;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Select mode enhancements */
 .select-mode-active .collection-browse {
-  background: transparent;
+  background: linear-gradient(to bottom, rgba(76, 99, 182, 0.03), transparent);
+  border: 2px solid rgba(76, 99, 182, 0.3);
 }
 
 .select-mode-active .collection-header-row h2 {
-  font-size: calc(var(--fs-20) + 2px);
+  font-size: calc(var(--fs-28) + 2px);
   font-weight: 700;
+  color: var(--primary-500);
+}
+
+.select-mode-active .pos-item {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.select-mode-active .pos-item:hover:not(.pos-item--selected) {
+  border-color: var(--primary-400);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(76, 99, 182, 0.2);
 }
 
 .select-mode-active .pos-item .title {
-  font-size: calc(var(--fs-16) + 1.5px);
+  font-size: calc(var(--fs-16) + 2px);
+  font-weight: 600;
+}
+
+.select-mode-active .pos-item-body {
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+}
+
+.select-mode-active .mini-board {
+  opacity: 0.85;
 }
 
 .select-mode-active #selection-count {
-  font-size: calc(var(--fs-13) + 2px);
+  font-size: calc(var(--fs-15) + 2px);
   font-weight: 700;
+  color: var(--primary-500);
 }
 
-.selected-panel {
-  border: 2px solid #007BFF !important;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3) !important;
-}
+/* Remove legacy selected-panel class (no longer used) */
 
 /* ------------------------------------------------------------------
    Mini board thumbnails

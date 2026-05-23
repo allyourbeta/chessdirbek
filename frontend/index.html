@@ -84,15 +84,13 @@
           </div>
         </div>
         <div id="cat-list" class="pos-list"></div>
-        <div id="bulk-action-bar" style="display:none;margin-top:16px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:4px;text-align:center;">
-          <div style="margin-bottom:8px;">
-            <span id="selection-count" style="font-size:15px;font-weight:600;color:var(--text)">0 selected</span>
-          </div>
-          <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
-            <button id="select-all-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Select All</button>
-            <button id="bulk-star-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Star</button>
-            <button id="bulk-unstar-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Unstar</button>
-            <button id="clear-selection-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Clear</button>
+        <div id="bulk-action-bar" style="display:none;position:sticky;bottom:20px;margin-top:16px;padding:12px 20px;background:var(--primary-500);border:none;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:50;width:fit-content;margin-left:auto;margin-right:auto;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span id="selection-count" style="font-size:15px;font-weight:600;color:white;margin-right:8px;">0 selected</span>
+            <button id="select-all-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">All</button>
+            <button id="bulk-star-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">Star</button>
+            <button id="bulk-unstar-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">Unstar</button>
+            <button id="clear-selection-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3);font-weight:600;">Clear</button>
           </div>
         </div>
       </div>

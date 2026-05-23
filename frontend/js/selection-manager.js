@@ -216,10 +216,13 @@ const SelectionManager = {
 
     // Add select mode visual class to the main container
     _addSelectModeClass() {
+        // Apply to all position type views
         const container = document.getElementById('view-category');
         if (container) {
             container.classList.add('select-mode-active');
         }
+        // Also add a body class for global styling
+        document.body.classList.add('select-mode-active-global');
     },
 
     // Remove select mode visual class from the main container
@@ -228,6 +231,8 @@ const SelectionManager = {
         if (container) {
             container.classList.remove('select-mode-active');
         }
+        // Remove body class
+        document.body.classList.remove('select-mode-active-global');
     }
 };
 

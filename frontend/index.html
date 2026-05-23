@@ -82,19 +82,19 @@
             <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px"></button>
             <button id="select-mode-toggle" class="btn btn-sm btn-ghost" title="Select multiple positions">Select</button>
           </div>
-          <div id="bulk-action-bar" style="display:none;margin-top:8px;padding:8px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:4px;">
-            <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;">
-              <span id="selection-count" style="font-size:13px;color:var(--text-muted)">0 selected</span>
-              <div style="display:flex;gap:8px;">
-                <button id="select-all-btn" class="btn btn-sm btn-ghost">Select All</button>
-                <button id="bulk-star-btn" class="btn btn-sm btn-ghost">Star</button>
-                <button id="bulk-unstar-btn" class="btn btn-sm btn-ghost">Unstar</button>
-                <button id="clear-selection-btn" class="btn btn-sm btn-ghost">Clear</button>
-              </div>
-            </div>
-          </div>
         </div>
         <div id="cat-list" class="pos-list"></div>
+        <div id="bulk-action-bar" style="display:none;margin-top:16px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:4px;text-align:center;">
+          <div style="margin-bottom:8px;">
+            <span id="selection-count" style="font-size:15px;font-weight:600;color:var(--text)">0 selected</span>
+          </div>
+          <div style="display:flex;gap:12px;justify-content:center;align-items:center;">
+            <button id="select-all-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Select All</button>
+            <button id="bulk-star-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Star</button>
+            <button id="bulk-unstar-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Unstar</button>
+            <button id="clear-selection-btn" class="btn btn-md btn-ghost" style="font-size:14px;">Clear</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

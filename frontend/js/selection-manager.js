@@ -12,12 +12,14 @@ const SelectionManager = {
     // Enter select mode
     enter() {
         this._active = true;
+        this._addSelectModeClass();
         this._notifyStateChange();
     },
 
     // Exit select mode
     exit() {
         this._active = false;
+        this._removeSelectModeClass();
         this.clear();
         this._notifyStateChange();
     },
@@ -209,6 +211,22 @@ const SelectionManager = {
 
         if (AppState.currentCategory) {
             renderCategoryList(AppState.currentCategory);
+        }
+    },
+
+    // Add select mode visual class to the main container
+    _addSelectModeClass() {
+        const container = document.getElementById('view-category');
+        if (container) {
+            container.classList.add('select-mode-active');
+        }
+    },
+
+    // Remove select mode visual class from the main container
+    _removeSelectModeClass() {
+        const container = document.getElementById('view-category');
+        if (container) {
+            container.classList.remove('select-mode-active');
         }
     }
 };

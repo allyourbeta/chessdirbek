@@ -137,6 +137,34 @@
   z-index: 1;
 }
 
+/* Select mode styling */
+.select-mode-active {
+  background: #f0f8ff !important;
+}
+
+.select-mode-active .collection-browse {
+  background: transparent;
+}
+
+.select-mode-active .collection-header-row h2 {
+  font-size: calc(var(--fs-20) + 2px);
+  font-weight: 700;
+}
+
+.select-mode-active .pos-item .title {
+  font-size: calc(var(--fs-16) + 1.5px);
+}
+
+.select-mode-active #selection-count {
+  font-size: calc(var(--fs-13) + 2px);
+  font-weight: 700;
+}
+
+.selected-panel {
+  border: 2px solid #007BFF !important;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3) !important;
+}
+
 /* ------------------------------------------------------------------
    Mini board thumbnails
    ------------------------------------------------------------------ */

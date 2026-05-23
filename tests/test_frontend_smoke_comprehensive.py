@@ -132,9 +132,20 @@ class TestNavigationRegression:
         cancel_found = "cancel" in html.lower() or "Cancel" in html
         assert cancel_found, "No cancel button found in editor"
         
-        # Check that navigation helper is available
-        navigation_helper = "Navigation.cancelToFallback" in html or "data-action=\"cancel\"" in html
-        assert navigation_helper, "No navigation cancel helper found"
+        # Check that cancel/back controls are wired through the centralized
+        # Navigation helper. After inline-handler removal, this wiring lives in
+        # data-nav-cancel attributes plus event-delegation/action handler JS,
+        # not as inline HTML calls.
+        navigation_js = (FRONTEND / "js" / "navigation.js").read_text()
+        event_delegation_js = (FRONTEND / "js" / "event-delegation.js").read_text()
+        action_handlers_js = (FRONTEND / "js" / "action-handlers.js").read_text()
+
+        navigation_helper = (
+            "cancelToFallback" in navigation_js
+            and ("data-nav-cancel" in html or "data-nav-cancel" in event_delegation_js)
+            and "Navigation.cancelToFallback" in (event_delegation_js + action_handlers_js)
+        )
+        assert navigation_helper, "No centralized navigation cancel helper wiring found"
 
 
 class TestFENOwnershipRegression:

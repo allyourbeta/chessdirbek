@@ -74,23 +74,31 @@
       <div class="collection-browse">
         <div class="collection-header-row">
           <h2 id="cat-browse-title" class="collection-title"></h2>
-          <span id="cat-count" class="collection-count"></span>
+          <span id="cat-count" class="collection-count" style="font-size:16px;font-weight:600;background:rgba(0,0,0,0.05);color:var(--text-secondary);padding:4px 10px;border-radius:12px;flex:none;"></span>
         </div>
         <div style="margin-bottom:12px">
           <div id="cat-tag-filters" class="tag-row" style="margin-bottom:8px"></div>
           <div class="filter-row" style="display:flex;gap:12px;align-items:center">
-            <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px"></button>
-            <button id="select-mode-toggle" class="btn btn-sm btn-ghost" title="Select multiple positions">Select</button>
+            <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px;font-size:16px;font-weight:600;"></button>
+            <button id="select-mode-toggle" class="btn btn-sm" title="Select multiple positions" style="font-size:16px;font-weight:600;background:rgba(0,0,0,0.05);color:var(--text-primary);border:none;padding:8px 14px;border-radius:8px;">Select</button>
           </div>
         </div>
         <div id="cat-list" class="pos-list"></div>
         <div id="bulk-action-bar" style="display:none;position:sticky;bottom:20px;margin-top:16px;padding:12px 20px;background:var(--primary-500);border:none;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:50;width:fit-content;margin-left:auto;margin-right:auto;">
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span id="selection-count" style="font-size:15px;font-weight:600;color:white;margin-right:8px;">0 selected</span>
-            <button id="select-all-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">All</button>
-            <button id="bulk-star-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">Star</button>
-            <button id="bulk-unstar-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.9);color:var(--primary-600);border:none;font-weight:600;">Unstar</button>
-            <button id="clear-selection-btn" class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3);font-weight:600;">Clear</button>
+          <div style="display:flex;gap:16px;align-items:center;">
+            <span id="selection-count" style="font-size:15px;font-weight:600;color:white;">0 selected</span>
+            
+            <!-- Selection controls pill -->
+            <div style="display:flex;background:rgba(255,255,255,0.9);border-radius:6px;overflow:hidden;">
+              <button id="select-all-btn" style="padding:8px 14px;background:none;border:none;color:var(--primary-600);font-weight:600;font-size:16px;border-right:1px solid rgba(0,0,0,0.1);cursor:pointer;">All</button>
+              <button id="clear-selection-btn" style="padding:8px 14px;background:none;border:none;color:var(--primary-600);font-weight:600;font-size:16px;cursor:pointer;">Clear</button>
+            </div>
+            
+            <!-- Action controls pill -->
+            <div style="display:flex;background:rgba(255,255,255,0.9);border-radius:6px;overflow:hidden;">
+              <button id="bulk-star-btn" style="padding:8px 14px;background:none;border:none;color:var(--primary-600);font-weight:600;font-size:16px;border-right:1px solid rgba(0,0,0,0.1);cursor:pointer;">Star</button>
+              <button id="bulk-unstar-btn" style="padding:8px 14px;background:none;border:none;color:var(--primary-600);font-weight:600;font-size:16px;cursor:pointer;">Unstar</button>
+            </div>
           </div>
         </div>
       </div>

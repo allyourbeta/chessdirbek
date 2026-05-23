@@ -85,6 +85,11 @@ const SelectionManager = {
         this._onStateChangeCallback = callback;
     },
 
+    // Clear the state change callback
+    clearStateChangeCallback() {
+        this._onStateChangeCallback = null;
+    },
+
     // Private method to notify of state changes
     _notifyStateChange() {
         if (this._onStateChangeCallback) {

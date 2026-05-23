@@ -204,6 +204,15 @@ function _handlePositionListClick(event) {
     }
 }
 
+// Track current event handlers to avoid accumulation
+let _currentSelectionHandlers = {
+    selectToggle: null,
+    selectAllBtn: null,
+    bulkStarBtn: null,
+    bulkUnstarBtn: null,
+    clearSelectionBtn: null
+};
+
 function _setupSelectionControls(categoryKey) {
     const selectToggle = document.getElementById('select-mode-toggle');
     const bulkActionBar = document.getElementById('bulk-action-bar');
@@ -214,6 +223,64 @@ function _setupSelectionControls(categoryKey) {
     const clearSelectionBtn = document.getElementById('clear-selection-btn');
 
     if (!selectToggle || !bulkActionBar || !SelectionManager) return;
+
+    // Clean up previous event listeners to prevent accumulation
+    _cleanupSelectionHandlers();
+
+    // Clear previous state change callback to prevent stale references
+    SelectionManager.clearStateChangeCallback();
+
+    // Exit selection mode when switching categories to avoid confusion
+    if (SelectionManager.isActive()) {
+        SelectionManager.exit();
+    }
+
+    // Create new handlers for this category
+    const selectToggleHandler = function() {
+        SelectionManager.toggleActive();
+    };
+
+    const selectAllHandler = function() {
+        _toggleAllVisiblePositions(categoryKey);
+    };
+
+    const bulkStarHandler = function() {
+        SelectionManager.bulkStar();
+    };
+
+    const bulkUnstarHandler = function() {
+        SelectionManager.bulkUnstar();
+    };
+
+    const clearSelectionHandler = function() {
+        SelectionManager.clear();
+    };
+
+    // Store handlers for cleanup
+    _currentSelectionHandlers.selectToggle = selectToggleHandler;
+    _currentSelectionHandlers.selectAllBtn = selectAllHandler;
+    _currentSelectionHandlers.bulkStarBtn = bulkStarHandler;
+    _currentSelectionHandlers.bulkUnstarBtn = bulkUnstarHandler;
+    _currentSelectionHandlers.clearSelectionBtn = clearSelectionHandler;
+
+    // Attach event listeners
+    selectToggle.addEventListener('click', selectToggleHandler);
+    
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', selectAllHandler);
+    }
+    
+    if (bulkStarBtn) {
+        bulkStarBtn.addEventListener('click', bulkStarHandler);
+    }
+
+    if (bulkUnstarBtn) {
+        bulkUnstarBtn.addEventListener('click', bulkUnstarHandler);
+    }
+
+    if (clearSelectionBtn) {
+        clearSelectionBtn.addEventListener('click', clearSelectionHandler);
+    }
 
     // Update UI when selection state changes
     SelectionManager.onStateChange(function(state) {
@@ -254,37 +321,40 @@ function _setupSelectionControls(categoryKey) {
         // Re-render list to update selection visual state
         renderCategoryList(categoryKey);
     });
+}
 
-    // Select mode toggle
-    selectToggle.addEventListener('click', function() {
-        SelectionManager.toggleActive();
-    });
+function _cleanupSelectionHandlers() {
+    const selectToggle = document.getElementById('select-mode-toggle');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const bulkStarBtn = document.getElementById('bulk-star-btn');
+    const bulkUnstarBtn = document.getElementById('bulk-unstar-btn');
+    const clearSelectionBtn = document.getElementById('clear-selection-btn');
 
-    // Select all visible positions
-    if (selectAllBtn) {
-        selectAllBtn.addEventListener('click', function() {
-            _toggleAllVisiblePositions(categoryKey);
-        });
+    // Remove previous event listeners if they exist
+    if (_currentSelectionHandlers.selectToggle && selectToggle) {
+        selectToggle.removeEventListener('click', _currentSelectionHandlers.selectToggle);
+    }
+    if (_currentSelectionHandlers.selectAllBtn && selectAllBtn) {
+        selectAllBtn.removeEventListener('click', _currentSelectionHandlers.selectAllBtn);
+    }
+    if (_currentSelectionHandlers.bulkStarBtn && bulkStarBtn) {
+        bulkStarBtn.removeEventListener('click', _currentSelectionHandlers.bulkStarBtn);
+    }
+    if (_currentSelectionHandlers.bulkUnstarBtn && bulkUnstarBtn) {
+        bulkUnstarBtn.removeEventListener('click', _currentSelectionHandlers.bulkUnstarBtn);
+    }
+    if (_currentSelectionHandlers.clearSelectionBtn && clearSelectionBtn) {
+        clearSelectionBtn.removeEventListener('click', _currentSelectionHandlers.clearSelectionBtn);
     }
 
-    // Bulk action buttons
-    if (bulkStarBtn) {
-        bulkStarBtn.addEventListener('click', function() {
-            SelectionManager.bulkStar();
-        });
-    }
-
-    if (bulkUnstarBtn) {
-        bulkUnstarBtn.addEventListener('click', function() {
-            SelectionManager.bulkUnstar();
-        });
-    }
-
-    if (clearSelectionBtn) {
-        clearSelectionBtn.addEventListener('click', function() {
-            SelectionManager.clear();
-        });
-    }
+    // Clear stored handlers
+    _currentSelectionHandlers = {
+        selectToggle: null,
+        selectAllBtn: null,
+        bulkStarBtn: null,
+        bulkUnstarBtn: null,
+        clearSelectionBtn: null
+    };
 }
 
 function _toggleAllVisiblePositions(categoryKey) {

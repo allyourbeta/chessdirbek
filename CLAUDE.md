@@ -130,3 +130,49 @@ The board editor has two known failure modes:
    method must use cm-chessboard's native one-argument API. If someone changes
    it to pass `POINTER_EVENTS.pointerdown` as the first argument, square
    selection will silently fail.
+# Stabilization Guardrails
+
+Before editing:
+
+1. Run `./test_smoke.sh`
+2. Do not proceed if tests fail.
+
+After editing:
+
+1. Run `./test_smoke.sh`
+2. Do not declare completion unless it passes.
+
+## Hard Rules
+
+Do not introduce:
+
+* inline HTML event handlers
+* direct frontend `fetch()` outside `frontend/js/api-client.js`
+* direct `history.back()` outside `frontend/js/navigation.js`
+* undocumented `innerHTML`
+* direct Stockfish `new Worker(...)` outside approved engine services
+* direct FEN clipboard writes outside `frontend/js/fen-actions.js`
+* duplicated naming, ECO, move-count, notification, FEN, save-current-position, or category-label logic
+
+Use existing centralized helpers/services:
+
+* ApiClient
+* Navigation
+* NamingService
+* BoardManager.getCurrentFen()
+* MoveCounts
+* EcoOpenings
+* PositionTypes
+* FenActions
+* Notifications
+* SaveCurrentPosition
+* EmptyStates
+
+This is a vanilla-JS app.
+Do not introduce React, TypeScript migrations, bundlers, or framework rewrites.
+
+If adding new functionality:
+
+* prefer extending existing helpers/services
+* avoid creating parallel ownership paths
+* preserve stabilization invariants

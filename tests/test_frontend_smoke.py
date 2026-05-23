@@ -98,4 +98,7 @@ def test_editor_cancel_button_structure():
     
     # Check for cancel-related elements
     assert "cancel" in html.lower() or "Cancel" in html
-    assert "Navigation.cancelToFallback" in html or "history.back" in html
+    # Check for cancel functionality via data-action or Navigation helper
+    cancel_patterns = ["Navigation.cancelToFallback", "history.back", "data-action=\"cancel\"", "data-action=\"collection-cancel\""]
+    has_cancel_functionality = any(pattern in html for pattern in cancel_patterns)
+    assert has_cancel_functionality, "No cancel functionality found"

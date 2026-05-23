@@ -14,8 +14,11 @@ function loadRandomCategoryFeatured() {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pick.fen);
     document.getElementById('cat-featured-title').textContent = pick.title || 'Untitled';
-    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
-    document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pick.starred);
+    
+    const featuredStar = document.getElementById('cat-featured-star');
+    featuredStar.dataset.positionId = pick.id;
+    // SAFE_INNER_HTML: Controlled content - StarControl.renderStarIcon returns static SVG
+    featuredStar.innerHTML = StarControl.renderStarIcon(pick.starred);
     // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for tag names
     document.getElementById('cat-featured-tags').innerHTML =
         pick.tags.map(function(t) { return '<span class="tag">#' + t.name + '</span>'; }).join('');
@@ -47,8 +50,11 @@ function loadCategoryFeaturedById(id) {
     EngineUI.mount('cat-featured-engine');
     EngineUI.setPosition(pos.fen);
     document.getElementById('cat-featured-title').textContent = pos.title || 'Untitled';
-    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
-    document.getElementById('cat-featured-star').innerHTML = renderStarIcon(pos.starred);
+    
+    const featuredStar = document.getElementById('cat-featured-star');
+    featuredStar.dataset.positionId = pos.id;
+    // SAFE_INNER_HTML: Controlled content - StarControl.renderStarIcon returns static SVG
+    featuredStar.innerHTML = StarControl.renderStarIcon(pos.starred);
     // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
     document.getElementById('cat-featured-tags').innerHTML = TagRenderer.renderChips(pos.tags);
     document.getElementById('cat-featured-title').onclick = function() {
@@ -90,15 +96,6 @@ async function deleteFeaturedPosition() {
     }
 }
 
-function toggleFeaturedStar() {
-    var id = AppState.featuredCategoryId;
-    if (!id) return;
-    toggleStar(id, function(newStarred) {
-        // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
-        document.getElementById('cat-featured-star').innerHTML = renderStarIcon(newStarred);
-        renderCategoryList(AppState.currentCategory);
-    });
-}
 
 function forkCategoryFeatured() {
     const id = AppState.featuredCategoryId;
@@ -174,7 +171,6 @@ window.loadRandomCategoryFeatured = loadRandomCategoryFeatured;
 window.loadCategoryFeaturedById = loadCategoryFeaturedById;
 window.flipCategoryFeaturedBoard = flipCategoryFeaturedBoard;
 window.shuffleCategoryFeatured = shuffleCategoryFeatured;
-window.toggleFeaturedStar = toggleFeaturedStar;
 window.forkCategoryFeatured = forkCategoryFeatured;
 window.editFeaturedPosition = editFeaturedPosition;
 window.deleteFeaturedPosition = deleteFeaturedPosition;

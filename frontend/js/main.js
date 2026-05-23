@@ -22,5 +22,8 @@ setupUrlParams();
 setupPuzzleKeyboardShortcuts();
 setupStaticActions();
 
+// Initialize star control global handlers
+StarControl.initGlobalHandlers();
+
 // Start the router — all globals are guaranteed to exist at this point.
 Router.init();

@@ -36,6 +36,22 @@ function mountCategoryTagFilter(categoryKey) {
         },
         placeholder: 'Filter by tag...',
     });
+
+    // Mount starred filter toggle button
+    const starToggle = document.getElementById('starred-filter-toggle');
+    if (starToggle) {
+        function updateStarToggle() {
+            const isActive = AppState.starredFilter || false;
+            StarControl.updateStarFilterVisual(starToggle, isActive);
+        }
+        updateStarToggle();
+        
+        StarControl.initStarFilterHandler(starToggle, function() {
+            AppState.starredFilter = !AppState.starredFilter;
+            updateStarToggle();
+            renderCategoryList(categoryKey);
+        });
+    }
 }
 
 function renderCategoryList(categoryKey) {
@@ -48,12 +64,19 @@ function renderCategoryList(categoryKey) {
     const el = document.getElementById('cat-list');
     if (!el) return;
     
-    const positions = AppState.allPositions.filter(p => p.position_type === category.positionType);
+    let positions = AppState.allPositions.filter(p => p.position_type === category.positionType);
+    
+    // Apply starred filter if enabled
+    if (AppState.starredFilter) {
+        positions = positions.filter(p => p.starred);
+    }
+    
     const countEl = document.getElementById('cat-count');
     if (countEl) {
         const tags = AppState.positionTagFilters || [];
-        countEl.textContent = tags.length
-            ? 'Showing ' + positions.length + ' positions'
+        const starFilter = AppState.starredFilter ? ' (starred only)' : '';
+        countEl.textContent = tags.length || AppState.starredFilter
+            ? 'Showing ' + positions.length + ' positions' + starFilter
             : positions.length + ' positions';
     }
     
@@ -83,12 +106,15 @@ function renderCategoryList(categoryKey) {
     el.innerHTML = positions.map(p => {
         const isFeatured = featuredId && p.id === featuredId;
         const featuredClass = isFeatured ? ' pos-item--featured' : '';
-        const starHtml = p.starred ? '<span class="pos-item-star">' + STAR_SVG_FILLED + '</span>' : '';
+        const starHtml = StarControl.renderPositionStar(p);
         return `<div class="pos-item${featuredClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
     
     // Set up event delegation for the position list
     _setupPositionListEvents(el);
+    
+    // Set up star control handlers
+    StarControl.initPositionStarHandlers(el);
 }
 
 function showDetail(id) {

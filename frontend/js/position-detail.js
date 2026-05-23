@@ -15,8 +15,11 @@ async function loadPositionDetail(id) {
     }
     
     document.getElementById('detail-title').textContent = pos.title || 'Untitled';
-    // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
-    document.getElementById('detail-star').innerHTML = renderStarIcon(pos.starred);
+    
+    const detailStar = document.getElementById('detail-star');
+    detailStar.dataset.positionId = pos.id;
+    // SAFE_INNER_HTML: Controlled content - StarControl.renderStarIcon returns static SVG
+    detailStar.innerHTML = StarControl.renderStarIcon(pos.starred);
     document.getElementById('detail-fen').textContent = pos.fen;
     const notesEl = document.getElementById('detail-notes');
     notesEl.value = pos.notes || '';
@@ -253,14 +256,6 @@ async function randomFromDetail() {
     }
 }
 
-function toggleDetailStar() {
-    var id = AppState.currentDetailId;
-    if (!id) return;
-    toggleStar(id, function(newStarred) {
-        // SAFE_INNER_HTML: Controlled content - renderStarIcon returns static SVG
-        document.getElementById('detail-star').innerHTML = renderStarIcon(newStarred);
-    });
-}
 
 window.loadPositionDetail = loadPositionDetail;
 window.toggleCollapsible = toggleCollapsible;
@@ -270,4 +265,3 @@ window.editPosition = editPosition;
 window.flipDetailBoard = flipDetailBoard;
 window.deleteFromDetail = deleteFromDetail;
 window.randomFromDetail = randomFromDetail;
-window.toggleDetailStar = toggleDetailStar;

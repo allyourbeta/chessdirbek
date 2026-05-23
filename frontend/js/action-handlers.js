@@ -1,7 +1,7 @@
 const ActionHandlers = {
     execute(action, target, event) {
         // Handle stopPropagation for certain actions
-        const stopPropActions = ['toggle-featured-star', 'copy-fen', 'toggle-detail-star'];
+        const stopPropActions = ['copy-fen'];
         if (stopPropActions.includes(action)) {
             event.stopPropagation();
         }
@@ -24,9 +24,6 @@ const ActionHandlers = {
                 break;
             case 'fork-category-featured':
                 forkCategoryFeatured();
-                break;
-            case 'toggle-featured-star':
-                toggleFeaturedStar();
                 break;
             case 'save-position':
                 savePosition();
@@ -127,9 +124,6 @@ const ActionHandlers = {
             case 'start-title-edit':
                 startTitleEdit();
                 break;
-            case 'toggle-detail-star':
-                toggleDetailStar();
-                break;
             case 'edit-position':
                 editPosition();
                 break;
@@ -172,6 +166,9 @@ const ActionHandlers = {
                 break;
             case 'hide-notification':
                 hideProminentNotification();
+                break;
+            case 'cancel-add-position':
+                Navigation.cancelToFallback({view: TYPE_TO_CATEGORY[AppState.addPositionType] || 'tabiya'});
                 break;
         }
     }

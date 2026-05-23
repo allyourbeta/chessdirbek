@@ -62,7 +62,7 @@
         <div class="featured-info">
           <div class="featured-title-row">
             <h3 id="cat-featured-title" class="featured-title"></h3>
-            <button class="star-toggle" id="cat-featured-star" data-action="toggle-featured-star" title="Toggle star"></button>
+            <button class="star-toggle" id="cat-featured-star" data-star-kind="position" title="Toggle star"></button>
           </div>
           <div id="cat-featured-tags" class="featured-tags"></div>
         </div>
@@ -76,7 +76,12 @@
           <h2 id="cat-browse-title" class="collection-title"></h2>
           <span id="cat-count" class="collection-count"></span>
         </div>
-        <div id="cat-tag-filters" class="tag-row" style="margin-bottom:12px"></div>
+        <div style="margin-bottom:12px">
+          <div id="cat-tag-filters" class="tag-row" style="margin-bottom:8px"></div>
+          <div class="filter-row" style="display:flex;gap:12px;align-items:center">
+            <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px"></button>
+          </div>
+        </div>
         <div id="cat-list" class="pos-list"></div>
       </div>
     </div>
@@ -94,6 +99,7 @@
             <button class="btn btn-md" data-action="set-start-pos">Starting Position</button>
             <button class="btn btn-md" data-action="flip-board">Flip Board</button>
             <button class="btn btn-md" data-action="open-editor-from-form">Editor</button>
+            <button class="btn btn-md" data-action="cancel-add-position">Cancel</button>
           </div>
         </div>
       </div>
@@ -299,7 +305,7 @@
         <div class="card">
           <div class="detail-title-row">
             <h2 id="detail-title" style="cursor:pointer" data-action="start-title-edit" title="Click to rename">Position</h2>
-            <button class="star-toggle" id="detail-star" data-action="toggle-detail-star" title="Toggle star"></button>
+            <button class="star-toggle" id="detail-star" data-star-kind="position" title="Toggle star"></button>
           </div>
           <div id="detail-tags"></div>
         </div>
@@ -437,7 +443,6 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
   <div id="view-editor" class="view">
     <div class="view-header">
       <h2 id="editor-title">Board Editor</h2>
-      <button class="btn btn-md" data-nav-cancel="tactics">Back</button>
     </div>
     <div class="card" style="padding:var(--sp-4)">
       <div class="board-area">
@@ -448,6 +453,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
             <button class="btn btn-md" data-editor-action="clear">Clear Board</button>
             <button class="btn btn-md" data-editor-action="start">Starting Position</button>
             <button class="btn btn-md" data-editor-action="flip">Flip</button>
+            <button class="btn btn-md" data-nav-cancel="tactics">Cancel</button>
           </div>
           <div class="btn-row" id="editor-save-single" style="margin-top:8px;display:none">
             <button class="btn btn-success btn-md" id="editor-save-ctx-btn" data-editor-action="save-context">Save</button>
@@ -563,6 +569,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/action-handlers.js"></script>
 <script src="/js/practice-viewer-actions.js"></script>
 <script src="/js/dynamic-click-handlers.js"></script>
+<script src="/js/star-control.js"></script>
 <script src="/js/board-editor.js"></script>
 <script type="module" src="/js/main.js"></script>
 <script>

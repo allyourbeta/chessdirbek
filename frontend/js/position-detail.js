@@ -28,7 +28,6 @@ async function loadPositionDetail(id) {
     notesEl.onblur = _autoSaveDetailNotes;
     // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
     document.getElementById('detail-tags').innerHTML = TagRenderer.renderChips(pos.tags);
-    _initCollapsibleCards(pos.notes);
     
     if (pos.position_type === 'puzzle') {
         document.getElementById('detail-stockfish-card').style.display = 'none';
@@ -101,29 +100,8 @@ async function loadPositionDetail(id) {
     EngineUI.setPosition(pos.fen);
 }
 
-function toggleCollapsible(id) {
-    var card = document.getElementById(id);
-    if (card) card.classList.toggle('expanded');
-}
-
 function copyFen() {
     FenActions.copyCurrentFen();
-}
-
-function _initCollapsibleCards(notes) {
-    var notesCard = document.getElementById('notes-card');
-    var notesLabel = document.getElementById('notes-card-label');
-    if (notesCard) {
-        if (notes && notes.trim()) {
-            notesCard.classList.add('expanded');
-            // SAFE_INNER_HTML: Static template with controlled styling
-            if (notesLabel) notesLabel.innerHTML = 'Your Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span>';
-        } else {
-            notesCard.classList.remove('expanded');
-            // SAFE_INNER_HTML: Static template with controlled styling
-            if (notesLabel) notesLabel.innerHTML = 'Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(click to add)</span>';
-        }
-    }
 }
 
 function startTitleEdit() {
@@ -258,7 +236,6 @@ async function randomFromDetail() {
 
 
 window.loadPositionDetail = loadPositionDetail;
-window.toggleCollapsible = toggleCollapsible;
 window.copyFen = copyFen;
 window.startTitleEdit = startTitleEdit;
 window.editPosition = editPosition;

@@ -80,13 +80,6 @@ function handleClick(event) {
         return;
     }
     
-    // Handle data-collapsible attributes
-    const collapsible = target.dataset.collapsible;
-    if (collapsible) {
-        toggleCollapsible(collapsible);
-        return;
-    }
-    
     // Handle data-confirm-delete attributes
     const confirmDelete = target.dataset.confirmDelete;
     if (confirmDelete) {

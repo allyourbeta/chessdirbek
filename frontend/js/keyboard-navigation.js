@@ -20,6 +20,45 @@ const KeyboardNavigation = (function() {
             btn.setAttribute('data-nav-index', i);
         });
         
+        function focusNavButton(button) {
+            if (!button || !navButtons.includes(button)) return;
+            navButtons.forEach(btn => btn.tabIndex = -1);
+            button.tabIndex = 0;
+            button.focus({ preventScroll: true });
+        }
+
+        function focusActiveNavButton() {
+            const activeButton = navButtons.find(btn => btn.classList.contains('active'))
+                                || navButtons.find(btn => btn.tabIndex === 0)
+                                || navButtons[0];
+            focusNavButton(activeButton);
+        }
+
+        // Make the whole header/nav strip a focus-entry target for the top nav.
+        // This fixes the common case where focus is down in cards/controls and the
+        // user clicks the visible top bar background expecting arrow keys to return
+        // to the section tabs. Keep this intentionally scoped to header/nav only.
+        const headerElement = navElement.closest('header') || navElement;
+        headerElement.addEventListener('pointerdown', function(e) {
+            const clickedNavButton = e.target.closest('button[data-nav]');
+            if (clickedNavButton && navButtons.includes(clickedNavButton)) {
+                focusNavButton(clickedNavButton);
+                return;
+            }
+
+            // Do not steal focus from the + New menu or other explicit controls on
+            // the right side of the header. Empty/header/nav background should focus
+            // the active tab; real controls should keep their normal behavior.
+            if (e.target.closest('.nav-right, button, input, select, textarea, a')) {
+                return;
+            }
+
+            if (e.target.closest('header')) {
+                e.preventDefault();
+                focusActiveNavButton();
+            }
+        });
+
         navElement.addEventListener('keydown', function(e) {
             const target = e.target;
             if (!navButtons.includes(target)) return;

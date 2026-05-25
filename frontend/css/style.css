@@ -176,6 +176,8 @@ nav {
   gap: var(--sp-1);
   align-items: center;
   margin: 0 auto;
+  padding: 4px 8px;
+  cursor: pointer;
 }
 nav button {
   position: relative;
@@ -589,4 +591,35 @@ textarea {
   .container { padding: var(--sp-4); }
   header { padding: var(--sp-3) var(--sp-4); }
   .view-header h2 { font-size: var(--fs-20); }
+}
+
+/* ------------------------------------------------------------------
+   Keyboard navigation focus styles
+   ------------------------------------------------------------------ */
+/* Enhanced focus styles for keyboard navigation */
+.pos-item:focus-visible,
+.game-row:focus-visible,
+nav button:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Position items with keyboard focus */
+.pos-item:focus-visible {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease;
+}
+
+/* Search result items with keyboard focus */
+#search-results .pos-item:focus-visible {
+  background-color: var(--bg-hover);
+  border-color: var(--primary-500);
+}
+
+/* Game table row focus styles */
+.games-table tbody tr:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: -1px;
+  background-color: var(--bg-hover);
 }

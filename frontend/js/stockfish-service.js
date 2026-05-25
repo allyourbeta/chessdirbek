@@ -58,17 +58,31 @@ const StockfishService = (function () {
     }
 
     function uciToSan(fen, uciMoves) {
-        const chess = new Chess(fen);
-        const sanMoves = [];
-        for (const uci of uciMoves) {
-            const from = uci.substring(0, 2);
-            const to = uci.substring(2, 4);
-            const promotion = uci.length > 4 ? uci[4] : undefined;
-            const move = chess.move({ from, to, promotion });
-            if (!move) break;
-            sanMoves.push(move.san);
+        try {
+            const chess = new Chess(fen);
+            const sanMoves = [];
+            for (const uci of uciMoves) {
+                const from = uci.substring(0, 2);
+                const to = uci.substring(2, 4);
+                const promotion = uci.length > 4 ? uci[4] : undefined;
+                const move = chess.move({ from, to, promotion });
+                if (!move) break;
+                sanMoves.push(move.san);
+            }
+            // If conversion was successful and we got moves, return them
+            if (sanMoves.length > 0) {
+                return sanMoves;
+            }
+            // If we got no moves but had UCI moves, log and return raw UCI
+            if (uciMoves.length > 0) {
+                console.warn('SAN conversion failed for position:', fen, 'UCI moves:', uciMoves);
+                return null; // Signal that SAN conversion failed
+            }
+            return [];
+        } catch (error) {
+            console.error('SAN conversion error for position:', fen, 'UCI moves:', uciMoves, 'Error:', error);
+            return null; // Signal that SAN conversion failed
         }
-        return sanMoves;
     }
 
     function _onMessage(e) {
@@ -104,9 +118,21 @@ const StockfishService = (function () {
                     isMate: parsed.isMate,
                     mateIn: parsed.mateIn,
                     depth: parsed.depth,
-                    moves: sanMoves,
+                    moves: sanMoves !== null ? sanMoves : parsed.uciMoves, // Fallback to raw UCI if SAN fails
+                    isUciFormat: sanMoves === null, // Flag to indicate UCI format
                 };
-                _currentLines[parsed.pv - 1] = entry;
+                
+                // Only update if we have a valid PV with moves, or preserve existing
+                const existingEntry = _currentLines[parsed.pv - 1];
+                if (entry.moves.length > 0 || !existingEntry) {
+                    _currentLines[parsed.pv - 1] = entry;
+                } else if (existingEntry && entry.moves.length === 0) {
+                    // Preserve existing moves if new update has none
+                    entry.moves = existingEntry.moves;
+                    entry.isUciFormat = existingEntry.isUciFormat;
+                    _currentLines[parsed.pv - 1] = entry;
+                }
+                
                 // Only call callback if we're still analyzing (not destroyed)
                 if (_state === 'analyzing' && _onUpdate) {
                     _onUpdate(_currentLines.slice());

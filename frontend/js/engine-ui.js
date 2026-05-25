@@ -16,8 +16,15 @@ const EngineUI = (function () {
         return entry.scoreCp > 0 ? 'positive' : 'negative';
     }
 
-    function _formatMoves(moves, fen) {
+    function _formatMoves(moves, fen, isUciFormat) {
         if (!moves || !moves.length) return '';
+        
+        // If in UCI format, just display the raw moves with spacing
+        if (isUciFormat) {
+            return moves.join(' ');
+        }
+        
+        // Otherwise format as SAN with move numbers
         var isBlack = fen && fen.split(' ')[1] === 'b';
         var fullMoveNum = fen ? parseInt(fen.split(' ')[5], 10) || 1 : 1;
         var parts = [];
@@ -65,11 +72,15 @@ const EngineUI = (function () {
         for (var i = 0; i < lines.length; i++) {
             var entry = lines[i];
             if (!entry) continue;
-            html += '<div class="engine-line">' +
-                '<span class="engine-line-score ' + _scoreClass(entry) + '">' + entry.score + '</span>' +
-                '<span class="engine-line-depth">d' + entry.depth + '</span>' +
-                '<span class="engine-line-moves">' + _formatMoves(entry.moves, _currentFen) + '</span>' +
-                '</div>';
+            var movesText = _formatMoves(entry.moves, _currentFen, entry.isUciFormat);
+            // Only render the line if we have moves or at least score/depth
+            if (movesText || entry.score) {
+                html += '<div class="engine-line">' +
+                    '<span class="engine-line-score ' + _scoreClass(entry) + '">' + entry.score + '</span>' +
+                    '<span class="engine-line-depth">d' + entry.depth + '</span>' +
+                    '<span class="engine-line-moves">' + movesText + '</span>' +
+                    '</div>';
+            }
         }
         // SAFE_INNER_HTML: Controlled template - only chess evaluation data from trusted engine
         output.innerHTML = html;

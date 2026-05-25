@@ -5,30 +5,30 @@
 window.NamingService = (function() {
     'use strict';
 
-    // Adjectives for generated names
+    // Adjectives for generated names (short, ≤8 chars each)
     const ADJECTIVES = [
-        'Brilliant', 'Sharp', 'Clever', 'Bold', 'Solid', 'Tactical', 'Strategic', 'Dynamic',
-        'Complex', 'Elegant', 'Powerful', 'Subtle', 'Creative', 'Fierce', 'Calm', 'Active',
-        'Critical', 'Precise', 'Fluid', 'Balanced', 'Aggressive', 'Defensive', 'Modern',
-        'Classic', 'Advanced', 'Tricky', 'Deep', 'Clear', 'Forcing', 'Quiet'
+        'sharp', 'bold', 'solid', 'deep', 'calm', 'active', 'precise', 'fluid',
+        'tricky', 'clear', 'quiet', 'fierce', 'clever', 'subtle', 'modern',
+        'classic', 'quick', 'smooth', 'tight', 'open', 'wild', 'safe',
+        'risky', 'fresh', 'clean', 'neat', 'strong', 'weak', 'fast', 'slow'
     ];
 
-    // Nouns for generated names
+    // Nouns for generated names (short, ≤8 chars each)  
     const NOUNS = [
-        'Position', 'Setup', 'Formation', 'Structure', 'Pattern', 'Configuration', 'Arrangement',
-        'Study', 'Exercise', 'Challenge', 'Puzzle', 'Theme', 'Motif', 'Concept', 'Idea',
-        'Variation', 'Line', 'System', 'Approach', 'Plan', 'Scheme', 'Tactic', 'Strategy',
-        'Endgame', 'Opening', 'Middlegame', 'Breakthrough', 'Attack', 'Defense'
+        'setup', 'pattern', 'study', 'puzzle', 'theme', 'motif', 'idea',
+        'line', 'plan', 'tactic', 'endgame', 'opening', 'attack', 'defense',
+        'fork', 'pin', 'skewer', 'trap', 'gambit', 'storm', 'break',
+        'mate', 'check', 'blitz', 'tempo', 'space', 'center', 'wing'
     ];
 
     /**
      * Generate a random adjective-noun position name
-     * @returns {string} Generated name like "Brilliant Tactic"
+     * @returns {string} Generated name like "sharp-tactic"
      */
     function generatePositionName() {
         const adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
         const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-        return adjective + ' ' + noun;
+        return adjective + '-' + noun;
     }
 
     /**

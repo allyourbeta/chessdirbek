@@ -133,6 +133,13 @@ function renderCategoryList(categoryKey) {
     
     // Set up star control handlers
     StarControl.initPositionStarHandlers(el);
+    
+    // Initialize keyboard navigation
+    setTimeout(() => {
+        if (window.KeyboardNavigation) {
+            KeyboardNavigation.initGrid('cat-list', '.pos-item');
+        }
+    }, 50);
 }
 
 function showDetail(id) {

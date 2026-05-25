@@ -56,6 +56,7 @@ function renderSearchPalette() {
         html += '</button>';
     });
     html += '</div></div>';
+    // SAFE_INNER_HTML: Template with controlled palette buttons and trusted SVG images
     el.innerHTML = html;
 }
 
@@ -98,6 +99,7 @@ function searchOnSquareClick(square) {
 function renderSearchScope() {
     const el = document.getElementById('search-scope');
     if (!el) return;
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for collection names
     el.innerHTML = '<option value="">All games</option>' +
         (AppState.allCollections || []).map(c =>
             `<option value="${c.id}">${Html.escape(c.name)}</option>`
@@ -114,6 +116,7 @@ function searchSetStart() {
     _syncSearchFen(SEARCH_START_FEN, false);
     BoardManager.setPosition('search-board', SEARCH_START_FEN);
     BoardManager.enableSquareSelect('search-board', searchOnSquareClick);
+    // SAFE_INNER_HTML: Clearing element content
     document.getElementById('search-results').innerHTML = '';
     document.getElementById('search-status').textContent = 'Board cleared. Build a new search position.';
     _searchSetPhase('build');
@@ -143,6 +146,7 @@ function resetSearch() {
     if (input) input.value = '';
     BoardManager.setPosition('search-board', SEARCH_START_FEN);
     BoardManager.enableSquareSelect('search-board', searchOnSquareClick);
+    // SAFE_INNER_HTML: Clearing element content
     document.getElementById('search-results').innerHTML = '';
     document.getElementById('search-status').textContent = 'New search. Place pieces on the board.';
     const pawnRadio = document.querySelector('input[name="search-type"][value="pawn"]');
@@ -181,6 +185,7 @@ async function doPositionSearch() {
     const results = document.getElementById('search-results');
 
     status.textContent = 'Searching...';
+    // SAFE_INNER_HTML: Clearing element content
     results.innerHTML = '';
     _searchSetPhase('searching');
     searchAbortController = new AbortController();
@@ -220,9 +225,11 @@ function renderSearchResults(data) {
     const countLabel = data.length === 1 ? '1 match' : data.length + ' matches';
     const header = '<div class="search-results-header"><div><h3>Results</h3><p class="text-muted">' + countLabel + ' found</p></div><button class="btn btn-primary" data-action="search-reset">New Search</button></div>';
     if (!data.length) {
+        // SAFE_INNER_HTML: Template with escaped content via EmptyStates.render()
         el.innerHTML = header + EmptyStates.render('No matches', 'Try a different position or search type.');
         return;
     }
+    // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for player names and events
     el.innerHTML = header + '<div class="search-results-grid">' + data.map(r => {
         const w = r.white || '?';
         const b = r.black || '?';
@@ -240,6 +247,13 @@ function renderSearchResults(data) {
             </div>
         </div>`;
     }).join('') + '</div>';
+    
+    // Initialize keyboard navigation for search results
+    setTimeout(() => {
+        if (window.KeyboardNavigation) {
+            KeyboardNavigation.initGrid('search-results', '.pos-item');
+        }
+    }, 50);
 }
 
 async function openSearchResult(gameId, halfMove) {

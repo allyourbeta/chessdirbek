@@ -133,6 +133,13 @@ function renderGamesList() {
     </table>`;
     updateBulkBar();
     renderPager();
+    
+    // Initialize keyboard navigation for games table
+    setTimeout(() => {
+        if (window.KeyboardNavigation) {
+            KeyboardNavigation.initGrid('games-list', 'tr[data-game-id]');
+        }
+    }, 50);
 }
 
 function renderPager() {

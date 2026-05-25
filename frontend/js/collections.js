@@ -26,13 +26,20 @@ function renderCollectionsView() {
             <div class="btn-row" style="margin:0">
                 <button class="btn btn-sm collection-review-btn" data-collection-name="${Html.escape(c.name)}">Start Review</button>
                 <button class="btn btn-sm collection-edit-btn">Edit</button>
-                <button class="btn btn-sm btn-danger collection-delete-btn">Delete</button>
+                <button class="btn btn-sm btn-danger collection-delete-btn" tabindex="-1">Delete</button>
             </div>
         </div>`;
     }).join('');
     
     // Set up event delegation for collections list
     _setupCollectionsEvents(el);
+    
+    // Initialize keyboard navigation for collections
+    setTimeout(() => {
+        if (window.KeyboardNavigation) {
+            KeyboardNavigation.initGrid('collections-list', '.pos-item');
+        }
+    }, 50);
 }
 
 function _setupCollectionsEvents(container) {

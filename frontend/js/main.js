@@ -25,5 +25,10 @@ setupStaticActions();
 // Initialize star control global handlers
 StarControl.initGlobalHandlers();
 
+// Initialize keyboard navigation for top navigation
+if (window.KeyboardNavigation) {
+    KeyboardNavigation.initTopNav();
+}
+
 // Start the router — all globals are guaranteed to exist at this point.
 Router.init();

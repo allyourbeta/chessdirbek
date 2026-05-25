@@ -21,11 +21,6 @@ async function loadPositionDetail(id) {
     // SAFE_INNER_HTML: Controlled content - StarControl.renderStarIcon returns static SVG
     detailStar.innerHTML = StarControl.renderStarIcon(pos.starred);
     document.getElementById('detail-fen').textContent = pos.fen;
-    const notesEl = document.getElementById('detail-notes');
-    notesEl.value = pos.notes || '';
-    notesEl._lastSaved = pos.notes || '';
-    notesEl.oninput = _onDetailNotesInput;
-    notesEl.onblur = _autoSaveDetailNotes;
     // SAFE_INNER_HTML: Template with escaped content via TagRenderer.renderChips()
     document.getElementById('detail-tags').innerHTML = TagRenderer.renderChips(pos.tags);
     
@@ -171,33 +166,6 @@ function flipDetailBoard() {
     BoardManager.flip('detail-board');
 }
 
-let _detailNotesTimeout = null;
-function _onDetailNotesInput() {
-    if (_detailNotesTimeout) clearTimeout(_detailNotesTimeout);
-    _detailNotesTimeout = setTimeout(_autoSaveDetailNotes, 1000);
-    var lbl = document.getElementById('notes-card-label');
-    // SAFE_INNER_HTML: Static template with controlled styling
-    if (lbl) lbl.innerHTML = 'Your Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span>';
-}
-async function _autoSaveDetailNotes() {
-    if (_detailNotesTimeout) { clearTimeout(_detailNotesTimeout); _detailNotesTimeout = null; }
-    const id = AppState.currentDetailId;
-    if (!id) return;
-    const el = document.getElementById('detail-notes');
-    if (!el) return;
-    const notes = el.value;
-    if (notes === el._lastSaved) return;
-    console.log('[NOTES] Saving notes for position', id);
-    try {
-        await ApiClient.put('/positions/' + id, { notes: notes || null });
-        el._lastSaved = notes;
-        console.log('[NOTES] Save succeeded');
-        topBanner('Notes saved', 1500);
-    } catch (e) {
-        console.error('[NOTES] Save failed', e);
-        toast('Failed to save notes', true);
-    }
-}
 
 async function deleteFromDetail() {
     const id = AppState.currentDetailId;

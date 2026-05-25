@@ -653,29 +653,6 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-.collapsible-card .collapsible-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  user-select: none;
-}
-.collapsible-card .collapsible-header .collapse-arrow {
-  font-size: 10px;
-  transition: transform 0.2s ease;
-  color: var(--text-muted);
-}
-.collapsible-card.expanded .collapsible-header .collapse-arrow {
-  transform: rotate(90deg);
-}
-.collapsible-card .card-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease;
-}
-.collapsible-card.expanded .card-body {
-  max-height: 500px;
-}
 
 /* ------------------------------------------------------------------
    Board editor palette
@@ -853,4 +830,11 @@
   color: var(--text-muted);
   font-weight: 400;
   flex: 1;
+}
+
+/* Blur reveal for annotation textarea */
+.annotation-textarea.blurred {
+  filter: blur(5px);
+  cursor: pointer;
+  user-select: none;
 }

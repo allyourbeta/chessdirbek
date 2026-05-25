@@ -30,6 +30,7 @@ const AnnotationPanel = (function () {
         if (ta) {
             ta.addEventListener('input', _onInput);
             ta.addEventListener('blur', _onBlur);
+            ta.addEventListener('click', _onRevealClick);
         }
     }
 
@@ -47,6 +48,12 @@ const AnnotationPanel = (function () {
         var myVersion = _loadVersion;
         _setTextarea('');
         _setStatus('');
+        
+        // Clear blur class at start (before async load)
+        var ta = document.getElementById('annotation-textarea');
+        if (ta) {
+            ta.classList.remove('blurred');
+        }
 
         ApiClient.get('/annotations/', { fen })
             .then(function (data) {
@@ -54,6 +61,18 @@ const AnnotationPanel = (function () {
                 _loadedText = data.note_text || '';
                 _draftText = _loadedText;
                 _setTextarea(_loadedText);
+                
+                // Apply blur if notes exist (after data loads)
+                var ta = document.getElementById('annotation-textarea');
+                if (ta) {
+                    if (_loadedText) {
+                        ta.classList.add('blurred');
+                        ta.readOnly = true;
+                    } else {
+                        ta.classList.remove('blurred');
+                        ta.readOnly = false;
+                    }
+                }
             })
             .catch(function () {
                 if (myVersion !== _loadVersion) return;
@@ -70,6 +89,7 @@ const AnnotationPanel = (function () {
         if (ta) {
             ta.removeEventListener('input', _onInput);
             ta.removeEventListener('blur', _onBlur);
+            ta.removeEventListener('click', _onRevealClick);
         }
         var container = document.getElementById(_containerId);
         // SAFE_INNER_HTML: Clearing element content
@@ -81,6 +101,17 @@ const AnnotationPanel = (function () {
         _isDirty = false;
         _isSaving = false;
         _loadVersion = 0;
+    }
+
+    function _onRevealClick(e) {
+        var ta = document.getElementById('annotation-textarea');
+        if (ta && ta.classList.contains('blurred')) {
+            e.preventDefault();
+            ta.classList.remove('blurred');
+            ta.readOnly = false;
+            // Don't focus or place cursor on the reveal click —
+            // let the user click again to start editing
+        }
     }
 
     function _onInput() {

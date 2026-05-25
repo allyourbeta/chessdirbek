@@ -142,6 +142,10 @@ function renderRoute(route) {
     EngineUI.unmount();
     AnnotationPanel.unmount();
     if (window.PracticeEngineService) PracticeEngineService.destroy();
+    // Clean up add form keyboard shortcut when leaving the add view
+    if (typeof cleanupAddFormKeyboardShortcut === 'function') {
+        cleanupAddFormKeyboardShortcut();
+    }
     const params = (route && route.params) || {};
     switch (route.view) {
         case 'tactics':
@@ -185,6 +189,10 @@ function renderRoute(route) {
             BoardManager.setPosition('board', AppState.boardFen);
             _initFormTagFilter();
             _focusFenInputForAddPosition();
+            // Setup Cmd/Ctrl+Enter keyboard shortcut
+            if (typeof setupAddFormKeyboardShortcut === 'function') {
+                setupAddFormKeyboardShortcut();
+            }
             break;
         case 'games':
             _applyGameFilters(params);

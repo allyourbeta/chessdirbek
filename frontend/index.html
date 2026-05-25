@@ -229,38 +229,40 @@
     <div id="collections-list" class="pos-list"></div>
   </div>
   <div id="view-search" class="view">
-    <div class="view-header"><h2>Position Search</h2></div>
-    <div class="board-area">
-      <div>
-        <div id="search-board" class="board-wrap"></div>
-        <div class="board-controls">
+    <div class="view-header">
+      <h2>Position Search</h2>
+    </div>
+    <div class="split-layout">
+      <div class="card" style="margin:0;padding:var(--sp-4)">
+        <div id="search-board" class="board-wrap board-wrap--fluid"></div>
+        <div id="search-palette" style="margin-top:12px"></div>
+        <div class="board-controls search-board-controls">
           <div class="control-group">
             <button class="btn btn-sm" data-action="search-flip-board">Flip</button>
-            <button class="btn btn-sm" data-action="search-set-start">Starting Position</button>
-          </div>
-          <div class="control-group">
-            <button class="btn btn-success btn-sm" data-save-board="search-board" data-position-type="tabiya">+ Tabiya</button>
-            <button class="btn btn-success btn-sm" data-save-board="search-board" data-position-type="puzzle">+ Tactic</button>
+            <button class="btn btn-sm" data-action="search-set-start">Clear Board</button>
           </div>
         </div>
       </div>
       <div class="panel">
-        <h3 style="margin-bottom:12px">Search Criteria</h3>
+        <h3 style="margin-bottom:12px">Build Search</h3>
+        <p class="text-muted" style="margin-top:-4px;margin-bottom:12px;font-size:13px">Place pieces on the board, then search for matching games.</p>
         <label>FEN</label>
-        <input type="text" id="search-fen" placeholder="Paste FEN or use current board...">
+        <input type="text" id="search-fen" placeholder="Optional: paste FEN here...">
         <div class="btn-row">
           <button class="btn btn-sm" data-action="search-load-fen">Load FEN to board</button>
           <button class="btn btn-sm" data-action="search-use-board">Use current board</button>
-          <button class="btn btn-sm" data-action="open-board-editor-from-search">Open Editor</button>
         </div>
         <label style="margin-top:12px">Search Type</label>
         <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="search-type" value="exact" checked> Exact position</label>
-          <label class="radio-label"><input type="radio" name="search-type" value="pawn"> Pawn structure</label>
+          <label class="radio-label"><input type="radio" name="search-type" value="exact"> Exact position</label>
+          <label class="radio-label"><input type="radio" name="search-type" value="pawn" checked> Pawn structure</label>
         </div>
         <label style="margin-top:12px">Scope</label>
         <select id="search-scope" class="select-input" style="width:100%"></select>
-        <div class="btn-row" style="margin-top:16px"><button class="btn btn-primary" data-action="do-position-search">Search</button></div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-primary" data-action="do-position-search" id="search-run-btn">Search</button>
+          <button class="btn btn-danger" data-action="search-stop" id="search-stop-btn" style="display:none">Stop Search</button>
+        </div>
         <div id="search-status" class="text-muted" style="font-size:12px;margin-top:8px"></div>
       </div>
     </div>
@@ -320,7 +322,6 @@
           <code id="detail-fen" class="fen-display" style="flex:1"></code>
           <button class="btn btn-sm" data-action="copy-fen" title="Copy FEN">Copy</button>
         </div>
-        <div id="detail-annotation-container" style="margin-top:var(--sp-2)"></div>
         <div id="detail-engine-container" style="margin-top:var(--sp-2)"></div>
       </div>
       <div class="panel" style="display:flex;flex-direction:column;gap:0">
@@ -332,7 +333,7 @@
           </div>
           <div id="detail-tags"></div>
         </div>
-
+        <div id="detail-annotation-container" style="margin-top:0"></div>
 
         <div id="detail-stockfish-card" class="card" style="display:none">
           <pre id="detail-stockfish" class="detail-pre"></pre>

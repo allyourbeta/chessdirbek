@@ -103,6 +103,12 @@ const ActionHandlers = {
             case 'do-position-search':
                 doPositionSearch();
                 break;
+            case 'search-stop':
+                stopPositionSearch();
+                break;
+            case 'search-reset':
+                resetSearch();
+                break;
             case 'clear-import-file':
                 clearImportFile();
                 break;

@@ -181,6 +181,36 @@ function setupKeyboardSave() {
     });
 }
 
+function setupAddFormKeyboardShortcut() {
+    const addView = document.getElementById('view-add');
+    if (!addView) return;
+    
+    const handler = e => {
+        // Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            // Only trigger if we're in the add position view
+            if (addView.classList.contains('active')) {
+                e.preventDefault();
+                savePosition();
+            }
+        }
+    };
+    
+    // Add listener to the add view container
+    addView.addEventListener('keydown', handler);
+    
+    // Store handler for cleanup
+    addView._keyboardHandler = handler;
+}
+
+function cleanupAddFormKeyboardShortcut() {
+    const addView = document.getElementById('view-add');
+    if (!addView || !addView._keyboardHandler) return;
+    
+    addView.removeEventListener('keydown', addView._keyboardHandler);
+    delete addView._keyboardHandler;
+}
+
 function setupUrlParams() {
     const p = new URLSearchParams(window.location.search);
     const fen = p.get('fen');
@@ -284,6 +314,7 @@ function openEditorFromForm() {
 Object.assign(window, {
     savePosition, deletePosition, openEditorFromForm, loadFen, setStartPos, flipBoard, clearForm,
     setupAutoLoad, setupAutoGrowTextareas, setupKeyboardSave, setupUrlParams,
+    setupAddFormKeyboardShortcut, cleanupAddFormKeyboardShortcut,
 });
 window._formTagState = _formTagState;
 window._initFormTagFilter = _initFormTagFilter;

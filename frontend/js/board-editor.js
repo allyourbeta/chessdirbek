@@ -38,7 +38,9 @@ var BoardEditor = (function () {
         if (fen && _chess.load(fen)) {
             _turn = _chess.turn();
         } else {
-            _chess.clear();
+            // Use a proper empty board FEN instead of chess.clear()
+            var emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1';
+            _chess.load(emptyFen);
             _turn = 'w';
         }
         _activeTool = 'eraser';
@@ -84,7 +86,16 @@ var BoardEditor = (function () {
             _chess.remove(square);
         } else {
             var parts = _activeTool.split('_');
-            _chess.put({ type: parts[1], color: parts[0] }, square);
+            var selectedPiece = { type: parts[1], color: parts[0] };
+            var existingPiece = _chess.get(square);
+
+            // Toggle behavior: clicking the same selected piece removes it.
+            // Clicking a different piece replaces it. Clicking an empty square places it.
+            if (existingPiece && existingPiece.color === selectedPiece.color && existingPiece.type === selectedPiece.type) {
+                _chess.remove(square);
+            } else {
+                _chess.put(selectedPiece, square);
+            }
         }
         var fen = _getFen();
         BoardManager.setPosition(BOARD_ID, fen);
@@ -144,7 +155,8 @@ var BoardEditor = (function () {
         if (el) el.value = _getFen();
     }
     function clear() {
-        _chess.clear();
+        var emptyFen = '8/8/8/8/8/8/8/8 w - - 0 1';
+        _chess.load(emptyFen);
         var fen = _getFen();
         BoardManager.setPosition(BOARD_ID, fen);
         _updateFenDisplay();
@@ -219,10 +231,7 @@ var BoardEditor = (function () {
         }, 50);
     }
     function openFromSearch() {
-        var fen = document.getElementById('search-fen').value.trim();
-        var params = {};
-        if (fen) params.fen = fen;
-        Router.navigate({ view: 'editor', params: params });
+        Router.navigate({ view: 'editor', params: {} });
     }
     function cancel() {
         if (_positionType) {

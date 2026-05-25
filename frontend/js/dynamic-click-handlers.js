@@ -47,9 +47,20 @@ const DynamicClickHandlers = {
             return;
         }
         
-        // Handle board editor palette buttons
-        if (target.classList.contains('palette-btn')) {
-            const tool = target.dataset.tool;
+        // Handle search/editor palette buttons. Use closest() so clicks on the piece image
+        // are handled the same as clicks on the button shell.
+        const searchPaletteBtn = target.closest('[data-search-tool]');
+        if (searchPaletteBtn) {
+            const tool = searchPaletteBtn.dataset.searchTool;
+            if (tool && window.searchSelectTool) {
+                searchSelectTool(tool);
+            }
+            return;
+        }
+
+        const editorPaletteBtn = target.closest('[data-tool]');
+        if (editorPaletteBtn && editorPaletteBtn.classList.contains('palette-btn')) {
+            const tool = editorPaletteBtn.dataset.tool;
             if (tool) {
                 BoardEditor.selectTool(tool);
             }

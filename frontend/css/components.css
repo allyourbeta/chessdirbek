@@ -700,6 +700,48 @@
   color: var(--primary-700);
 }
 
+
+/* ------------------------------------------------------------------
+   Search workflow polish
+   ------------------------------------------------------------------ */
+.search-board-controls {
+  margin-top: var(--sp-3);
+}
+.search-erase-btn.active {
+  border-color: var(--primary-500);
+  background: var(--primary-050);
+  color: var(--primary-700);
+  box-shadow: 0 0 0 2px var(--primary-100);
+}
+.search-results-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  margin-bottom: var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+.search-results-header h3 {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.search-results-header p {
+  margin: 2px 0 0;
+  font-size: var(--fs-13);
+}
+.search-results-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--sp-3);
+}
+
 /* ------------------------------------------------------------------
    Collection landing (Tactics + Tabiyas) — featured board + browse grid
    ------------------------------------------------------------------ */

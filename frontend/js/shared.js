@@ -190,6 +190,7 @@ function renderRoute(route) {
             _applyGameFilters(params);
             _activateView('games', 'Games');
             mountGameTagFilter();
+            _mountGameStarredFilter();
             loadGames();
             loadCollections();
             break;
@@ -302,6 +303,25 @@ fetch('https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/pieces/staunty.svg')
     // Fallback to base64 pieces if sprite loading fails
     console.warn('Failed to load staunty sprites, using fallback pieces');
   });
+
+function _mountGameStarredFilter() {
+    const starToggle = document.getElementById('game-starred-filter');
+    if (starToggle) {
+        function updateStarToggle() {
+            const isActive = AppState.gameStarredFilter || false;
+            StarControl.updateStarFilterVisual(starToggle, isActive);
+        }
+        updateStarToggle();
+        
+        StarControl.initStarFilterHandler(starToggle, function() {
+            AppState.gameStarredFilter = !AppState.gameStarredFilter;
+            AppState.gamePage = 0;
+            updateStarToggle();
+            _pushGamesUrl();
+            loadGames();
+        });
+    }
+}
 
 window.API = API;
 window.PIECE_SVG = PIECE_SVG;

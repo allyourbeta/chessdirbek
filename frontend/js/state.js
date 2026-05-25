@@ -35,6 +35,8 @@ const AppState = {
     addPositionType: 'tabiya',
     featuredCategoryId: null,
     currentCategory: null,
+    gameStarredFilter: false,
+    positionSort: 'newest',
 };
 
 const CATEGORIES = {

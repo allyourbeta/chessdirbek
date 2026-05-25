@@ -28,6 +28,17 @@ def create_game(data: GameCreate, db: Session = Depends(get_db)):
     db.refresh(game)
     return game
 
+@router.patch("/{game_id}/star")
+def toggle_game_star(game_id: int, db: Session = Depends(get_db)):
+    """Toggle the starred flag on a game. Returns new state."""
+    game = db.query(Game).filter(Game.id == game_id).first()
+    if not game:
+        raise HTTPException(status_code=404, detail="Game not found")
+    game.starred = not game.starred
+    db.commit()
+    db.refresh(game)
+    return {"id": game.id, "starred": game.starred}
+
 @router.post("/import", response_model=BulkPGNImportResult)
 def bulk_import(data: BulkPGNImport, db: Session = Depends(get_db)):
     """Non-streaming bulk import. Atomic: commits once at end, rolls back on error."""
@@ -69,7 +80,7 @@ def bulk_import_cancel(job_id: str):
 
 _VALID_RESULTS = {"1-0", "0-1", "1/2-1/2"}
 
-def _apply_game_filters(query, tag, tags, collection_id, search, eco, result):
+def _apply_game_filters(query, tag, tags, collection_id, search, eco, result, starred=None):
     tag_names = []
     if tag:
         tag_names.append(tag)
@@ -101,6 +112,9 @@ def _apply_game_filters(query, tag, tags, collection_id, search, eco, result):
     if result and result in _VALID_RESULTS:
         query = query.filter(Game.result == result)
 
+    if starred is not None:
+        query = query.filter(Game.starred == starred)
+
     return query
 
 
@@ -112,13 +126,14 @@ def list_games(
     search: str | None = None,
     eco: str | None = None,
     result: str | None = None,
+    starred: bool | None = None,
     limit: int = Query(default=100, ge=1, le=1000),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ):
     query = db.query(Game).options(joinedload(Game.tags))
     query = _apply_game_filters(
-        query, tag, tags, collection_id, search, eco, result
+        query, tag, tags, collection_id, search, eco, result, starred
     )
     return (
         query.order_by(Game.created_at.desc())
@@ -136,11 +151,12 @@ def count_games(
     search: str | None = None,
     eco: str | None = None,
     result: str | None = None,
+    starred: bool | None = None,
     db: Session = Depends(get_db),
 ):
     query = db.query(Game.id)
     query = _apply_game_filters(
-        query, tag, tags, collection_id, search, eco, result
+        query, tag, tags, collection_id, search, eco, result, starred
     )
     return {"count": query.count()}
 

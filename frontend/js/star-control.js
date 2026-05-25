@@ -13,9 +13,14 @@ const StarControl = {
         return `<span class="pos-item-star" data-star-kind="position" data-position-id="${position.id}">${this.renderStarIcon(position.starred)}</span>`;
     },
 
+    // Render a game star control
+    renderGameStar(game) {
+        return `<span class="game-star-toggle" data-star-kind="game" data-game-id="${game.id}">${this.renderStarIcon(game.starred)}</span>`;
+    },
+
     // Render a starred-only filter star
     renderStarFilter(active) {
-        return this.renderStarIcon(active) + (active ? ' Starred' : ' All');
+        return this.renderStarIcon(active);
     },
 
     // Initialize position star handlers for a container
@@ -93,6 +98,39 @@ const StarControl = {
         }
     },
 
+    // Handle game star clicks
+    async _handleGameStarClick(event) {
+        const starElement = event.target.closest('[data-star-kind="game"]');
+        if (!starElement) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const gameId = parseInt(starElement.dataset.gameId, 10);
+        if (!gameId) return;
+
+        try {
+            const data = await ApiClient.patch(`/games/${gameId}/star`);
+            
+            // Update in-memory list
+            if (AppState.allGames) {
+                const game = AppState.allGames.find(g => g.id === gameId);
+                if (game) game.starred = data.starred;
+            }
+
+            // Update visual
+            // SAFE_INNER_HTML: Using renderStarIcon() SVG output
+            starElement.innerHTML = this.renderStarIcon(data.starred);
+
+            // Re-render list if starred filter is active to maintain filtering
+            if (AppState.gameStarredFilter) {
+                renderGamesList();
+            }
+        } catch (e) {
+            toast('Failed to toggle star', 'error');
+        }
+    },
+
     // Global star click handler for all star types
     handleGlobalStarClick(event) {
         const starElement = event.target.closest('[data-star-kind]');
@@ -102,6 +140,9 @@ const StarControl = {
 
         if (starKind === 'position') {
             this._handlePositionStarClick(event);
+        }
+        if (starKind === 'game') {
+            this._handleGameStarClick(event);
         }
         // Filter stars are handled by their specific callbacks via initStarFilterHandler
     },

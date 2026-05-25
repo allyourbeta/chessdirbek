@@ -122,15 +122,15 @@
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-xs);
-  font-size: var(--fs-13);
+  font-size: var(--fs-15);
   table-layout: fixed;
 }
 .games-table thead th {
   text-align: left;
-  padding: 7px 10px;
+  padding: 10px 12px;
   background: var(--grey-050);
   border-bottom: 1px solid var(--border);
-  font-size: var(--fs-11);
+  font-size: var(--fs-13);
   color: var(--text-secondary);
   font-weight: 600;
   white-space: nowrap;
@@ -142,7 +142,7 @@
 .games-table tbody tr + tr td { border-top: 1px solid var(--border); }
 .games-table tbody tr:hover { background: var(--primary-050); }
 .games-table td {
-  padding: 7px 10px;
+  padding: 10px 12px;
   vertical-align: middle;
   color: var(--text);
   line-height: 1.4;
@@ -152,6 +152,8 @@
 }
 
 .games-table .col-select   { width: 32px; text-align: center; padding: 7px 4px; }
+.games-table .col-star { width: 36px; text-align: center; padding: 7px 4px; }
+.game-star-toggle { cursor: pointer; display: inline-flex; align-items: center; }
 .games-table .col-players  { font-weight: 500; }
 .games-table .col-result {
   width: 88px;
@@ -162,25 +164,22 @@
 }
 .games-table .col-opening {
   color: var(--text-muted);
-  font-size: var(--fs-12);
   width: 28%;
 }
 .games-table .col-date {
   width: 110px;
   color: var(--text-muted);
-  font-size: var(--fs-12);
   font-variant-numeric: tabular-nums;
 }
 .games-table .col-moves {
   width: 60px;
   text-align: right;
   color: var(--text-muted);
-  font-size: var(--fs-12);
   font-variant-numeric: tabular-nums;
 }
 .games-table .elo {
   color: var(--text-subtle);
-  font-size: var(--fs-11);
+  font-size: var(--fs-13);
   font-weight: 500;
   margin-left: 3px;
   font-variant-numeric: tabular-nums;
@@ -203,7 +202,7 @@
   align-items: center;
   gap: 10px;
   margin-top: var(--sp-4);
-  font-size: var(--fs-13);
+  font-size: var(--fs-15);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }

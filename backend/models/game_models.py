@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
@@ -51,6 +52,12 @@ class Game(Base):
         DateTime,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+    )
+    starred = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
     tags = relationship("Tag", secondary=game_tags, back_populates="games")

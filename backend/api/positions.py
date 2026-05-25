@@ -78,6 +78,7 @@ def list_puzzles(
     tag: str | None = None,
     tags: list[str] | None = Query(default=None),
     search: str | None = None,
+    sort: str = "newest",
     db: Session = Depends(get_db),
 ):
     """List only puzzle positions."""
@@ -86,6 +87,7 @@ def list_puzzles(
         tags=tags, 
         search=search, 
         position_type=PositionType.puzzle, 
+        sort=sort,
         db=db
     )
 
@@ -95,6 +97,7 @@ def list_tabiyas(
     tag: str | None = None,
     tags: list[str] | None = Query(default=None),
     search: str | None = None,
+    sort: str = "newest",
     db: Session = Depends(get_db),
 ):
     """List only tabiya positions."""
@@ -103,6 +106,7 @@ def list_tabiyas(
         tags=tags, 
         search=search, 
         position_type=PositionType.tabiya, 
+        sort=sort,
         db=db
     )
 
@@ -113,6 +117,7 @@ def list_positions(
     tags: list[str] | None = Query(default=None),
     search: str | None = None,
     position_type: Optional[PositionType] = None,
+    sort: str = "newest",  # "newest" or "oldest"
     db: Session = Depends(get_db),
 ):
     """List positions, optionally filtered by tag(s), search text, or type."""
@@ -138,7 +143,8 @@ def list_positions(
             Position.title.ilike(pattern) | Position.notes.ilike(pattern)
         )
 
-    return query.order_by(Position.created_at.desc()).all()
+    order = Position.created_at.desc() if sort != "oldest" else Position.created_at.asc()
+    return query.order_by(order).all()
 
 
 @router.get("/random", response_model=PositionBrief)

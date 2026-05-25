@@ -10,6 +10,9 @@ async function loadCategoryPositions(categoryKey) {
     if (tags.length) {
         u += '&' + tags.map(t => 'tags=' + encodeURIComponent(t)).join('&');
     }
+    if (AppState.positionSort && AppState.positionSort !== 'newest') {
+        u += '&sort=' + AppState.positionSort;
+    }
     
     const positions = await ApiClient.get(u.replace(API, ''));
     AppState.allPositions = positions;
@@ -50,6 +53,16 @@ function mountCategoryTagFilter(categoryKey) {
             AppState.starredFilter = !AppState.starredFilter;
             updateStarToggle();
             renderCategoryList(categoryKey);
+        });
+    }
+
+    // Mount sort dropdown
+    const sortSelect = document.getElementById('position-sort');
+    if (sortSelect) {
+        sortSelect.value = AppState.positionSort || 'newest';
+        sortSelect.addEventListener('change', function() {
+            AppState.positionSort = this.value;
+            loadCategoryPositions(categoryKey);
         });
     }
 

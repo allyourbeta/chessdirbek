@@ -26,6 +26,7 @@ function _currentGamesParams() {
     if (AppState.gameResultFilter) p.result = AppState.gameResultFilter;
     if (AppState.gameSearch) p.search = AppState.gameSearch;
     if (AppState.gamePage) p.page = AppState.gamePage;
+    if (AppState.gameStarredFilter) p.starred = true;
     return p;
 }
 
@@ -104,10 +105,12 @@ function renderGamesList() {
         const opening = Html.escape(_gameOpening(g));
         const date = Html.escape(_gameDate(g));
         const checked = AppState.selectedGameIds.has(g.id) ? 'checked' : '';
+        const starHtml = `<span class="game-star-toggle" data-star-kind="game" data-game-id="${g.id}">${StarControl.renderStarIcon(g.starred)}</span>`;
         return `<tr data-game-id="${g.id}">
             <td class="col-select">
                 <input type="checkbox" class="game-select" data-id="${g.id}" ${checked}>
             </td>
+            <td class="col-star">${starHtml}</td>
             <td class="col-players">${w}${we} <span class="text-muted">vs</span> ${b}${be}</td>
             <td class="col-result">${res}</td>
             <td class="col-opening">${opening}</td>
@@ -119,6 +122,7 @@ function renderGamesList() {
     el.innerHTML = `<table class="games-table">
         <thead><tr>
             <th class="col-select"></th>
+            <th class="col-star"></th>
             <th class="col-players">White [Elo] vs Black [Elo]</th>
             <th class="col-result">Result</th>
             <th class="col-opening">Opening</th>

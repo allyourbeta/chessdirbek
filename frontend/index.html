@@ -80,6 +80,10 @@
           <div id="cat-tag-filters" class="tag-row" style="margin-bottom:8px"></div>
           <div class="filter-row" style="display:flex;gap:12px;align-items:center">
             <button id="starred-filter-toggle" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px;font-size:16px;font-weight:600;"></button>
+            <select id="position-sort" class="select-input" style="font-size:14px;font-weight:600;">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
             <button id="select-mode-toggle" class="btn btn-sm" title="Select multiple positions" style="font-size:16px;font-weight:600;background:rgba(0,0,0,0.05);color:var(--text-primary);border:none;padding:8px 14px;border-radius:8px;">Select</button>
           </div>
         </div>
@@ -144,6 +148,7 @@
       <h2>Games</h2>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="text" id="game-search-input" placeholder="Search players, events..." style="width:200px" onkeyup="onGameSearch()">
+        <button id="game-starred-filter" class="btn btn-sm btn-ghost" data-star-kind="filter" title="Show starred only" style="display:flex;align-items:center;gap:4px;padding:4px 8px;font-size:16px;font-weight:600;"></button>
         <select id="game-result-filter" class="select-input" data-change="result-filter">
           <option value="">All Results</option>
           <option value="1-0">White wins (1-0)</option>

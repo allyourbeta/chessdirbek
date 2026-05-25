@@ -40,6 +40,7 @@ class GameBrief(BaseModel):
     eco: str | None
     opening: str | None
     move_count: int | None
+    starred: bool = False
     tags: list[TagOut]
 
     class Config:

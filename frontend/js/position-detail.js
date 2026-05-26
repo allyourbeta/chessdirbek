@@ -91,7 +91,27 @@ async function loadPositionDetail(id) {
 
     AnnotationPanel.mount('detail-annotation-container');
     AnnotationPanel.setPosition(pos.fen);
-    EngineUI.mount('detail-engine-container');
+    EngineUI.mount('detail-engine-container', {
+        onFenChange: async function (fen) {
+            // Manual edits in the Engine FEN toolbar are intentional corrections.
+            // Persist them so a White/Black side-to-move fix survives hide/show,
+            // navigation away/back, and page reloads.
+            var id = AppState.currentDetailId;
+            if (!id || !fen) return;
+            AppState.currentDetailFen = fen;
+            var fenEl = document.getElementById('detail-fen');
+            if (fenEl) fenEl.textContent = fen;
+            try {
+                await ApiClient.put('/positions/' + id, { fen: fen });
+                var cached = Array.isArray(AppState.allPositions)
+                    ? AppState.allPositions.find(function (p) { return String(p.id) === String(id); })
+                    : null;
+                if (cached) cached.fen = fen;
+            } catch (e) {
+                toast('Could not save Engine FEN change', 'error');
+            }
+        }
+    });
     EngineUI.setPosition(pos.fen);
 }
 

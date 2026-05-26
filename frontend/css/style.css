@@ -623,3 +623,50 @@ nav button:focus-visible {
   outline-offset: -1px;
   background-color: var(--bg-hover);
 }
+
+/* Engine FEN editing controls */
+.engine-fen-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.engine-fen-input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-muted);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 13px;
+}
+.engine-side-pills {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    background: var(--surface);
+    white-space: nowrap;
+}
+.engine-side-pill {
+    border: 0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.engine-side-pill.is-active {
+    background: var(--primary-600);
+    color: white;
+}
+.engine-side-pill:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}

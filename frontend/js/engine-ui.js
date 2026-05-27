@@ -7,16 +7,11 @@ const EngineUI = (function () {
     let _fenKeyHandler = null;
     let _sideHandler = null;
     let _options = {};
-    let _visualBoardPart = null;
     let _orientation = 'white';
     let _trainingSide = null;
     let _allowSideCheck = true;
     let _sideNeedsCheck = false;
     let _sideManuallyConfirmed = false;
-    // Generation counter: incremented each time _startAnalysis runs.
-    // Captured in the onUpdate closure so stale callbacks from a previous
-    // analysis cannot mutate UI state (e.g. re-triggering side-check).
-    let _analysisGen = 0;
 
     function _getLineCount() {
         var sel = document.getElementById('engine-lines-select');
@@ -58,64 +53,15 @@ const EngineUI = (function () {
         return (fen || '').trim().split(/\s+/);
     }
 
-    function _expandFenRow(row) {
-        var out = [];
-        for (var i = 0; i < row.length; i++) {
-            var ch = row.charAt(i);
-            if (ch >= '1' && ch <= '8') {
-                for (var n = 0; n < parseInt(ch, 10); n++) out.push(null);
-            } else {
-                out.push(ch);
-            }
-        }
-        return out;
-    }
-
-    function _compressFenRow(row) {
-        var out = '';
-        var empties = 0;
-        for (var i = 0; i < row.length; i++) {
-            var p = row[i];
-            if (!p) {
-                empties++;
-            } else {
-                if (empties) {
-                    out += String(empties);
-                    empties = 0;
-                }
-                out += p;
-            }
-        }
-        if (empties) out += String(empties);
-        return out;
-    }
-
-    function _rotateFenBoardPart(boardPart) {
-        var rows = (boardPart || '').split('/');
-        if (rows.length !== 8) return boardPart;
-        var grid = rows.map(_expandFenRow);
-        if (grid.some(function (r) { return r.length !== 8; })) return boardPart;
-        var rotated = [];
-        for (var r = 7; r >= 0; r--) {
-            var row = [];
-            for (var c = 7; c >= 0; c--) row.push(grid[r][c]);
-            rotated.push(_compressFenRow(row));
-        }
-        return rotated.join('/');
-    }
-
     function _sideToOrientation(side) {
         return side === 'b' ? 'black' : 'white';
     }
 
-    function _visualBoardFromFen(fen, orientation) {
-        var boardPart = _fenParts(fen)[0] || '';
-        return orientation === 'black' ? _rotateFenBoardPart(boardPart) : boardPart;
-    }
-
-    function _engineBoardFromVisual(visualBoardPart, side) {
-        return side === 'b' ? _rotateFenBoardPart(visualBoardPart) : visualBoardPart;
-    }
+    // Board orientation (which side is on the bottom) is a DISPLAY concern handled
+    // by the board component's flip, never by rewriting the FEN. The engine always
+    // receives the true, canonical position. (Rotating the FEN was the root cause of
+    // illegal engine moves / SAN-conversion failures on black-to-move positions: the
+    // engine analyzed a mirrored board whose moves were illegal on the real one.)
 
     function _isValidFenShape(fen) {
         var parts = _fenParts(fen);
@@ -155,21 +101,15 @@ const EngineUI = (function () {
         var input = document.getElementById('engine-fen-input');
         var raw = input ? input.value.trim() : '';
         var side = sideOverride || _getSelectedSide();
-        if (!raw) raw = _visualBoardPart || _visualBoardFromFen(_currentFen, _orientation);
+        if (!raw) raw = _currentFen || '';
         if (!raw) return '';
 
+        // The input/current FEN is the TRUE position. We never rotate it. The
+        // White/Black buttons only change whose move it is (the side-to-move
+        // field). Display orientation is handled separately by the board flip.
         var parts = _fenParts(raw);
-        var visualBoardPart = parts[0] || '';
-        var engineBoardPart = _engineBoardFromVisual(visualBoardPart, side);
-
-        _visualBoardPart = visualBoardPart;
-        _orientation = _sideToOrientation(side);
-
-        // The input is the visible/source-image board placement. If Black is selected,
-        // rotate the coordinate grid internally, but keep the visual piece layout stable
-        // by also saving/displaying the board with black orientation.
-        var out = parts.length > 1 ? parts.slice() : [engineBoardPart, side, '-', '-', '0', '1'];
-        out[0] = engineBoardPart;
+        var out = parts.slice();
+        out[0] = parts[0] || '';
         while (out.length < 6) {
             if (out.length === 1) out.push(side);
             else if (out.length === 2) out.push('-');
@@ -178,6 +118,7 @@ const EngineUI = (function () {
             else if (out.length === 5) out.push('1');
         }
         out[1] = side;
+        _orientation = _sideToOrientation(side);
         return out.join(' ');
     }
 
@@ -188,8 +129,7 @@ const EngineUI = (function () {
         var pills = document.getElementById('engine-side-pills');
         var warning = document.getElementById('engine-side-warning');
         var parts = _fenParts(_currentFen);
-        var boardPart = _visualBoardPart || _visualBoardFromFen(_currentFen, _orientation);
-        if (input && input.value !== boardPart) input.value = boardPart;
+        if (input && _currentFen && input.value !== _currentFen) input.value = _currentFen;
         var side = parts[1];
         var whiteActive = !_sideNeedsCheck && side !== 'b';
         var blackActive = !_sideNeedsCheck && side === 'b';
@@ -307,10 +247,20 @@ const EngineUI = (function () {
         return 50 + 50 * (2 / (1 + Math.exp(-cp / 250)) - 1);
     }
 
-    function _renderLines(lines, allowCheck, confirmed) {
+    function _renderLines(lines, meta) {
         var output = document.getElementById('engine-output');
         var bar = document.getElementById('engine-eval-bar-fill');
         if (!output) return;
+
+        // Persistent SAN-conversion failure past the engine's ready barrier means
+        // the position's side-to-move is likely wrong. Prompt the user to check it
+        // (only for the initially imported position, gated as before).
+        if (meta && meta.sanFailed) {
+            if (_allowSideCheck && !_sideManuallyConfirmed) {
+                _markSideNeedsCheck();
+            }
+            return;
+        }
 
         if (!lines || !lines.length) {
             // SAFE_INNER_HTML: Static template with no dynamic content
@@ -318,17 +268,11 @@ const EngineUI = (function () {
             return;
         }
 
+        // Fresh lines have arrived — clear any "switching position" dim.
+        output.style.opacity = '';
+
         if (bar && lines[0]) {
             bar.style.width = _evalPercent(_entryForTrainingPerspective(lines[0])) + '%';
-        }
-
-        // Use the frozen allowCheck/confirmed values captured when the analysis
-        // started, so async callbacks from a previous (initial) analysis cannot
-        // re-trigger the side-check prompt during derived-position navigation.
-        var shouldCheck = (allowCheck !== undefined ? allowCheck : _allowSideCheck);
-        var wasConfirmed = (confirmed !== undefined ? confirmed : _sideManuallyConfirmed);
-        if (shouldCheck && !wasConfirmed && lines.some(function (entry) { return entry && entry.isUciFormat; })) {
-            _markSideNeedsCheck();
         }
 
         var html = '';
@@ -351,18 +295,19 @@ const EngineUI = (function () {
     }
 
     function _startAnalysis() {
-        _renderLines([]);
-        _analysisGen++;
-        var gen = _analysisGen;
-        var allowCheck = _allowSideCheck;
-        var confirmed = _sideManuallyConfirmed;
+        // Instead of blanking the panel (which flickers while the engine switches
+        // positions), dim the existing lines until fresh ones arrive. The dim
+        // class is removed on the first real _renderLines call below.
+        var output = document.getElementById('engine-output');
+        if (output && output.children.length && output.querySelector('.engine-line')) {
+            output.style.opacity = '0.4';
+            output.style.transition = 'opacity 0.15s';
+        } else {
+            _renderLines([]);
+        }
         StockfishService.analyze(_currentFen, {
             multiPV: _getLineCount(),
-            onUpdate: function (lines) {
-                // Discard callbacks from a superseded analysis run
-                if (gen !== _analysisGen) return;
-                _renderLines(lines, allowCheck, confirmed);
-            },
+            onUpdate: _renderLines,
         });
     }
 
@@ -502,7 +447,6 @@ const EngineUI = (function () {
         }
 
         _allowSideCheck = meta.allowSideCheck !== false;
-        _visualBoardPart = _visualBoardFromFen(fen, _orientation);
 
         // Only the initially opened/imported position should ask the user to confirm
         // side-to-move after a SAN fallback. Normal analysis moves inherit the same
@@ -547,9 +491,7 @@ const EngineUI = (function () {
         _currentFen = null;
         _sideNeedsCheck = false;
         _sideManuallyConfirmed = false;
-        _analysisGen = 0;
         _options = {};
-        _visualBoardPart = null;
         _orientation = 'white';
     }
 

@@ -6,6 +6,15 @@ const StockfishService = (function () {
     let _initResolve = null;
     let _initReject = null;
     let _initPromise = null;
+    // Each analyze() sends one 'isready' and increments _pendingReady; each
+    // 'readyok' decrements it. While _pendingReady > 0 at least one position
+    // switch is still unacknowledged, so 'info' lines belong to a superseded
+    // search — their moves are illegal in the current _currentFen — and are
+    // dropped. A counter (not a boolean) is required because stepping through
+    // plies quickly queues several isready/readyok pairs at once.
+    let _pendingReady = 0;
+    let _sanFailCount = 0;
+    let _multiPV = 3;
 
     function _send(cmd) {
         if (_worker) _worker.postMessage(cmd);
@@ -90,6 +99,14 @@ const StockfishService = (function () {
 
         if (_state === 'loading') {
             if (line.includes('uciok')) {
+                // Set engine options ONCE here, not on every analyze() call.
+                // Re-sending options per-ply churns engine state and defeats the
+                // transposition-table warm-start that makes tree navigation snappy.
+                // A large hash lets the sub-tree of the current line stay resident,
+                // so stepping one ply forward warm-starts instead of searching cold.
+                _send('setoption name Hash value 512');
+                _send('setoption name Use NNUE value true');
+                _send('setoption name MultiPV value ' + _multiPV);
                 _send('isready');
                 return;
             }
@@ -107,10 +124,35 @@ const StockfishService = (function () {
         }
 
         if (_state === 'analyzing') {
+            // Barrier: each analyze() sends one 'isready' and bumps _pendingReady.
+            // Every 'readyok' decrements it. While ANY readyok is still outstanding,
+            // info lines belong to a superseded position (their moves are illegal in
+            // the current _currentFen), so we drop them. A single boolean barrier was
+            // insufficient: stepping through plies quickly queues several isready/
+            // readyok pairs, and the first readyok would wrongly open the gate while
+            // older positions' lines were still draining — causing SAN failures.
+            if (line === 'readyok') {
+                if (_pendingReady > 0) _pendingReady--;
+                return;
+            }
+            if (_pendingReady > 0) return;
             if (line.startsWith('bestmove')) return;
             const parsed = parseInfoLine(line);
             if (parsed && _onUpdate) {
                 const sanMoves = uciToSan(_currentFen, parsed.uciMoves);
+                if (sanMoves === null) {
+                    // Past the barrier these moves SHOULD be legal in _currentFen.
+                    // Persistent failure means the position's side-to-move is wrong
+                    // (an import problem), not a race. Count failures; after a few at
+                    // real depth, signal the UI to prompt for a side check — but never
+                    // display raw UCI.
+                    _sanFailCount++;
+                    if (_sanFailCount >= 3 && parsed.depth >= 2 && _onUpdate) {
+                        _onUpdate(_currentLines.slice(), { sanFailed: true });
+                    }
+                    return;
+                }
+                _sanFailCount = 0;
                 const entry = {
                     pv: parsed.pv,
                     score: parsed.score,
@@ -118,10 +160,10 @@ const StockfishService = (function () {
                     isMate: parsed.isMate,
                     mateIn: parsed.mateIn,
                     depth: parsed.depth,
-                    moves: sanMoves !== null ? sanMoves : parsed.uciMoves, // Fallback to raw UCI if SAN fails
-                    isUciFormat: sanMoves === null, // Flag to indicate UCI format
+                    moves: sanMoves,
+                    isUciFormat: false,
                 };
-                
+
                 // Only update if we have a valid PV with moves, or preserve existing
                 const existingEntry = _currentLines[parsed.pv - 1];
                 if (entry.moves.length > 0 || !existingEntry) {
@@ -132,7 +174,7 @@ const StockfishService = (function () {
                     entry.isUciFormat = existingEntry.isUciFormat;
                     _currentLines[parsed.pv - 1] = entry;
                 }
-                
+
                 // Only call callback if we're still analyzing (not destroyed)
                 if (_state === 'analyzing' && _onUpdate) {
                     _onUpdate(_currentLines.slice());
@@ -146,6 +188,7 @@ const StockfishService = (function () {
     function init(multiPV) {
         if (_state === 'ready' || _state === 'analyzing') return Promise.resolve();
         if (_state === 'loading') return _initPromise || Promise.resolve();
+        if (typeof multiPV === 'number' && multiPV > 0) _multiPV = multiPV;
         
         // Ensure any existing worker is cleaned up
         if (_worker) {
@@ -169,22 +212,37 @@ const StockfishService = (function () {
 
     function analyze(fen, options) {
         if (_state !== 'ready' && _state !== 'analyzing') return;
-        _send('stop');
-        var mpv = (options && options.multiPV) || 3;
-        _send('setoption name MultiPV value ' + mpv);
-        _send('setoption name Use NNUE value true');
-        _send('position fen ' + fen);
-        _send('go depth 24');
+        var mpv = (options && options.multiPV) || _multiPV;
+        // Set state and FEN BEFORE issuing commands so the barrier is armed when
+        // the first drained 'info' lines from the previous search arrive.
         _state = 'analyzing';
         _currentFen = fen;
         _currentLines = [];
         _onUpdate = (options && options.onUpdate) || null;
+        _pendingReady++;
+        _sanFailCount = 0;
+        _send('stop');
+        // Only re-send MultiPV when the user actually changed the line count.
+        // Re-sending options every ply churns engine state and would discard the
+        // warm transposition table; sending nothing keeps the tree hot so a step
+        // into an already-explored line warm-starts instead of searching cold.
+        if (mpv !== _multiPV) {
+            _multiPV = mpv;
+            _send('setoption name MultiPV value ' + mpv);
+        }
+        _send('position fen ' + fen);
+        // 'isready' forces a 'readyok' that, by UCI ordering guarantees, arrives
+        // only after the new position is accepted. _onMessage drops every 'info'
+        // line until then, so no stale moves are parsed against the new FEN.
+        _send('isready');
+        _send('go depth 24');
     }
 
     function stop() {
         if (_worker) _send('stop');
         _state = (_state === 'destroyed') ? 'destroyed' : 'ready';
         _onUpdate = null;
+        _pendingReady = 0;
     }
 
     function destroy() {
@@ -200,6 +258,7 @@ const StockfishService = (function () {
         _currentLines = [];
         _onUpdate = null;
         _currentFen = '';
+        _pendingReady = 0;
         _state = 'destroyed';
     }
 

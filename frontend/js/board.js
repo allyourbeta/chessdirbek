@@ -126,14 +126,20 @@ const BoardManager = {
         }
     },
 
-    setPosition(elementId, fen) {
+    setPosition(elementId, fen, animated) {
         const board = this.boards[elementId];
         if (!board) {
             this.create(elementId, fen);
             return;
         }
         board._fen = fen;
-        board.setPosition(fen, true);
+        // Default to NO animation. cm-chessboard animates by diffing the old and
+        // new positions and sliding pieces; when navigating an analysis tree the
+        // jump between plies is not always a single legal move, so its diff tries
+        // to slide a piece from an empty square and logs "no piece on X". Instant
+        // placement (animated=false) avoids that. Callers that genuinely play one
+        // move forward (drag-to-move) animate the cm-chessboard instance directly.
+        board.setPosition(fen, animated === true);
         _playBoardSound();
     },
 
@@ -225,7 +231,7 @@ const BoardManager = {
         board._analysisHistory.pop();
         const fen = board._analysisHistory[board._analysisHistory.length - 1];
         board._fen = fen;
-        board.setPosition(fen, true);
+        board.setPosition(fen, false);
         if (board._onPositionChange) board._onPositionChange(fen);
         return fen;
     },
@@ -236,7 +242,7 @@ const BoardManager = {
         const fen = board._analysisOrigin;
         board._analysisHistory = [fen];
         board._fen = fen;
-        board.setPosition(fen, true);
+        board.setPosition(fen, false);
         if (board._onPositionChange) board._onPositionChange(fen);
         return fen;
     },

@@ -121,8 +121,8 @@ async function loadPositionDetail(id) {
             var fenEl = document.getElementById('detail-fen');
             if (fenEl) fenEl.textContent = fen;
 
-            // Keep the visible piece layout stable while changing the coordinate grid:
-            // black side-to-move uses a 180°-rotated internal FEN plus black orientation.
+            // Display the true FEN and flip the board view to match side-to-move.
+            // The FEN is never rotated; orientation is purely a display choice.
             if (window.BoardManager) {
                 BoardManager.setPosition('detail-board', fen);
                 if (typeof BoardManager.setFlipped === 'function') {

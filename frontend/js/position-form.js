@@ -49,16 +49,24 @@ async function savePosition() {
         );
     } catch (err) {
         const errorMsg = err.message || 'Error saving';
-        toast(errorMsg, true);
-        const formTitle = document.getElementById('form-title');
-        if (formTitle && errorMsg.includes('already exists')) {
-            formTitle.style.color = 'var(--danger, red)';
-            formTitle.textContent = errorMsg;
-            setTimeout(() => {
-                formTitle.style.color = '';
-                var addCat = Object.values(CATEGORIES).find(c => c.positionType === savedType);
-                formTitle.textContent = addCat ? addCat.addLabel : 'New Position';
-            }, 3000);
+        
+        // Handle duplicate position - navigate to existing position
+        if (err.status === 409 && err.existingId) {
+            toast('Position already exists — opening saved position.');
+            clearForm();
+            Router.navigate({ view: 'positionDetail', id: err.existingId });
+        } else {
+            toast(errorMsg, true);
+            const formTitle = document.getElementById('form-title');
+            if (formTitle && errorMsg.includes('already exists')) {
+                formTitle.style.color = 'var(--danger, red)';
+                formTitle.textContent = errorMsg;
+                setTimeout(() => {
+                    formTitle.style.color = '';
+                    var addCat = Object.values(CATEGORIES).find(c => c.positionType === savedType);
+                    formTitle.textContent = addCat ? addCat.addLabel : 'New Position';
+                }, 3000);
+            }
         }
     }
 }
@@ -295,7 +303,12 @@ function setupPuzzleKeyboardShortcuts() {
         if (!AppState.currentDetailType || AppState.currentDetailType !== 'puzzle') return;
         if (!AppState.puzzleNavigation) return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        
+        // In the position-detail view the arrow keys belong to the analysis-tree
+        // navigator (MoveNavigator, keyScope 'view-detail'). Puzzle-to-puzzle
+        // jumping must not also fire there, or one keypress would do both.
+        var detailView = document.getElementById('view-detail');
+        if (detailView && detailView.classList.contains('active')) return;
+
         if (e.key === 'ArrowRight' && AppState.puzzleNavigation.next_id) {
             e.preventDefault();
             navigateToPuzzle(AppState.puzzleNavigation.next_id);

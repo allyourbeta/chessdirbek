@@ -1,7 +1,7 @@
 // Chessdirbek Service Worker — enables PWA install (Add to Dock)
 // Network-first strategy: always fetch from server, fall back to cache
 
-const CACHE_NAME = 'chessdirbek-v6';
+const CACHE_NAME = 'chessdirbek-v7';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => {

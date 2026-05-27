@@ -213,27 +213,28 @@ const Practice = (function () {
         _setPlayingUI(false); _destroyPlayWorker();
         _practiceGeneration += 1; // Invalidate any pending engine moves
         if (_playBoardId && AppState.currentDetailFen) {
+            var ts = AppState.detailTrainingSide || 'white';
             MoveNavigator.create('detail-nav', {
                 fens: [AppState.currentDetailFen], startIndex: 0,
                 boardId: 'detail-board', containerId: 'detail-move-nav',
                 keyScope: 'view-detail',
                 onNavigate: function (f) {
-                    EngineUI.setPosition(f);
+                    EngineUI.setPosition(f, { orientation: ts, trainingSide: ts, allowSideCheck: false });
                     AnnotationPanel.setPosition(f);
                     var fenEl = document.getElementById('detail-fen');
                     if (fenEl) fenEl.textContent = f;
                 },
             });
             BoardManager.create(_playBoardId, AppState.currentDetailFen, {
-                flipped: false, mode: 'analysis',
+                flipped: AppState.detailFlipped || false, mode: 'analysis',
                 onPositionChange: function (f) {
                     MoveNavigator.push('detail-nav', f);
-                    EngineUI.setPosition(f);
+                    EngineUI.setPosition(f, { orientation: ts, trainingSide: ts, allowSideCheck: false });
                     AnnotationPanel.setPosition(f);
                     var fenEl = document.getElementById('detail-fen');
                     if (fenEl) fenEl.textContent = f;
                 } });
-            EngineUI.setPosition(AppState.currentDetailFen);
+            EngineUI.setPosition(AppState.currentDetailFen, { orientation: ts, trainingSide: ts, allowSideCheck: false });
             AnnotationPanel.setPosition(AppState.currentDetailFen);
             var fenEl = document.getElementById('detail-fen');
             if (fenEl) fenEl.textContent = AppState.currentDetailFen;

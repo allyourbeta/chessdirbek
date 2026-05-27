@@ -26,10 +26,21 @@ const ApiClient = (function () {
         const res = await fetch(_url(path, opts.params), opts);
         const data = await _parse(res);
         if (!res.ok) {
-            const message = data && data.detail ? data.detail : 'Request failed';
+            // Handle both string and object detail formats
+            let message = 'Request failed';
+            let existingId = null;
+            if (data && data.detail) {
+                if (typeof data.detail === 'string') {
+                    message = data.detail;
+                } else if (data.detail.message) {
+                    message = data.detail.message;
+                    existingId = data.detail.existing_id;
+                }
+            }
             const err = new Error(message);
             err.status = res.status;
             err.data = data;
+            err.existingId = existingId;
             throw err;
         }
         return data;

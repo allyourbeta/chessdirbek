@@ -144,6 +144,14 @@ const BoardManager = {
         board.setOrientation(board._flipped ? COLOR.black : COLOR.white, true);
     },
 
+    setFlipped(elementId, flipped) {
+        const board = this.boards[elementId];
+        if (!board) return;
+        const shouldFlip = !!flipped;
+        board._flipped = shouldFlip;
+        board.setOrientation(shouldFlip ? COLOR.black : COLOR.white, true);
+    },
+
     destroy(elementId) {
         const board = this.boards[elementId];
         if (board) {

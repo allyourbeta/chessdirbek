@@ -45,9 +45,13 @@ def create_position(data: PositionCreate, db: Session = Depends(get_db)):
     existing = db.query(Position).filter(Position.fen == data.fen).first()
     if existing:
         existing_category = existing.position_type.value  # e.g. "tabiya", "endgame"
+        # Return existing position data in the response so frontend can navigate to it
         raise HTTPException(
             status_code=409,
-            detail=f"This position already exists (in {existing_category})."
+            detail={
+                "message": f"This position already exists (in {existing_category}).",
+                "existing_id": existing.id
+            }
         )
     
     # Auto-generate a friendly placeholder name if title is missing/blank.

@@ -45,6 +45,8 @@
       </div>
     </div>
     <button class="mute-btn" data-action="toggle-mute" id="mute-btn" title="Toggle sound">&#x1f50a;</button>
+    <span id="build-stamp" title="Build identifier — confirms which code is loaded"
+          style="font-size:11px;font-family:monospace;color:var(--text-muted);padding:2px 6px;border:1px solid var(--border-color,#ccc);border-radius:4px;white-space:nowrap"></span>
   </div>
 </header>
 <div id="notification-banner" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1000;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:16px;font-weight:500;text-align:center;min-width:300px;max-width:500px"></div>
@@ -588,6 +590,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/keyboard-navigation.js"></script>
 <script src="/js/board-editor.js"></script>
 <script type="module" src="/js/main.js"></script>
+<script src="/js/build-stamp.js"></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').then(() => console.log('SW registered')).catch(e => console.log('SW failed:', e)); }
 </script>

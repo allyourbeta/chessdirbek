@@ -7,8 +7,16 @@ const EngineUI = (function () {
     let _fenKeyHandler = null;
     let _sideHandler = null;
     let _options = {};
+    let _visualBoardPart = null;
+    let _orientation = 'white';
+    let _trainingSide = null;
+    let _allowSideCheck = true;
     let _sideNeedsCheck = false;
     let _sideManuallyConfirmed = false;
+    // Generation counter: incremented each time _startAnalysis runs.
+    // Captured in the onUpdate closure so stale callbacks from a previous
+    // analysis cannot mutate UI state (e.g. re-triggering side-check).
+    let _analysisGen = 0;
 
     function _getLineCount() {
         var sel = document.getElementById('engine-lines-select');
@@ -21,9 +29,92 @@ const EngineUI = (function () {
         return entry.scoreCp > 0 ? 'positive' : 'negative';
     }
 
+    function _formatScore(entry) {
+        if (!entry) return '0.00';
+        if (entry.isMate) {
+            var mate = entry.mateIn || 0;
+            return mate > 0 ? 'M' + mate : '-M' + Math.abs(mate);
+        }
+        var cp = entry.scoreCp || 0;
+        var sign = cp >= 0 ? '+' : '';
+        return sign + (cp / 100).toFixed(2);
+    }
+
+    function _entryForTrainingPerspective(entry) {
+        if (!entry) return entry;
+        var currentSide = _fenParts(_currentFen)[1] === 'b' ? 'black' : 'white';
+        var perspective = _trainingSide || currentSide;
+        if (currentSide === perspective) return entry;
+
+        var out = Object.assign({}, entry);
+        if (typeof out.scoreCp === 'number') out.scoreCp = -out.scoreCp;
+        if (out.isMate && typeof out.mateIn === 'number') out.mateIn = -out.mateIn;
+        out.score = _formatScore(out);
+        return out;
+    }
+
 
     function _fenParts(fen) {
         return (fen || '').trim().split(/\s+/);
+    }
+
+    function _expandFenRow(row) {
+        var out = [];
+        for (var i = 0; i < row.length; i++) {
+            var ch = row.charAt(i);
+            if (ch >= '1' && ch <= '8') {
+                for (var n = 0; n < parseInt(ch, 10); n++) out.push(null);
+            } else {
+                out.push(ch);
+            }
+        }
+        return out;
+    }
+
+    function _compressFenRow(row) {
+        var out = '';
+        var empties = 0;
+        for (var i = 0; i < row.length; i++) {
+            var p = row[i];
+            if (!p) {
+                empties++;
+            } else {
+                if (empties) {
+                    out += String(empties);
+                    empties = 0;
+                }
+                out += p;
+            }
+        }
+        if (empties) out += String(empties);
+        return out;
+    }
+
+    function _rotateFenBoardPart(boardPart) {
+        var rows = (boardPart || '').split('/');
+        if (rows.length !== 8) return boardPart;
+        var grid = rows.map(_expandFenRow);
+        if (grid.some(function (r) { return r.length !== 8; })) return boardPart;
+        var rotated = [];
+        for (var r = 7; r >= 0; r--) {
+            var row = [];
+            for (var c = 7; c >= 0; c--) row.push(grid[r][c]);
+            rotated.push(_compressFenRow(row));
+        }
+        return rotated.join('/');
+    }
+
+    function _sideToOrientation(side) {
+        return side === 'b' ? 'black' : 'white';
+    }
+
+    function _visualBoardFromFen(fen, orientation) {
+        var boardPart = _fenParts(fen)[0] || '';
+        return orientation === 'black' ? _rotateFenBoardPart(boardPart) : boardPart;
+    }
+
+    function _engineBoardFromVisual(visualBoardPart, side) {
+        return side === 'b' ? _rotateFenBoardPart(visualBoardPart) : visualBoardPart;
     }
 
     function _isValidFenShape(fen) {
@@ -55,7 +146,7 @@ const EngineUI = (function () {
     }
 
     function _markSideNeedsCheck() {
-        if (_sideManuallyConfirmed || _sideNeedsCheck) return;
+        if (!_allowSideCheck || _sideManuallyConfirmed || _sideNeedsCheck) return;
         _sideNeedsCheck = true;
         _syncFenControls();
     }
@@ -64,25 +155,30 @@ const EngineUI = (function () {
         var input = document.getElementById('engine-fen-input');
         var raw = input ? input.value.trim() : '';
         var side = sideOverride || _getSelectedSide();
-        if (!raw && _currentFen) raw = _fenParts(_currentFen)[0] || '';
+        if (!raw) raw = _visualBoardPart || _visualBoardFromFen(_currentFen, _orientation);
         if (!raw) return '';
 
         var parts = _fenParts(raw);
-        if (parts.length === 1) {
-            // UI displays only the board-placement part. Build a complete engine FEN.
-            return parts[0] + ' ' + side + ' - - 0 1';
-        }
+        var visualBoardPart = parts[0] || '';
+        var engineBoardPart = _engineBoardFromVisual(visualBoardPart, side);
 
-        // Full FEN pasted/typed by the user. Normalize/override side to match the pill.
-        while (parts.length < 6) {
-            if (parts.length === 1) parts.push(side);
-            else if (parts.length === 2) parts.push('-');
-            else if (parts.length === 3) parts.push('-');
-            else if (parts.length === 4) parts.push('0');
-            else if (parts.length === 5) parts.push('1');
+        _visualBoardPart = visualBoardPart;
+        _orientation = _sideToOrientation(side);
+
+        // The input is the visible/source-image board placement. If Black is selected,
+        // rotate the coordinate grid internally, but keep the visual piece layout stable
+        // by also saving/displaying the board with black orientation.
+        var out = parts.length > 1 ? parts.slice() : [engineBoardPart, side, '-', '-', '0', '1'];
+        out[0] = engineBoardPart;
+        while (out.length < 6) {
+            if (out.length === 1) out.push(side);
+            else if (out.length === 2) out.push('-');
+            else if (out.length === 3) out.push('-');
+            else if (out.length === 4) out.push('0');
+            else if (out.length === 5) out.push('1');
         }
-        parts[1] = side;
-        return parts.join(' ');
+        out[1] = side;
+        return out.join(' ');
     }
 
     function _syncFenControls() {
@@ -92,7 +188,7 @@ const EngineUI = (function () {
         var pills = document.getElementById('engine-side-pills');
         var warning = document.getElementById('engine-side-warning');
         var parts = _fenParts(_currentFen);
-        var boardPart = parts[0] || '';
+        var boardPart = _visualBoardPart || _visualBoardFromFen(_currentFen, _orientation);
         if (input && input.value !== boardPart) input.value = boardPart;
         var side = parts[1];
         var whiteActive = !_sideNeedsCheck && side !== 'b';
@@ -132,7 +228,7 @@ const EngineUI = (function () {
 
     function _notifyManualFenChange() {
         if (_options && typeof _options.onFenChange === 'function' && _currentFen) {
-            _options.onFenChange(_currentFen);
+            _options.onFenChange(_currentFen, _orientation);
         }
     }
 
@@ -211,7 +307,7 @@ const EngineUI = (function () {
         return 50 + 50 * (2 / (1 + Math.exp(-cp / 250)) - 1);
     }
 
-    function _renderLines(lines) {
+    function _renderLines(lines, allowCheck, confirmed) {
         var output = document.getElementById('engine-output');
         var bar = document.getElementById('engine-eval-bar-fill');
         if (!output) return;
@@ -223,10 +319,15 @@ const EngineUI = (function () {
         }
 
         if (bar && lines[0]) {
-            bar.style.width = _evalPercent(lines[0]) + '%';
+            bar.style.width = _evalPercent(_entryForTrainingPerspective(lines[0])) + '%';
         }
 
-        if (!_sideManuallyConfirmed && lines.some(function (entry) { return entry && entry.isUciFormat; })) {
+        // Use the frozen allowCheck/confirmed values captured when the analysis
+        // started, so async callbacks from a previous (initial) analysis cannot
+        // re-trigger the side-check prompt during derived-position navigation.
+        var shouldCheck = (allowCheck !== undefined ? allowCheck : _allowSideCheck);
+        var wasConfirmed = (confirmed !== undefined ? confirmed : _sideManuallyConfirmed);
+        if (shouldCheck && !wasConfirmed && lines.some(function (entry) { return entry && entry.isUciFormat; })) {
             _markSideNeedsCheck();
         }
 
@@ -234,12 +335,13 @@ const EngineUI = (function () {
         for (var i = 0; i < lines.length; i++) {
             var entry = lines[i];
             if (!entry) continue;
+            var displayEntry = _entryForTrainingPerspective(entry);
             var movesText = _formatMoves(entry.moves, _currentFen, entry.isUciFormat);
             // Only render the line if we have moves or at least score/depth
-            if (movesText || entry.score) {
+            if (movesText || displayEntry.score) {
                 html += '<div class="engine-line">' +
-                    '<span class="engine-line-score ' + _scoreClass(entry) + '">' + entry.score + '</span>' +
-                    '<span class="engine-line-depth">d' + entry.depth + '</span>' +
+                    '<span class="engine-line-score ' + _scoreClass(displayEntry) + '">' + displayEntry.score + '</span>' +
+                    '<span class="engine-line-depth">d' + displayEntry.depth + '</span>' +
                     '<span class="engine-line-moves">' + movesText + '</span>' +
                     '</div>';
             }
@@ -250,9 +352,17 @@ const EngineUI = (function () {
 
     function _startAnalysis() {
         _renderLines([]);
+        _analysisGen++;
+        var gen = _analysisGen;
+        var allowCheck = _allowSideCheck;
+        var confirmed = _sideManuallyConfirmed;
         StockfishService.analyze(_currentFen, {
             multiPV: _getLineCount(),
-            onUpdate: _renderLines,
+            onUpdate: function (lines) {
+                // Discard callbacks from a superseded analysis run
+                if (gen !== _analysisGen) return;
+                _renderLines(lines, allowCheck, confirmed);
+            },
         });
     }
 
@@ -375,16 +485,33 @@ const EngineUI = (function () {
         _syncFenControls();
     }
 
-    function setPosition(fen) {
-        var previousBoard = _fenParts(_currentFen)[0] || '';
-        var nextBoard = _fenParts(fen)[0] || '';
+    function setPosition(fen, meta) {
+        meta = meta || {};
         _currentFen = fen;
-        // A new board position should be trusted until SAN conversion proves otherwise.
-        // Re-setting the same board during engine refreshes should not erase an explicit user choice.
-        if (previousBoard !== nextBoard) {
-            _sideNeedsCheck = false;
-            _sideManuallyConfirmed = false;
+
+        if (meta.trainingSide) {
+            _trainingSide = meta.trainingSide === 'black' ? 'black' : 'white';
+        } else if (!_trainingSide) {
+            _trainingSide = _fenParts(fen)[1] === 'b' ? 'black' : 'white';
         }
+
+        if (meta.orientation) {
+            _orientation = meta.orientation === 'black' ? 'black' : 'white';
+        } else {
+            _orientation = _sideToOrientation(_fenParts(fen)[1]);
+        }
+
+        _allowSideCheck = meta.allowSideCheck !== false;
+        _visualBoardPart = _visualBoardFromFen(fen, _orientation);
+
+        // Only the initially opened/imported position should ask the user to confirm
+        // side-to-move after a SAN fallback. Normal analysis moves inherit the same
+        // training-side decision; they must not re-prompt on every ply.
+        if (meta.resetSideCheck) {
+            _sideNeedsCheck = false;
+            _sideManuallyConfirmed = !!meta.sideConfirmed;
+        }
+
         _syncFenControls();
         if (_engineOn) {
             _startAnalysis();
@@ -420,7 +547,10 @@ const EngineUI = (function () {
         _currentFen = null;
         _sideNeedsCheck = false;
         _sideManuallyConfirmed = false;
+        _analysisGen = 0;
         _options = {};
+        _visualBoardPart = null;
+        _orientation = 'white';
     }
 
     function show() {

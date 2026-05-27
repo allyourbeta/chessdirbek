@@ -1,7 +1,12 @@
 var MoveNavigator = (function () {
     var _instances = {};
+    var _keyHandlers = {};
 
     function create(id, opts) {
+        // Recreating a navigator with the same id must first remove any old
+        // keydown listener. Otherwise one ArrowLeft/ArrowRight press can fire
+        // multiple stale handlers after opening/changing positions.
+        destroy(id);
         var inst = {
             id: id,
             fens: opts.fens || [],
@@ -18,6 +23,10 @@ var MoveNavigator = (function () {
     }
 
     function destroy(id) {
+        if (_keyHandlers[id]) {
+            document.removeEventListener('keydown', _keyHandlers[id], true);
+            delete _keyHandlers[id];
+        }
         delete _instances[id];
     }
 
@@ -63,7 +72,7 @@ var MoveNavigator = (function () {
         var fen = inst.fens[inst.idx];
         if (inst.boardId) {
             BoardManager.setPosition(inst.boardId, fen);
-            BoardManager.setAnalysisOrigin(inst.boardId, fen);
+            // Don't reset analysis origin when navigating - that clears the board's move history
         }
         if (inst.onNavigate) inst.onNavigate(fen, inst.idx);
     }
@@ -94,7 +103,12 @@ var MoveNavigator = (function () {
     }
 
     function _bindKeys(inst) {
-        document.addEventListener('keydown', function (e) {
+        if (_keyHandlers[inst.id]) {
+            document.removeEventListener('keydown', _keyHandlers[inst.id], true);
+            delete _keyHandlers[inst.id];
+        }
+        var handler = function (e) {
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
             if (!_instances[inst.id]) return;
             var scope = document.getElementById(inst.keyScope);
             if (!scope || !scope.classList.contains('active')) return;
@@ -103,7 +117,11 @@ var MoveNavigator = (function () {
             else if (e.key === 'ArrowRight') { e.preventDefault(); next(inst.id); }
             else if (e.key === 'Home') { e.preventDefault(); first(inst.id); }
             else if (e.key === 'End') { e.preventDefault(); last(inst.id); }
-        });
+        };
+        _keyHandlers[inst.id] = handler;
+        // Use capture phase so the handler fires before any element-level
+        // listeners (e.g. cm-chessboard SVG) can swallow the event.
+        document.addEventListener('keydown', handler, true);
     }
 
     return {

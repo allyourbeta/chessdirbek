@@ -48,6 +48,23 @@ app.include_router(opening_tree_router, prefix="/api")
 app.include_router(practice_stats_router, prefix="/api")
 app.include_router(practice_router, prefix="/api")
 
+
+# During local development the browser (and PWA service worker) aggressively
+# cache JS/CSS/HTML, which makes on-disk edits appear to have no effect. Send
+# no-store on these asset types so a reload always fetches fresh code.
+# API (/api/...) and vendored libraries (/vendor/...) are left alone.
+@app.middleware("http")
+async def _no_cache_assets(request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    is_asset = path.endswith((".js", ".css", ".html")) or path == "/"
+    if is_asset and not path.startswith("/vendor"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 app.mount("/js", StaticFiles(directory=FRONTEND_DIR / "js"), name="js")

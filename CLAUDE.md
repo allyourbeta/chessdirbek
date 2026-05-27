@@ -6,8 +6,8 @@ Personal chess position quiz app. Save positions (FEN), annotate them with notes
 
 ```
 Vanilla JS (browser)
-  ├── Stockfish WASM (engine analysis, client-side)
   ├── cm-chessboard v8 (board rendering, via CDN)
+  ├── chess.js (move validation, client-side)
   └── calls → Python backend (FastAPI)
                 ├── python-chess (FEN validation, pawn structure search)
                 └── SQLite via SQLAlchemy (persistence)
@@ -15,7 +15,7 @@ Vanilla JS (browser)
 
 ## Tech Stack
 - **Backend**: Python 3 + FastAPI + SQLAlchemy + SQLite
-- **Chess logic**: python-chess (backend), stockfish.js WASM (frontend)
+- **Chess logic**: python-chess (backend), chess.js (frontend move validation)
 - **Frontend**: Vanilla JS + cm-chessboard v8 (CDN) + chess.js (move validation)
 - **Database**: SQLite (single file, no server)
 
@@ -35,7 +35,7 @@ Vanilla JS (browser)
 - Single-user MVP (no auth). User ID hardcoded as 1.
 - Quiz order: random within filtered tag set.
 - Quiz history tracked from day one (for future spaced repetition).
-- Stockfish runs in browser (WASM), not on server.
+- Stockfish WASM was removed (2026-05-27) due to irreconcilable state bugs. Clean rebuild planned.
 - python-chess used server-side for FEN validation, pawn structure, etc.
 
 ## Database Backup Scripts
@@ -93,30 +93,30 @@ The board editor uses click-to-place, NOT drag-and-drop:
 
 ## Troubleshooting
 
-### Stockfish analysis shows "Analyzing..." but no lines
+### Stockfish / Engine Analysis — REMOVED
 
-This has occurred 5+ times. Before changing any code, try these steps IN ORDER:
+As of 2026-05-27, Stockfish WASM, engine-ui.js, stockfish-service.js, and
+practice-engine-service.js have been removed. The engine integration and
+analysis tree navigation had accumulated irreconcilable state-management bugs
+across 12+ competing state variables. A clean rebuild is planned.
 
-1. **Hard refresh** (Cmd+Shift+R on Mac). The browser aggressively caches JS
-   files, especially ES modules. A stale `stockfish-service.js` or
-   `engine-ui.js` can cause analysis to silently fail.
-2. **Open an incognito window** and test there. If it works in incognito, it's
-   a cache problem.
-3. **Check the console** for errors. If the stockfish WASM worker fails to
-   load, you'll see network errors for `stockfish.wasm.js` or `stockfish.wasm`.
-4. **Check StockfishService.state** in the console (`StockfishService.state`).
-   - `"uninitialized"` → engine was never started. Click "Show Engine".
-   - `"loading"` → engine is loading but stuck. Worker may have failed.
-   - `"ready"` → engine loaded but not analyzing. `analyze()` not called.
-   - `"analyzing"` → engine is running. If no lines show, `_onUpdate`
-     callback may be null (check engine-ui.js `_startAnalysis`).
+What was removed:
+- `frontend/js/engine-ui.js` — engine panel UI (FEN toolbar, side pills, eval bar)
+- `frontend/js/stockfish-service.js` — WASM worker wrapper, UCI protocol, SAN conversion
+- `frontend/js/practice-engine-service.js` — separate worker for practice-vs-engine
+- `frontend/vendor/stockfish/` — WASM binary and JS loader
+- `BoardManager._analysisHistory` / `_analysisOrigin` / `undoAnalysis()` / `resetAnalysis()` / `setAnalysisOrigin()` — competing history that conflicted with MoveNavigator
 
-Only if ALL of the above fail to reveal the issue, look at the code. The
-historical root cause was a race condition in `stockfish-service.js` where
-a `bestmove` response set `_state = 'ready'`, causing subsequent `info` lines
-to be ignored. This was fixed by making the `bestmove` handler simply return
-without changing state (line ~94 in stockfish-service.js). If someone
-reintroduces `_state = 'ready'` in the bestmove handler, that is the bug.
+What still works:
+- Saving/loading positions, tags, annotations, all CRUD
+- Board display and drag-to-move in analysis mode
+- MoveNavigator (arrow keys, on-screen buttons) — now the sole history owner
+- Practice history (viewing past games)
+- Game viewer with move navigation
+
+What is temporarily disabled:
+- Engine evaluation display (no eval bar, no engine lines)
+- Practice vs Stockfish ("Start Practice" shows a toast instead)
 
 ### Board editor not working
 
@@ -150,7 +150,6 @@ Do not introduce:
 * direct frontend `fetch()` outside `frontend/js/api-client.js`
 * direct `history.back()` outside `frontend/js/navigation.js`
 * undocumented `innerHTML`
-* direct Stockfish `new Worker(...)` outside approved engine services
 * direct FEN clipboard writes outside `frontend/js/fen-actions.js`
 * duplicated naming, ECO, move-count, notification, FEN, save-current-position, or category-label logic
 

@@ -8,11 +8,8 @@ function loadRandomCategoryFeatured() {
         flipped: pick.orientation === 'black',
         mode: 'analysis',
         onPositionChange: function(newFen) {
-            EngineUI.setPosition(newFen);
         },
     });
-    EngineUI.mount('cat-featured-engine');
-    EngineUI.setPosition(pick.fen);
     document.getElementById('cat-featured-title').textContent = pick.title || 'Untitled';
     
     const featuredStar = document.getElementById('cat-featured-star');
@@ -44,11 +41,8 @@ function loadCategoryFeaturedById(id) {
         flipped: pos.orientation === 'black',
         mode: 'analysis',
         onPositionChange: function(newFen) {
-            EngineUI.setPosition(newFen);
         },
     });
-    EngineUI.mount('cat-featured-engine');
-    EngineUI.setPosition(pos.fen);
     document.getElementById('cat-featured-title').textContent = pos.title || 'Untitled';
     
     const featuredStar = document.getElementById('cat-featured-star');

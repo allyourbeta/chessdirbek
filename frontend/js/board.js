@@ -94,8 +94,6 @@ const BoardManager = {
         }
 
         if (options.mode === 'analysis') {
-            board._analysisHistory = [fen];
-            board._analysisOrigin = fen;
             board._onPositionChange = options.onPositionChange || null;
             const self = this;
             board.enableMoveInput((event) => {
@@ -116,7 +114,6 @@ const BoardManager = {
                     if (!move) return false;
                     const newFen = chess.fen();
                     board._fen = newFen;
-                    board._analysisHistory.push(newFen);
                     board.setPosition(newFen, true);
                     _playBoardSound();
                     if (board._onPositionChange) board._onPositionChange(newFen);
@@ -223,35 +220,6 @@ const BoardManager = {
         const board = this.boards[elementId];
         if (!board) return;
         board.disableMoveInput();
-    },
-
-    undoAnalysis(elementId) {
-        const board = this.boards[elementId];
-        if (!board || !board._analysisHistory || board._analysisHistory.length <= 1) return null;
-        board._analysisHistory.pop();
-        const fen = board._analysisHistory[board._analysisHistory.length - 1];
-        board._fen = fen;
-        board.setPosition(fen, false);
-        if (board._onPositionChange) board._onPositionChange(fen);
-        return fen;
-    },
-
-    resetAnalysis(elementId) {
-        const board = this.boards[elementId];
-        if (!board || !board._analysisOrigin) return null;
-        const fen = board._analysisOrigin;
-        board._analysisHistory = [fen];
-        board._fen = fen;
-        board.setPosition(fen, false);
-        if (board._onPositionChange) board._onPositionChange(fen);
-        return fen;
-    },
-
-    setAnalysisOrigin(elementId, fen) {
-        const board = this.boards[elementId];
-        if (!board) return;
-        board._analysisOrigin = fen;
-        board._analysisHistory = [fen];
     },
 
     // Shared helper to get current FEN from any active context

@@ -85,8 +85,6 @@ async function loadPositionDetail(id) {
         containerId: 'detail-move-nav',
         keyScope: navKeyScope,
         onNavigate: function (fen) {
-            // Use fixed training side perspective for engine evals, not current board orientation
-            EngineUI.setPosition(fen, { orientation: AppState.detailTrainingSide || 'white', trainingSide: AppState.detailTrainingSide || 'white', allowSideCheck: false });
             AnnotationPanel.setPosition(fen);
             document.getElementById('detail-fen').textContent = fen;
         },
@@ -96,8 +94,6 @@ async function loadPositionDetail(id) {
         mode: 'analysis',
         onPositionChange: function (newFen) {
             MoveNavigator.push('detail-nav', newFen);
-            // Use fixed training side perspective for engine evals, not current board orientation
-            EngineUI.setPosition(newFen, { orientation: AppState.detailTrainingSide || 'white', trainingSide: AppState.detailTrainingSide || 'white', allowSideCheck: false });
             AnnotationPanel.setPosition(newFen);
             document.getElementById('detail-fen').textContent = newFen;
         },
@@ -105,54 +101,6 @@ async function loadPositionDetail(id) {
 
     AnnotationPanel.mount('detail-annotation-container');
     AnnotationPanel.setPosition(pos.fen);
-    EngineUI.mount('detail-engine-container', {
-        onFenChange: async function (fen, orientation) {
-            // Manual edits in the Engine FEN toolbar are intentional corrections.
-            // Persist them so a White/Black side-to-move / coordinate-grid fix survives
-            // hide/show, navigation away/back, and page reloads.
-            var id = AppState.currentDetailId;
-            if (!id || !fen) return;
-            var nextOrientation = orientation === 'black' ? 'black' : 'white';
-            AppState.currentDetailFen = fen;
-            AppState.detailFlipped = nextOrientation === 'black';
-            // Also update the training side if the side-to-move changes
-            const fenParts = fen.split(' ');
-            AppState.detailTrainingSide = fenParts[1] === 'b' ? 'black' : 'white';
-            var fenEl = document.getElementById('detail-fen');
-            if (fenEl) fenEl.textContent = fen;
-
-            // Display the true FEN and flip the board view to match side-to-move.
-            // The FEN is never rotated; orientation is purely a display choice.
-            if (window.BoardManager) {
-                BoardManager.setPosition('detail-board', fen);
-                if (typeof BoardManager.setFlipped === 'function') {
-                    BoardManager.setFlipped('detail-board', nextOrientation === 'black');
-                }
-                BoardManager.setAnalysisOrigin('detail-board', fen);
-            }
-            if (window.MoveNavigator) {
-                MoveNavigator.setFens('detail-nav', [fen], 0);
-            }
-            if (window.AnnotationPanel) {
-                AnnotationPanel.setPosition(fen);
-            }
-
-            try {
-                await ApiClient.put('/positions/' + id, { fen: fen, orientation: nextOrientation });
-                var cached = Array.isArray(AppState.allPositions)
-                    ? AppState.allPositions.find(function (p) { return String(p.id) === String(id); })
-                    : null;
-                if (cached) {
-                    cached.fen = fen;
-                    cached.orientation = nextOrientation;
-                }
-            } catch (e) {
-                toast('Could not save Engine FEN change', 'error');
-            }
-        }
-    });
-    // Use training side for initial engine position, not board orientation
-    EngineUI.setPosition(pos.fen, { orientation: AppState.detailTrainingSide || 'white', trainingSide: AppState.detailTrainingSide || 'white', allowSideCheck: true, resetSideCheck: true });
 }
 
 function copyFen() {

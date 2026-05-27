@@ -35,7 +35,6 @@ async function loadGameDetail(id) {
         flipped: false,
         mode: 'analysis',
         onPositionChange: function (newFen) {
-            EngineUI.setPosition(newFen);
             AnnotationPanel.setPosition(newFen);
         },
     });
@@ -48,7 +47,6 @@ async function loadGameDetail(id) {
         onNavigate: function (fen, idx) {
             AppState.currentPly = idx;
             highlightCurrentMove();
-            EngineUI.setPosition(fen);
             AnnotationPanel.setPosition(fen);
         },
     });
@@ -57,8 +55,6 @@ async function loadGameDetail(id) {
 
     AnnotationPanel.mount('game-annotation-container');
     AnnotationPanel.setPosition(game.fens[0]);
-    EngineUI.mount('game-engine-container');
-    EngineUI.setPosition(game.fens[0]);
 }
 
 function renderMoveList() {
@@ -180,11 +176,11 @@ async function deleteCurrentGame() {
 }
 
 function undoGameBoard() {
-    BoardManager.undoAnalysis('game-board');
+    MoveNavigator.prev('game-nav');
 }
 
 function resetGameBoard() {
-    BoardManager.resetAnalysis('game-board');
+    MoveNavigator.first('game-nav');
 }
 
 window.openGame = openGame;

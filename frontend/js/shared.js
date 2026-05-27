@@ -138,10 +138,7 @@ function _focusFenInputForAddPosition() {
 }
 
 function renderRoute(route) {
-    EngineUI.teardown();
-    EngineUI.unmount();
     AnnotationPanel.unmount();
-    if (window.PracticeEngineService) PracticeEngineService.destroy();
     // Clean up add form keyboard shortcut when leaving the add view
     if (typeof cleanupAddFormKeyboardShortcut === 'function') {
         cleanupAddFormKeyboardShortcut();
@@ -338,8 +335,6 @@ window.toast = toast;
 window.showView = showView;
 window.saveBoardPosition = saveBoardPosition;
 window.addEventListener('beforeunload', function () { 
-    EngineUI.teardown(); 
-    if (window.PracticeEngineService) PracticeEngineService.destroy();
 });
 function toggleNewMenu() {
     var menu = document.getElementById('new-dropdown-menu');

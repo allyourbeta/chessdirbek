@@ -1,9 +1,25 @@
 // Chessdirbek Service Worker — enables PWA install (Add to Dock)
 // Network-first strategy: always fetch from server, fall back to cache
 
-const CACHE_NAME = 'chessdirbek-v7';
+const CACHE_NAME = 'chessdirbek-v8';
 
-self.addEventListener('install', () => self.skipWaiting());
+// Precache critical files for offline play
+const PRECACHE_FILES = [
+  '/vendor/stockfish/stockfish-18-lite-single.js',
+  '/vendor/stockfish/stockfish-18-lite-single.wasm'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_FILES).catch(err => {
+        // Continue even if precaching fails
+        console.warn('Precaching failed for some files:', err);
+      });
+    })
+  );
+  self.skipWaiting();
+});
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((names) =>

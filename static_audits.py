@@ -101,7 +101,7 @@ def audit_history_back():
 def audit_worker_creation():
     """Check for new Worker() usage outside approved engine files."""
     print("\n=== Worker Creation Audit ===")
-    allowed_files = {"stockfish-service.js", "practice-engine-service.js", "engine.js"}
+    allowed_files = {"engine.js"}
     violations = []
     
     for js_file in FRONTEND_JS.rglob("*.js"):

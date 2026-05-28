@@ -16,8 +16,6 @@ from backend.api import (
     opening_tree_router,
     positions_router,
     positions_extra_router,
-    practice_router,
-    practice_stats_router,
     tags_router,
 )
 from backend.database import Base, engine, run_lightweight_migrations
@@ -46,8 +44,6 @@ app.include_router(chess_router, prefix="/api")
 app.include_router(games_router, prefix="/api")
 app.include_router(collections_router, prefix="/api")
 app.include_router(opening_tree_router, prefix="/api")
-app.include_router(practice_stats_router, prefix="/api")
-app.include_router(practice_router, prefix="/api")
 app.include_router(engine_games_router, prefix="/api")
 
 

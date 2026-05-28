@@ -4,8 +4,6 @@ from backend.api.games import router as games_router
 from backend.api.opening_tree import router as opening_tree_router
 from backend.api.positions import router as positions_router
 from backend.api.positions_extra import router as positions_extra_router
-from backend.api.practice import router as practice_router
-from backend.api.practice_stats import router as practice_stats_router
 from backend.api.tags_and_chess import chess_router, tags_router
 from backend.api.engine_games import router as engine_games_router
 
@@ -18,7 +16,5 @@ __all__ = [
     "games_router",
     "collections_router",
     "opening_tree_router",
-    "practice_router",
-    "practice_stats_router",
     "engine_games_router",
 ]

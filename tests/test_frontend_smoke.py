@@ -71,15 +71,6 @@ def test_eco_opening_label_integration():
     assert "EcoOpenings.labelFor" in game_viewer_js
 
 
-def test_practice_move_count_display():
-    """Practice save modal uses proper move count conversion from plies."""
-    practice_ui = (FRONTEND / "js" / "practice-ui.js").read_text()
-    
-    # Check that practice UI uses MoveCounts helper for move display
-    assert "MoveCounts.formatMoveCountFromPlies" in practice_ui
-    assert "showSaveModal" in practice_ui
-
-
 def test_lichess_analysis_integration():
     """FenActions provides Lichess analysis link capability."""
     fen_actions = (FRONTEND / "js" / "fen-actions.js").read_text()

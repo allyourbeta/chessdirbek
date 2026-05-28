@@ -335,7 +335,7 @@ class TestBusinessLogicRegression:
         violations = []
         
         for js_file in (FRONTEND / "js").rglob("*.js"):
-            if js_file.name in {"shared.js", "practice-ui-actions.js"}:  # Skip allowed files
+            if js_file.name in {"shared.js"}:  # Skip allowed files
                 continue
             content = js_file.read_text(errors="ignore")
             

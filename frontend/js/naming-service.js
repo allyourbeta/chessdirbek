@@ -6,24 +6,26 @@ window.NamingService = (function() {
     'use strict';
 
     // Adjectives for generated names (short, ≤8 chars each)
+    // Names are intentionally generic (non-chess). Only constraint is length so the adjective-noun pair fits the tile.
     const ADJECTIVES = [
-        'sharp', 'bold', 'solid', 'deep', 'calm', 'active', 'precise', 'fluid',
-        'tricky', 'clear', 'quiet', 'fierce', 'clever', 'subtle', 'modern',
-        'classic', 'quick', 'smooth', 'tight', 'open', 'wild', 'safe',
-        'risky', 'fresh', 'clean', 'neat', 'strong', 'weak', 'fast', 'slow'
+        'amber', 'brave', 'calm', 'clever', 'cosmic', 'cozy', 'crisp', 'dapper',
+        'eager', 'fuzzy', 'gentle', 'golden', 'happy', 'jolly', 'keen', 'lively',
+        'lucky', 'mellow', 'merry', 'nimble', 'plucky', 'quiet', 'rapid', 'shiny',
+        'snug', 'spry', 'sunny', 'swift', 'tidy', 'witty', 'zesty'
     ];
 
-    // Nouns for generated names (short, ≤8 chars each)  
+    // Nouns for generated names (short, ≤8 chars each)
+    // Names are intentionally generic (non-chess). Only constraint is length so the adjective-noun pair fits the tile.
     const NOUNS = [
-        'setup', 'pattern', 'study', 'puzzle', 'theme', 'motif', 'idea',
-        'line', 'plan', 'tactic', 'endgame', 'opening', 'attack', 'defense',
-        'fork', 'pin', 'skewer', 'trap', 'gambit', 'storm', 'break',
-        'mate', 'check', 'blitz', 'tempo', 'space', 'center', 'wing'
+        'acorn', 'badger', 'beacon', 'cabin', 'cedar', 'comet', 'cove', 'ember',
+        'falcon', 'fern', 'harbor', 'heron', 'lark', 'lotus', 'maple', 'marble',
+        'meadow', 'otter', 'pebble', 'quartz', 'raven', 'ridge', 'robin', 'sparrow',
+        'stone', 'thistle', 'tundra', 'willow'
     ];
 
     /**
      * Generate a random adjective-noun position name
-     * @returns {string} Generated name like "sharp-tactic"
+     * @returns {string} Generated name like "sunny-maple"
      */
     function generatePositionName() {
         const adjective = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];

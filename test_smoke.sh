@@ -75,8 +75,6 @@ echo "Checking for critical files..."
 critical_files=(
     "frontend/js/api-client.js"
     "frontend/js/board.js"
-    "frontend/js/stockfish-service.js"
-    "frontend/js/practice-engine-service.js"
     "frontend/js/move-count.js"
     "frontend/js/eco-openings.js"
     "frontend/js/fen-actions.js"

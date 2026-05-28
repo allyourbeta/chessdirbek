@@ -207,38 +207,28 @@ class TestECORegression:
         assert "EcoOpenings.labelFor" in search_js, "Search should use EcoOpenings helper"
 
 
-class TestEngineLifecycleRegression:
-    """Test 8: Engine lifecycle regression tests."""
+class TestLichessIntegrationRegression:
+    """Test 8: Lichess analysis integration (replaces removed engine lifecycle)."""
     
-    def test_engine_has_destruction_path(self):
-        """Verify show/hide engine calls proper destroy/teardown path."""
-        # Check that Stockfish service has termination
-        stockfish_js = (FRONTEND / "js" / "stockfish-service.js").read_text()
-        assert "terminate(" in stockfish_js, "StockfishService should have terminate()"
-        
-        # Check that engine UI has unmount/destroy
-        engine_ui_js = (FRONTEND / "js" / "engine-ui.js").read_text()
-        destroy_methods = ["unmount", "destroy", "hide"]
-        has_destroy = any(method in engine_ui_js for method in destroy_methods)
-        assert has_destroy, "EngineUI should have destruction method"
+    def test_lichess_analysis_available(self):
+        """Verify FenActions provides Lichess analysis link capability."""
+        fen_actions = (FRONTEND / "js" / "fen-actions.js").read_text()
+        assert "analyzeOnLichess" in fen_actions, "FenActions should have analyzeOnLichess"
+        assert "lichess.org/analysis" in fen_actions, "Should link to Lichess analysis board"
+
+    def test_lichess_button_in_detail_view(self):
+        """Verify Lichess button exists in the detail view."""
+        html = (FRONTEND / "index.html").read_text()
+        assert 'data-action="analyze-on-lichess"' in html, "Lichess action button should exist"
 
 
-class TestPracticeEngineRegression:
-    """Test 9: Practice engine async regression tests."""
+class TestActionHandlerRegression:
+    """Test 9: Action handler completeness (replaces removed practice engine)."""
     
-    def test_practice_engine_has_generation_tokens(self):
-        """Verify practice engine uses generation tokens to prevent stale moves."""
-        practice_engine = (FRONTEND / "js" / "practice-engine-service.js").read_text()
-        
-        # Look for generation/token patterns to prevent stale callbacks
-        generation_patterns = ["generation", "_generation", "token", "id", "abort"]
-        has_generation = any(pattern in practice_engine for pattern in generation_patterns)
-        assert has_generation, "PracticeEngineService should have generation/abort mechanism"
-        
-        # Check for invalidation patterns
-        invalidation_patterns = ["invalidate", "abort", "cancel", "stop"]
-        has_invalidation = any(pattern in practice_engine for pattern in invalidation_patterns)
-        assert has_invalidation, "PracticeEngineService should have invalidation mechanism"
+    def test_lichess_action_registered(self):
+        """Verify analyze-on-lichess action is handled in ActionHandlers."""
+        action_handlers = (FRONTEND / "js" / "action-handlers.js").read_text()
+        assert "analyze-on-lichess" in action_handlers, "ActionHandlers should handle analyze-on-lichess"
 
 
 class TestSaveCurrentRegression:

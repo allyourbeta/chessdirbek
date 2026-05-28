@@ -127,6 +127,9 @@ const ActionHandlers = {
             case 'copy-fen':
                 copyFen();
                 break;
+            case 'analyze-on-lichess':
+                FenActions.analyzeOnLichess();
+                break;
             case 'start-title-edit':
                 startTitleEdit();
                 break;

@@ -190,6 +190,7 @@
             <button class="btn btn-sm" data-action="gv-flip">Flip</button>
             <button class="btn btn-sm" data-action="undo-game-board">Undo</button>
             <button class="btn btn-sm" data-action="reset-game-board">Reset</button>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
           </div>
           <div class="control-group">
             <button class="btn btn-success btn-sm" data-save-board="game-board" data-position-type="tabiya">+ Tabiya</button>
@@ -306,6 +307,7 @@
           <div class="control-group" id="detail-move-nav-wrap">
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
             <button class="btn btn-sm" data-action="flip-detail-board">Flip</button>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
           </div>
           <div class="control-group" title="Save the current board position without interrupting practice">
             <span class="text-muted" style="font-size:12px">Save current:</span>
@@ -488,6 +490,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
           <div style="display:flex;gap:6px;align-items:center">
             <input type="text" id="editor-fen" readonly style="flex:1;font-family:'SF Mono','Fira Code',Menlo,Consolas,monospace;font-size:12px">
             <button class="btn btn-md" data-editor-action="copy">Copy</button>
+            <button class="btn btn-md" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
           </div>
           <label style="margin-top:12px">Title</label>
           <input type="text" id="editor-pos-title" placeholder="Position title (optional)">
@@ -584,8 +587,8 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/selection-manager.js"></script>
 <script src="/js/keyboard-navigation.js"></script>
 <script src="/js/board-editor.js"></script>
-<script type="module" src="/js/main.js"></script>
 <script src="/js/build-stamp.js"></script>
+<script type="module" src="/js/main.js"></script>
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').then(() => console.log('SW registered')).catch(e => console.log('SW failed:', e)); }
 </script>

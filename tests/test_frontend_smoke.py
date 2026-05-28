@@ -46,11 +46,9 @@ def test_pwa_manifest_references_existing_icons():
 def test_static_helper_contracts_are_present():
     eco = (FRONTEND / "js" / "eco-openings.js").read_text()
     move_counts = (FRONTEND / "js" / "move-count.js").read_text()
-    stockfish = (FRONTEND / "js" / "stockfish-service.js").read_text()
     assert "labelFor" in eco
     assert "formatMoveCountFromPlies" in move_counts
     assert "formatAverageMoveCountFromPlies" in move_counts
-    assert "terminate()" in stockfish
 
 
 def test_games_page_structure():
@@ -82,14 +80,11 @@ def test_practice_move_count_display():
     assert "showSaveModal" in practice_ui
 
 
-def test_engine_destruction_path():
-    """Engine has destruction/termination capability."""
-    stockfish = (FRONTEND / "js" / "stockfish-service.js").read_text()
-    engine_ui = (FRONTEND / "js" / "engine-ui.js").read_text()
-    
-    # Check destruction methods exist
-    assert "destroy(" in stockfish or "terminate(" in stockfish
-    assert "unmount" in engine_ui or "destroy" in engine_ui
+def test_lichess_analysis_integration():
+    """FenActions provides Lichess analysis link capability."""
+    fen_actions = (FRONTEND / "js" / "fen-actions.js").read_text()
+    assert "analyzeOnLichess" in fen_actions
+    assert "lichess.org/analysis" in fen_actions
 
 
 def test_editor_cancel_button_structure():

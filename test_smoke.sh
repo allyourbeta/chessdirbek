@@ -68,6 +68,14 @@ else
     echo ""
 fi
 
+# 4b. Engine Parser Tests
+if command -v node >/dev/null 2>&1; then
+    run_test_section "Engine Parser Tests" "node tests/engine/parse.test.js"
+else
+    echo -e "${YELLOW}⚠️  node not found, skipping engine parser tests${NC}"
+    echo ""
+fi
+
 # 5. Manual verification checks
 echo -e "${YELLOW}=== Manual Verification Checks ===${NC}"
 

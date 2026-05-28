@@ -83,6 +83,11 @@ const BoardManager = {
         this.boards[elementId]._flipped = options.flipped || false;
 
         if (options.mode === 'play' && options.onMove) {
+            // cm-chessboard v8 only makes pieces draggable for the color passed
+            // as the second argument. Without this, the board defaults to White
+            // move input, so a user playing Black can see the position but cannot
+            // pick up any black piece. PlayMode supplies the resolved user color.
+            const inputColor = options.inputColor === 'black' ? COLOR.black : COLOR.white;
             board.enableMoveInput((event) => {
                 if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
                     return true;
@@ -90,7 +95,8 @@ const BoardManager = {
                 if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
                     return options.onMove(event);
                 }
-            });
+                return true;
+            }, inputColor);
         }
 
         if (options.mode === 'analysis') {
@@ -130,12 +136,9 @@ const BoardManager = {
             return;
         }
         board._fen = fen;
-        // Default to NO animation. cm-chessboard animates by diffing the old and
-        // new positions and sliding pieces; when navigating an analysis tree the
-        // jump between plies is not always a single legal move, so its diff tries
-        // to slide a piece from an empty square and logs "no piece on X". Instant
-        // placement (animated=false) avoids that. Callers that genuinely play one
-        // move forward (drag-to-move) animate the cm-chessboard instance directly.
+        // Default to NO animation. cm-chessboard animates by diffing old/new
+        // positions; jumps between plies aren't always one legal move, which logs
+        // "no piece on X". Instant placement avoids that; drag-to-move animates directly.
         board.setPosition(fen, animated === true);
         _playBoardSound();
     },
@@ -222,9 +225,8 @@ const BoardManager = {
         board.disableMoveInput();
     },
 
-    // Shared helper to get current FEN from any active context
+    // Returns the current FEN for whichever view is active.
     getCurrentFen() {
-        // Determine the active view/context and return the current FEN
         const activeView = document.querySelector('.view.active');
         if (!activeView) return null;
 
@@ -264,6 +266,15 @@ const BoardManager = {
             return MoveNavigator.getFen('detail-nav') || AppState.currentDetailFen;
         }
 
+        // Play vs engine - live game position from PlayMode's chess.js
+        if (viewId === 'view-play') {
+            return (window.PlayMode && PlayMode.getCurrentFen && PlayMode.getCurrentFen())
+                || this.getPosition('play-board');
+        }
+        // Game replay - position at the current ply
+        if (viewId === 'view-replay') {
+            return MoveNavigator.getFen('replay-nav') || this.getPosition('replay-board');
+        }
         // Search view
         if (viewId === 'view-search') {
             return this.getPosition('search-board') || AppState.searchFen;

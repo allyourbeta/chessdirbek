@@ -82,9 +82,6 @@ class Position(Base):
     quiz_attempts = relationship(
         "QuizAttempt", back_populates="position", cascade="all, delete-orphan"
     )
-    practice_games = relationship(
-        "PracticeGame", back_populates="root_position", cascade="all, delete-orphan"
-    )
 
 
 class Tag(Base):

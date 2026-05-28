@@ -13,20 +13,47 @@ window.PlayMode = (function() {
     let userColor = null;
     let engineElo = null;
     let thinking = false;
+    let playSessionId = 0;
+    
     
     async function start(options) {
-        // Initialize game state
-        positionId = options.positionId;
-        startFen = options.startFen;
-        userColor = options.userColor;
-        engineElo = options.engineElo;
-        
-        // Create new chess.js instance
-        game = new Chess(startFen);
-        if (!game) {
-            Notifications.show('Invalid FEN position', 'error');
-            Navigation.back();
+        // Starting a new game invalidates any pending engine reply from an older
+        // play screen and clears the "thinking" lock that can otherwise make the
+        // new board reject user moves.
+        playSessionId += 1;
+        const sessionId = playSessionId;
+        thinking = false;
+
+        // Initialize game state. Normalize the saved FEN into a form chess.js
+        // can actually play. Several saved positions are arbitrary diagrams; they
+        // display fine in cm-chessboard, but their FEN metadata can contain stale
+        // castling/en-passant fields that make chess.js reject the whole FEN.
+        const prepared = preparePlayableFen(options.startFen);
+        if (!prepared.ok) {
+            console.error('[PlayMode.start] Refusing to start invalid FEN', prepared);
+            toast('Invalid FEN position — staying on the selected position', 'error');
+            game = null;
             return;
+        }
+
+        positionId = options.positionId;
+        startFen = prepared.fen;
+        userColor = normalizeUserColor(options.userColor, startFen);
+        engineElo = options.engineElo;
+        game = prepared.game;
+
+        if (window.console && console.info) {
+            console.info('[PlayMode.start]', {
+                positionId,
+                originalFen: prepared.originalFen,
+                startFen,
+                loadedFen: game.fen(),
+                userColor,
+                turn: game.turn(),
+                legalMoves: game.moves().length,
+                gameOver: game.game_over(),
+                stalemate: game.in_stalemate()
+            });
         }
         
         // Set up the board
@@ -36,11 +63,15 @@ window.PlayMode = (function() {
         
         boardManager = BoardManager.create('play-board', startFen, {
             mode: 'play',
-            flipped: userColor === 'black',
+            // In Play mode, the user's color must be the side at the bottom.
+            // Do not infer this from stale saved-position metadata or route state.
+            flipped: (options.boardOrientation || userColor) === 'black',
+            inputColor: userColor,
             onMove: handleUserMove
         });
         
         // Initialize UI
+        updateMeta();
         updateStatus();
         updateMoveList();
         
@@ -49,12 +80,13 @@ window.PlayMode = (function() {
         const enginePlaysFirst = (userColor === 'black' && sideToMove === 'w') ||
                                 (userColor === 'white' && sideToMove === 'b');
         
-        if (enginePlaysFirst) {
-            await engineReply();
+        if (enginePlaysFirst && sessionId === playSessionId) {
+            await engineReply(sessionId);
         }
     }
     
     function handleUserMove(event) {
+        if (!game) return false;
         if (thinking) return false; // Engine is thinking
         if (game.game_over()) return false;
         
@@ -65,18 +97,16 @@ window.PlayMode = (function() {
             return false;
         }
         
-        // Build move object
-        const move = {
-            from: event.from,
-            to: event.to
-        };
+        // cm-chessboard provides squareFrom / squareTo on the validate event.
+        const from = event.squareFrom;
+        const to = event.squareTo;
+        const move = { from: from, to: to };
         
-        // Auto-queen promotion (same as analysis board)
-        if (event.piece && event.piece.toLowerCase() === 'p') {
-            const toRank = event.to[1];
-            if (toRank === '8' || toRank === '1') {
-                move.promotion = 'q';
-            }
+        // Auto-queen promotion: detect a pawn reaching the last rank using the
+        // game's own piece data (same approach as the analysis board).
+        const piece = game.get(from);
+        if (piece && piece.type === 'p' && (to[1] === '8' || to[1] === '1')) {
+            move.promotion = 'q';
         }
         
         // Try the move
@@ -95,13 +125,16 @@ window.PlayMode = (function() {
             finalize();
         } else {
             // Engine's turn
-            engineReply();
+            engineReply(playSessionId);
         }
         
         return true;
     }
     
-    async function engineReply() {
+    async function engineReply(sessionId) {
+        sessionId = sessionId || playSessionId;
+        if (!game || sessionId !== playSessionId) return;
+
         // Guard: only if it's engine's turn and game not over
         const turn = game.turn();
         if ((userColor === 'white' && turn === 'w') || 
@@ -117,6 +150,7 @@ window.PlayMode = (function() {
         
         try {
             const response = await Engine.bestMove(game.fen(), { elo: engineElo });
+            if (sessionId !== playSessionId || !game) return;
             
             if (!response || !response.bestMove) {
                 // Engine has no move (game is over)
@@ -151,12 +185,107 @@ window.PlayMode = (function() {
                 finalize();
             }
         } catch (error) {
+            if (sessionId !== playSessionId) return;
             console.error('Engine error:', error);
-            Notifications.show('Engine error', 'error');
+            toast('Engine error', 'error');
         } finally {
-            thinking = false;
-            updateStatus();
+            if (sessionId === playSessionId) {
+                thinking = false;
+                updateStatus();
+            }
         }
+    }
+
+    function normalizeFen(fen) {
+        return (fen || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function normalizeUserColor(color, fen) {
+        if (color === 'white' || color === 'black') return color;
+        const side = normalizeFen(fen).split(' ')[1];
+        return side === 'b' ? 'black' : 'white';
+    }
+
+
+    function preparePlayableFen(rawFen) {
+        const originalFen = normalizeFen(rawFen);
+        const normalizedFen = completeAndSanitizeFen(originalFen);
+        const attempts = [];
+
+        function tryLoad(label, fen) {
+            const chess = new Chess();
+            let loaded = false;
+            try {
+                loaded = !!(fen && chess.load(fen));
+            } catch (error) {
+                attempts.push({ label, fen, ok: false, error: String(error) });
+                return null;
+            }
+            attempts.push({ label, fen, ok: loaded });
+            return loaded ? chess : null;
+        }
+
+        let chess = tryLoad('sanitized', normalizedFen);
+        if (chess) {
+            return { ok: true, fen: normalizedFen, game: chess, originalFen, attempts };
+        }
+
+        // Last-resort metadata scrub: keep the board and side-to-move, but remove
+        // optional state that is often wrong in hand-entered / editor-created diagrams.
+        const parts = normalizedFen.split(' ');
+        const scrubbedFen = [parts[0], parts[1] || 'w', '-', '-', '0', parts[5] || '1'].join(' ');
+        chess = tryLoad('scrubbed', scrubbedFen);
+        if (chess) {
+            return { ok: true, fen: scrubbedFen, game: chess, originalFen, attempts };
+        }
+
+        return { ok: false, fen: normalizedFen, originalFen, attempts };
+    }
+
+    function completeAndSanitizeFen(fen) {
+        const parts = normalizeFen(fen).split(' ');
+        const board = parts[0] || '';
+        const turn = parts[1] === 'b' ? 'b' : 'w';
+        const requestedCastling = parts[2] && parts[2] !== '-' ? parts[2] : '-';
+        const castling = sanitizeCastlingRights(board, requestedCastling);
+        const ep = sanitizeEnPassant(parts[3]);
+        const halfmove = /^\d+$/.test(parts[4] || '') ? parts[4] : '0';
+        const fullmove = /^[1-9]\d*$/.test(parts[5] || '') ? parts[5] : '1';
+        return [board, turn, castling, ep, halfmove, fullmove].join(' ');
+    }
+
+    function sanitizeCastlingRights(board, requested) {
+        if (!requested || requested === '-') return '-';
+        const pieces = fenPieceMap(board);
+        let rights = '';
+        if (requested.includes('K') && pieces.e1 === 'K' && pieces.h1 === 'R') rights += 'K';
+        if (requested.includes('Q') && pieces.e1 === 'K' && pieces.a1 === 'R') rights += 'Q';
+        if (requested.includes('k') && pieces.e8 === 'k' && pieces.h8 === 'r') rights += 'k';
+        if (requested.includes('q') && pieces.e8 === 'k' && pieces.a8 === 'r') rights += 'q';
+        return rights || '-';
+    }
+
+    function fenPieceMap(board) {
+        const map = {};
+        const rows = (board || '').split('/');
+        for (let r = 0; r < rows.length; r += 1) {
+            let fileIndex = 0;
+            const rank = 8 - r;
+            for (const ch of rows[r]) {
+                if (/[1-8]/.test(ch)) {
+                    fileIndex += Number(ch);
+                } else {
+                    const file = 'abcdefgh'[fileIndex];
+                    if (file) map[file + rank] = ch;
+                    fileIndex += 1;
+                }
+            }
+        }
+        return map;
+    }
+
+    function sanitizeEnPassant(ep) {
+        return /^[a-h][36]$/.test(ep || '') ? ep : '-';
     }
     
     function resign() {
@@ -168,12 +297,14 @@ window.PlayMode = (function() {
     }
     
     async function finalize(overrides = {}) {
+        if (!game) return;
+        thinking = false;
         const history = game.history();
         const moveCount = history.length;
         
         // Don't save empty games
         if (moveCount < 1) {
-            Notifications.show('Game abandoned (no moves made)', 'info');
+            toast('Game abandoned (no moves made)');
             return;
         }
         
@@ -216,57 +347,37 @@ window.PlayMode = (function() {
                 move_count: moveCount
             });
             
-            Notifications.show('Game saved', 'success');
+            toast('Game saved');
             
-            // Navigate back to detail view
+            // Navigate back to the position's detail view so the new game
+            // appears in its Past Games list.
+            const posType = (window.AppState && AppState.currentDetailType) || 'tabiya';
             setTimeout(() => {
-                Navigation.navigateToDetail(positionId);
+                Router.navigate({ view: 'positionDetail', id: positionId, positionType: posType });
             }, 1000);
         } catch (error) {
             console.error('Failed to save game:', error);
-            Notifications.show('Failed to save game', 'error');
+            toast('Failed to save game', 'error');
         }
     }
     
+    function updateMeta() {
+        PlayView.renderMeta(userColor, engineElo);
+    }
+
     function updateStatus() {
-        const statusEl = document.getElementById('play-status');
-        if (!statusEl) return;
-        
-        if (game.game_over()) {
-            if (game.in_checkmate()) {
-                const winner = game.turn() === 'b' ? 'White' : 'Black';
-                statusEl.textContent = `Checkmate! ${winner} wins`;
-            } else if (game.in_stalemate()) {
-                statusEl.textContent = 'Stalemate!';
-            } else if (game.in_draw()) {
-                statusEl.textContent = 'Draw!';
-            }
-        } else if (thinking) {
-            statusEl.textContent = 'Engine thinking…';
-        } else {
-            const turn = game.turn();
-            const isUserTurn = (userColor === 'white' && turn === 'w') || 
-                              (userColor === 'black' && turn === 'b');
-            statusEl.textContent = isUserTurn ? 'Your move' : 'Engine thinking…';
-        }
+        if (!game) return;
+        PlayView.renderStatus(game, userColor, thinking);
     }
     
     function updateMoveList() {
-        const moveListEl = document.getElementById('play-move-list');
-        if (!moveListEl) return;
-        
-        const history = game.history();
-        const html = history.map((move, i) => {
-            const moveNum = Math.floor(i / 2) + 1;
-            const prefix = i % 2 === 0 ? `${moveNum}.` : '';
-            return `<span class="move">${prefix}${move}</span>`;
-        }).join(' ');
-        
-        // SAFE_INNER_HTML: Controlled content - move list from game.history() with escaped text
-        moveListEl.innerHTML = html || '<span class="no-moves">No moves yet</span>';
+        if (!game) return;
+        PlayView.renderMoveList(game);
     }
     
     function cleanup() {
+        playSessionId += 1;
+        thinking = false;
         if (boardManager) {
             BoardManager.destroy('play-board');
             boardManager = null;
@@ -279,6 +390,8 @@ window.PlayMode = (function() {
     return {
         start,
         resign,
-        cleanup
+        cleanup,
+        getCurrentFen: function() { return game ? game.fen() : null; },
+        validateStartFen: function(fen) { return preparePlayableFen(fen); }
     };
 })();

@@ -9,6 +9,7 @@ const AppState = {
     quizTotal: 0,
     currentDetailId: null,
     currentDetailFen: null,
+    currentDetailOrientation: null,
     boardFlipped: false,
     detailFlipped: false,
     boardFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',

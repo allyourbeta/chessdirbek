@@ -3,6 +3,7 @@ async function loadPositionDetail(id) {
     AppState.currentDetailId = id;
     AppState.currentDetailFen = pos.fen;
     AppState.currentDetailType = pos.position_type || 'tabiya';
+    AppState.currentDetailOrientation = pos.orientation || 'white';
     // Honor the saved per-position orientation (default 'white' if missing).
     const flipped = pos.orientation === 'black';
     AppState.detailFlipped = flipped;
@@ -175,6 +176,12 @@ function editPosition() {
 
 function flipDetailBoard() {
     BoardManager.flip('detail-board');
+    // Keep AppState synchronized with the board the user is actually seeing.
+    // Play-vs-engine uses this to decide the intended training side when older
+    // saved positions have stale FEN side-to-move metadata.
+    const flipped = BoardManager.isFlipped('detail-board');
+    AppState.detailFlipped = flipped;
+    AppState.currentDetailOrientation = flipped ? 'black' : 'white';
 }
 
 

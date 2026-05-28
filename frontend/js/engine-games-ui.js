@@ -9,35 +9,137 @@ async function startEnginePlay() {
     
     if (!colorSelect || !difficultySelect) return;
     
-    let userColor = colorSelect.value;
+    const selectedColor = colorSelect.value;
     const engineElo = parseInt(difficultySelect.value);
-    
-    // Handle random color
-    if (userColor === 'random') {
-        userColor = Math.random() < 0.5 ? 'white' : 'black';
-    }
-    
-    // Get current position info
     const positionId = AppState.currentDetailId;
-    const startFen = BoardManager.getCurrentFen('detail-board');
-    
-    if (!positionId || !startFen) {
-        Notifications.show('Failed to start game', 'error');
+    // Use the FEN currently shown on the detail page. AppState.currentDetailFen
+    // is the saved original and can be stale after navigation/analysis moves.
+    const rawFen = getVisibleDetailFen();
+
+    if (!positionId || !rawFen) {
+        toast('Failed to start game', 'error');
         return;
     }
-    
-    // Navigate to play view
-    Router.navigate({ view: 'play' });
-    
-    // Start the game
-    setTimeout(() => {
-        PlayMode.start({
-            positionId,
+
+    const fenSideToMove = getSideToMoveFromFen(rawFen);
+    const detailBoardOrientation = getVisibleDetailBoardOrientation();
+
+    let userColor = selectedColor;
+    let startSideToMove = fenSideToMove;
+
+    if (userColor === 'side-to-move') {
+        userColor = fenSideToMove;
+        startSideToMove = fenSideToMove;
+    } else if (userColor === 'random') {
+        userColor = Math.random() < 0.5 ? 'white' : 'black';
+        // For random color, preserve the FEN's own side-to-move. That means
+        // the engine may move first if random gives the non-moving side.
+        startSideToMove = fenSideToMove;
+    } else if (userColor === 'white' || userColor === 'black') {
+        // Explicit "Play as White/Black" in this app is used from diagrams whose
+        // FEN side-to-move metadata is often stale. Make the selected side move
+        // first instead of trusting the possibly wrong FEN token.
+        startSideToMove = userColor;
+    } else {
+        userColor = fenSideToMove;
+        startSideToMove = fenSideToMove;
+    }
+
+    // Critical: preserve the board orientation the user was looking at on the
+    // detail page. Do NOT flip the play board merely because userColor is black;
+    // many imported/saved diagrams already encode black-at-bottom in the piece
+    // placement while the board orientation itself is still white-at-bottom.
+    const startFen = forceFenSideToMove(rawFen, startSideToMove);
+
+    const prepared = window.PlayMode && PlayMode.validateStartFen
+        ? PlayMode.validateStartFen(startFen)
+        : { ok: true, fen: startFen };
+    if (!prepared.ok) {
+        console.error('[startEnginePlay] Invalid FEN; not leaving detail view', {
+            rawFen,
             startFen,
+            fenSideToMove,
+            startSideToMove,
+            detailBoardOrientation,
+            selectedColor,
             userColor,
-            engineElo
+            prepared
         });
-    }, 100);
+        toast('Invalid FEN for playable game — staying on this position', 'error');
+        return;
+    }
+
+    console.info('[startEnginePlay]', {
+        positionId,
+        rawFen,
+        startFen: prepared.fen,
+        fenSideToMove,
+        startSideToMove,
+        detailBoardOrientation,
+        selectedColor,
+        userColor,
+        engineMovesFirst: userColor !== startSideToMove
+    });
+    
+    Router.navigate({ view: 'play' });
+    PlayMode.start({
+        positionId,
+        startFen: prepared.fen,
+        userColor,
+        engineElo,
+        startSource: 'detail-visible-position',
+        savedSideToMove: startSideToMove,
+        boardOrientation: detailBoardOrientation
+    });
+}
+
+function getSideToMoveFromFen(fen) {
+    const side = (fen || '').trim().split(/\s+/)[1];
+    return side === 'b' ? 'black' : 'white';
+}
+
+function getVisibleDetailFen() {
+    const detailFenEl = document.getElementById('detail-fen');
+    const textFen = detailFenEl && detailFenEl.textContent ? detailFenEl.textContent.trim() : '';
+    return textFen || AppState.currentDetailFen;
+}
+
+function getVisibleDetailBoardOrientation() {
+    if (window.BoardManager && typeof BoardManager.isFlipped === 'function') {
+        const detailFen = BoardManager.getPosition && BoardManager.getPosition('detail-board');
+        if (detailFen) {
+            return BoardManager.isFlipped('detail-board') ? 'black' : 'white';
+        }
+    }
+    return AppState.detailFlipped ? 'black' : 'white';
+}
+
+
+function getSavedSideToMoveColor(fen) {
+    // Source of truth at click time: the actual detail board currently on screen.
+    // This matters because the user can flip the detail board after loading, and
+    // older saved rows can have stale/missing orientation metadata. The Play start
+    // context must match what the user is looking at when they press Play.
+    if (window.BoardManager && typeof BoardManager.isFlipped === 'function') {
+        const detailFen = BoardManager.getPosition && BoardManager.getPosition('detail-board');
+        if (detailFen) {
+            return BoardManager.isFlipped('detail-board') ? 'black' : 'white';
+        }
+    }
+
+    const orientation = AppState.currentDetailOrientation || (AppState.detailFlipped ? 'black' : 'white');
+    if (orientation === 'black' || orientation === 'white') return orientation;
+    return getSideToMoveFromFen(fen);
+}
+
+function forceFenSideToMove(fen, color) {
+    const parts = (fen || '').trim().replace(/\s+/g, ' ').split(' ');
+    if (!parts[0]) return fen;
+    while (parts.length < 6) {
+        parts.push(parts.length === 1 ? 'w' : parts.length === 2 ? '-' : parts.length === 3 ? '-' : parts.length === 4 ? '0' : '1');
+    }
+    parts[1] = color === 'black' ? 'b' : 'w';
+    return parts.slice(0, 6).join(' ');
 }
 
 async function loadEngineGames(positionId) {
@@ -89,13 +191,9 @@ async function loadEngineGames(positionId) {
 async function openEngineGame(gameId) {
     if (!gameId) return;
     
-    // Navigate to replay view
+    // Navigate synchronously, then open immediately.
     Router.navigate({ view: 'replay' });
-    
-    // Open the game
-    setTimeout(() => {
-        GameReplay.open(gameId);
-    }, 100);
+    GameReplay.open(gameId);
 }
 
 async function deleteEngineGame(gameId) {
@@ -105,7 +203,7 @@ async function deleteEngineGame(gameId) {
     
     try {
         await ApiClient.delete(`/engine-games/${gameId}`);
-        Notifications.show('Game deleted', 'success');
+        toast('Game deleted');
         
         // Refresh the list
         const positionId = AppState.currentDetailId;
@@ -114,7 +212,7 @@ async function deleteEngineGame(gameId) {
         }
     } catch (error) {
         console.error('Failed to delete game:', error);
-        Notifications.show('Failed to delete game', 'error');
+        toast('Failed to delete game', 'error');
     }
 }
 

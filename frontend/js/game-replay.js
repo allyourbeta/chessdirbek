@@ -64,7 +64,7 @@ window.GameReplay = (function() {
             
         } catch (error) {
             console.error('Failed to load game:', error);
-            Notifications.show('Failed to load game', 'error');
+            toast('Failed to load game', 'error');
         }
     }
     

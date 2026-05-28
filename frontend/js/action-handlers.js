@@ -1,3 +1,17 @@
+// Return from Play/Replay to the position's detail page if we know which
+// position we came from, otherwise fall back to its category list. Uses the
+// real Router/Navigation API (there is no Navigation.back()).
+function _backToDetailOrCategory() {
+    var id = window.AppState && AppState.currentDetailId;
+    var type = (window.AppState && AppState.currentDetailType) || 'tabiya';
+    if (id) {
+        Router.navigate({ view: 'positionDetail', id: id, positionType: type });
+    } else {
+        var catKey = (window.TYPE_TO_CATEGORY && TYPE_TO_CATEGORY[type]) || 'tabiya';
+        Router.navigate({ view: catKey });
+    }
+}
+
 const ActionHandlers = {
     execute(action, target, event) {
         // Handle stopPropagation for certain actions
@@ -139,8 +153,8 @@ const ActionHandlers = {
                 }
                 break;
             case 'play-back':
-                if (confirm('Leave this game? (It will be saved if moves were made)')) {
-                    Navigation.back();
+                if (confirm('Leave this game?')) {
+                    _backToDetailOrCategory();
                 }
                 break;
             case 'engine-game-open':
@@ -150,7 +164,7 @@ const ActionHandlers = {
                 deleteEngineGame(target.dataset.gameId);
                 break;
             case 'replay-back':
-                Navigation.back();
+                _backToDetailOrCategory();
                 break;
             case 'start-title-edit':
                 startTitleEdit();

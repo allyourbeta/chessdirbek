@@ -91,6 +91,8 @@ const Router = (function () {
         }
         if (a === 'bulk-add') return { view: 'bulkAdd', params: q };
         if (a === 'editor') return { view: 'editor', params: q };
+        if (a === 'play') return { view: 'play', params: q };
+        if (a === 'replay') return { view: 'replay', params: q };
         if (a === 'add') return { view: 'addPosition', params: q };
 
         return { view: 'tactics', params: q };
@@ -120,6 +122,8 @@ const Router = (function () {
             case 'search':         return '/search' + _qs(p);
             case 'bulkAdd':        return '/bulk-add' + _qs(p);
             case 'editor':         return '/editor' + _qs(p);
+            case 'play':           return '/play' + _qs(p);
+            case 'replay':         return '/replay' + _qs(p);
             case 'practice':       return '/practice' + _qs(p);
             case 'practiceGameDetail': return `/practice/games/${route.id}` + _qs(p);
             default:               return '/tactics';

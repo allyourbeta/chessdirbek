@@ -119,7 +119,10 @@ _SPA_ROUTES = {
     "collections",
     "search",
     "add",
+    "bulk-add",
     "editor",
+    "play",
+    "replay",
     "practice",
 }
 

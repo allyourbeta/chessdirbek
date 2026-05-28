@@ -880,3 +880,79 @@
   cursor: pointer;
   user-select: none;
 }
+
+/* ------------------------------------------------------------------
+   Play vs Engine + Replay views
+   Shares the detail view's split-layout; these rules style the HUD,
+   status line, meta chips, and move list so the screens feel finished.
+   ------------------------------------------------------------------ */
+.play-hud {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.play-status {
+  font-size: var(--fs-20, 20px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.play-status.is-thinking {
+  color: var(--accent);
+}
+.play-status.is-thinking::after {
+  content: '';
+  display: inline-block;
+  width: 0.9em;
+  text-align: left;
+  animation: play-dots 1.2s steps(4, end) infinite;
+}
+@keyframes play-dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+.play-status.is-over {
+  color: var(--text);
+}
+.play-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.play-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.play-chip strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.play-moves {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-bottom: 0;
+  min-height: 48px;
+}
+.play-moves .move {
+  padding: 1px 3px;
+  border-radius: var(--radius-sm);
+}
+.play-moves .no-moves {
+  color: var(--text-subtle);
+  font-style: italic;
+  font-family: var(--font-body, inherit);
+}
+.replay-nav {
+  display: flex;
+  justify-content: center;
+}

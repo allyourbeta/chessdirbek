@@ -364,9 +364,10 @@
           <div class="card-header">Play vs Engine</div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <select id="engine-color-select" class="select-input">
-              <option value="random">Random Color</option>
+              <option value="side-to-move" selected>Play side to move</option>
               <option value="white">Play as White</option>
               <option value="black">Play as Black</option>
+              <option value="random">Random Color</option>
             </select>
             <select id="engine-difficulty-select" class="select-input">
               <option value="1320">Beginner</option>
@@ -569,33 +570,53 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
     </div>
   </div>
   <div id="view-play" class="view">
-    <div class="board-area">
-      <div>
-        <div id="play-board" class="board-wrap"></div>
-        <div id="play-status" class="game-status">Initializing...</div>
-        <div id="play-move-list" class="moves-panel" style="margin-top:8px;max-height:120px"></div>
-        <div class="btn-row" style="margin-top:8px">
-          <button class="btn btn-danger btn-sm" data-action="engine-play-resign">Resign</button>
-          <button class="btn btn-sm" data-action="analyze-on-lichess">Lichess</button>
-          <button class="btn btn-sm" data-action="play-back">Back</button>
+    <div class="split-layout">
+      <div class="card" style="margin:0;padding:var(--sp-4)">
+        <div id="play-board" class="board-wrap board-wrap--fluid"></div>
+      </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:var(--sp-4)">
+        <div class="card play-hud">
+          <div id="play-status" class="play-status">Initializing…</div>
+          <div id="play-meta" class="play-meta"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Moves</div>
+          <div id="play-move-list" class="moves-panel play-moves"></div>
+        </div>
+        <div class="card">
+          <div class="btn-row" style="margin:0;flex-wrap:wrap">
+            <button class="btn btn-danger" data-action="engine-play-resign">Resign</button>
+            <button class="btn" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Analyze on Lichess</button>
+            <button class="btn" data-action="play-back">Back</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
   <div id="view-replay" class="view">
-    <div class="board-area">
-      <div>
-        <div id="replay-board" class="board-wrap"></div>
-        <div id="replay-move-nav" style="margin-top:8px"></div>
-        <div id="replay-eval" class="eval-bar-container" style="margin-top:8px">
-          <div id="replay-eval-bar" class="eval-bar"></div>
-          <div id="replay-eval-text" class="eval-text">—</div>
+    <div class="split-layout">
+      <div class="card" style="margin:0;padding:var(--sp-4)">
+        <div id="replay-board" class="board-wrap board-wrap--fluid"></div>
+        <div id="replay-move-nav" class="replay-nav" style="margin-top:var(--sp-3)"></div>
+      </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:var(--sp-4)">
+        <div class="card">
+          <div class="card-header">Engine evaluation</div>
+          <div id="replay-eval" class="eval-bar-container">
+            <div id="replay-eval-bar" class="eval-bar"></div>
+            <div id="replay-eval-text" class="eval-text">—</div>
+          </div>
+          <div id="replay-bestline" class="bestline-text" style="margin-top:var(--sp-2)"></div>
         </div>
-        <div id="replay-bestline" class="bestline-text" style="margin-top:4px"></div>
-        <div id="replay-move-list" class="moves-panel" style="margin-top:8px;max-height:120px"></div>
-        <div class="btn-row" style="margin-top:8px">
-          <button class="btn btn-sm" data-action="analyze-on-lichess">Lichess</button>
-          <button class="btn btn-sm" data-action="replay-back">Back</button>
+        <div class="card">
+          <div class="card-header">Moves</div>
+          <div id="replay-move-list" class="moves-panel play-moves"></div>
+        </div>
+        <div class="card">
+          <div class="btn-row" style="margin:0;flex-wrap:wrap">
+            <button class="btn" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Analyze on Lichess</button>
+            <button class="btn" data-action="replay-back">Back</button>
+          </div>
         </div>
       </div>
     </div>
@@ -641,6 +662,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/board-editor.js"></script>
 <script src="/js/engine.js"></script>
 <script src="/js/eval-bar.js"></script>
+<script src="/js/play-view.js"></script>
 <script src="/js/play.js"></script>
 <script src="/js/game-replay.js"></script>
 <script src="/js/engine-games-ui.js"></script>

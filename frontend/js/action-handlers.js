@@ -143,6 +143,15 @@ const ActionHandlers = {
                     Navigation.back();
                 }
                 break;
+            case 'engine-game-open':
+                openEngineGame(target.dataset.gameId);
+                break;
+            case 'engine-game-delete':
+                deleteEngineGame(target.dataset.gameId);
+                break;
+            case 'replay-back':
+                Navigation.back();
+                break;
             case 'start-title-edit':
                 startTitleEdit();
                 break;

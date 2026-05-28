@@ -101,6 +101,17 @@ function hideProminentNotification() {
     }
 }
 function _activateView(viewId, navLabel) {
+    // Cleanup previous view if needed
+    const activeView = document.querySelector('.view.active');
+    if (activeView) {
+        const activeId = activeView.id;
+        if (activeId === 'view-play' && window.PlayMode) {
+            PlayMode.cleanup();
+        } else if (activeId === 'view-replay' && window.GameReplay) {
+            GameReplay.close();
+        }
+    }
+    
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const el = document.getElementById('view-' + viewId);
     if (el) el.classList.add('active');

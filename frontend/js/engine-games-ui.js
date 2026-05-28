@@ -86,5 +86,39 @@ async function loadEngineGames(positionId) {
     }
 }
 
+async function openEngineGame(gameId) {
+    if (!gameId) return;
+    
+    // Navigate to replay view
+    Router.navigate({ view: 'replay' });
+    
+    // Open the game
+    setTimeout(() => {
+        GameReplay.open(gameId);
+    }, 100);
+}
+
+async function deleteEngineGame(gameId) {
+    if (!gameId) return;
+    
+    if (!confirm('Delete this game?')) return;
+    
+    try {
+        await ApiClient.delete(`/engine-games/${gameId}`);
+        Notifications.show('Game deleted', 'success');
+        
+        // Refresh the list
+        const positionId = AppState.currentDetailId;
+        if (positionId) {
+            loadEngineGames(positionId);
+        }
+    } catch (error) {
+        console.error('Failed to delete game:', error);
+        Notifications.show('Failed to delete game', 'error');
+    }
+}
+
 window.startEnginePlay = startEnginePlay;
 window.loadEngineGames = loadEngineGames;
+window.openEngineGame = openEngineGame;
+window.deleteEngineGame = deleteEngineGame;

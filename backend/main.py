@@ -11,6 +11,7 @@ from backend.api import (
     annotations_router,
     chess_router,
     collections_router,
+    engine_games_router,
     games_router,
     opening_tree_router,
     positions_router,
@@ -47,6 +48,7 @@ app.include_router(collections_router, prefix="/api")
 app.include_router(opening_tree_router, prefix="/api")
 app.include_router(practice_stats_router, prefix="/api")
 app.include_router(practice_router, prefix="/api")
+app.include_router(engine_games_router, prefix="/api")
 
 
 # During local development the browser (and PWA service worker) aggressively

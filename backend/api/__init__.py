@@ -7,6 +7,7 @@ from backend.api.positions_extra import router as positions_extra_router
 from backend.api.practice import router as practice_router
 from backend.api.practice_stats import router as practice_stats_router
 from backend.api.tags_and_chess import chess_router, tags_router
+from backend.api.engine_games import router as engine_games_router
 
 __all__ = [
     "annotations_router",
@@ -19,4 +20,5 @@ __all__ = [
     "opening_tree_router",
     "practice_router",
     "practice_stats_router",
+    "engine_games_router",
 ]

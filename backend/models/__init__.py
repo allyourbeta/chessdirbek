@@ -8,6 +8,7 @@ from backend.models.game_models import (
 )
 from backend.models.practice_models import PracticeGame
 from backend.models.annotation_models import FenAnnotation
+from backend.models.engine_models import EngineGame
 
 __all__ = [
     "Position", "PositionType", "Tag", "QuizAttempt", "position_tags",
@@ -15,4 +16,5 @@ __all__ = [
     "game_tags", "game_collection_assoc",
     "PracticeGame",
     "FenAnnotation",
+    "EngineGame",
 ]

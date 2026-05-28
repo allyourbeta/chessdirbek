@@ -130,6 +130,19 @@ const ActionHandlers = {
             case 'analyze-on-lichess':
                 FenActions.analyzeOnLichess();
                 break;
+            case 'engine-play-start':
+                startEnginePlay();
+                break;
+            case 'engine-play-resign':
+                if (window.PlayMode) {
+                    PlayMode.resign();
+                }
+                break;
+            case 'play-back':
+                if (confirm('Leave this game? (It will be saved if moves were made)')) {
+                    Navigation.back();
+                }
+                break;
             case 'start-title-edit':
                 startTitleEdit();
                 break;

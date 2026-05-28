@@ -177,6 +177,14 @@ function renderRoute(route) {
             _activateView('detail', navLabel);
             loadPositionDetail(route.id);
             break;
+        case 'play':
+            _activateView('play', 'Play vs Engine');
+            // PlayMode.start is called by the action handler after navigation
+            break;
+        case 'replay':
+            _activateView('replay', 'Game Replay');
+            // GameReplay.open is called by the action handler after navigation
+            break;
         case 'addPosition':
             _activateView('add', 'Add New');
             AppState.addPositionType = (route.params && route.params.type) || 'tabiya';

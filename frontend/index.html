@@ -360,6 +360,32 @@
           </div>
         </div>
 
+        <div id="engine-play-section" class="card">
+          <div class="card-header">Play vs Engine</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <select id="engine-color-select" class="select-input">
+              <option value="random">Random Color</option>
+              <option value="white">Play as White</option>
+              <option value="black">Play as Black</option>
+            </select>
+            <select id="engine-difficulty-select" class="select-input">
+              <option value="1320">Beginner</option>
+              <option value="1600" selected>Casual</option>
+              <option value="2000">Intermediate</option>
+              <option value="2400">Strong</option>
+              <option value="3190">Maximum</option>
+            </select>
+            <button class="btn btn-primary btn-sm" data-action="engine-play-start">Play</button>
+          </div>
+        </div>
+
+        <div id="engine-games-section" class="card" style="margin-top:8px">
+          <div class="card-header">Past Games</div>
+          <div id="engine-games-list" class="game-list">
+            <div class="text-muted" style="font-size:13px">No games yet</div>
+          </div>
+        </div>
+
         <div id="practice-section" class="card" style="display:none">
           <div class="card-header">Practice This Position</div>
           <div id="practice-form-controls" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -542,6 +568,38 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
       </div>
     </div>
   </div>
+  <div id="view-play" class="view">
+    <div class="board-area">
+      <div>
+        <div id="play-board" class="board-wrap"></div>
+        <div id="play-status" class="game-status">Initializing...</div>
+        <div id="play-move-list" class="moves-panel" style="margin-top:8px;max-height:120px"></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-danger btn-sm" data-action="engine-play-resign">Resign</button>
+          <button class="btn btn-sm" data-action="analyze-on-lichess">Lichess</button>
+          <button class="btn btn-sm" data-action="play-back">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="view-replay" class="view">
+    <div class="board-area">
+      <div>
+        <div id="replay-board" class="board-wrap"></div>
+        <div id="replay-move-nav" style="margin-top:8px"></div>
+        <div id="replay-eval" class="eval-bar-container" style="margin-top:8px">
+          <div id="replay-eval-bar" class="eval-bar"></div>
+          <div id="replay-eval-text" class="eval-text">—</div>
+        </div>
+        <div id="replay-bestline" class="bestline-text" style="margin-top:4px"></div>
+        <div id="replay-move-list" class="moves-panel" style="margin-top:8px;max-height:120px"></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-sm" data-action="analyze-on-lichess">Lichess</button>
+          <button class="btn btn-sm" data-action="replay-back">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <script src="/js/state.js"></script>
 <script src="/js/navigation.js"></script>
@@ -587,6 +645,9 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/selection-manager.js"></script>
 <script src="/js/keyboard-navigation.js"></script>
 <script src="/js/board-editor.js"></script>
+<script src="/js/engine.js"></script>
+<script src="/js/play.js"></script>
+<script src="/js/engine-games-ui.js"></script>
 <script src="/js/build-stamp.js"></script>
 <script type="module" src="/js/main.js"></script>
 <script>

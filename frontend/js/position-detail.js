@@ -101,6 +101,9 @@ async function loadPositionDetail(id) {
 
     AnnotationPanel.mount('detail-annotation-container');
     AnnotationPanel.setPosition(pos.fen);
+    
+    // Load engine games for this position
+    loadEngineGames(id);
 }
 
 function copyFen() {

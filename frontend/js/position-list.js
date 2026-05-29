@@ -125,7 +125,7 @@ function renderCategoryList(categoryKey) {
         const isSelected = SelectionManager && SelectionManager.isSelected(p.id);
         const selectedClass = isSelected ? ' pos-item--selected' : '';
         const starHtml = StarControl.renderPositionStar(p);
-        return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+        return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-flip" data-flip-id="${p.id}" title="Flip FEN — rotate the position 180° to fix a board captured from the wrong side"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
     
     // Set up event delegation for the position list
@@ -201,7 +201,7 @@ function _setupPositionListEvents(container) {
 }
 
 function _handlePositionListClick(event) {
-    const target = event.target.closest('.pos-item-delete, .pos-item');
+    const target = event.target.closest('.pos-item-delete, .pos-item-flip, .pos-item');
     if (!target) return;
 
     if (target.classList.contains('pos-item-delete')) {
@@ -209,6 +209,11 @@ function _handlePositionListClick(event) {
         event.stopPropagation();
         const positionId = parseInt(target.dataset.deleteId, 10);
         if (positionId) deleteFromList(positionId);
+    } else if (target.classList.contains('pos-item-flip')) {
+        // Handle flip-FEN button click (must not also open the position)
+        event.stopPropagation();
+        const positionId = parseInt(target.dataset.flipId, 10);
+        if (positionId) FenFlip.flipFromList(positionId);
     } else if (target.classList.contains('pos-item')) {
         // Handle position item click
         const positionId = parseInt(target.dataset.posId, 10);

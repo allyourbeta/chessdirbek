@@ -76,6 +76,14 @@ else
     echo ""
 fi
 
+# 4c. FEN Rotation Tests (Flip-FEN button)
+if command -v node >/dev/null 2>&1; then
+    run_test_section "FEN Rotation Tests" "node tests/fen/rotate.test.js"
+else
+    echo -e "${YELLOW}⚠️  node not found, skipping FEN rotation tests${NC}"
+    echo ""
+fi
+
 # 5. Manual verification checks
 echo -e "${YELLOW}=== Manual Verification Checks ===${NC}"
 

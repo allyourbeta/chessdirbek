@@ -108,6 +108,20 @@
 .pos-item:hover .pos-item-delete {
   opacity: 1;
 }
+.pos-item-flip {
+  position: absolute;
+  bottom: var(--sp-2);
+  right: var(--sp-2);
+  background: rgba(255,255,255,0.85);
+  border-radius: var(--radius);
+  padding: 4px 6px;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 5;
+}
+.pos-item:hover .pos-item-flip {
+  opacity: 1;
+}
 .pos-item .mini-board {
   opacity: 0.60;
   transition: opacity 0.15s ease;

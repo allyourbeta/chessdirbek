@@ -307,6 +307,7 @@
           <div class="control-group" id="detail-move-nav-wrap">
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
             <button class="btn btn-sm" data-action="flip-detail-board">Flip</button>
+            <button class="btn btn-sm" data-action="flip-detail-fen" title="Flip FEN: rotate the position 180° and fix its orientation. Use this for boards captured from the wrong side (e.g. a Black-perspective screenshot read as White-on-bottom).">Flip FEN</button>
             <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
           </div>
           <div class="control-group" title="Save the current board position without interrupting practice">
@@ -630,6 +631,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/api-client.js"></script>
 <script src="/js/html-utils.js"></script>
 <script src="/js/fen-actions.js"></script>
+<script src="/js/fen-flip.js"></script>
 <script src="/js/tag-renderer.js"></script>
 <script src="/js/error-messages.js"></script>
 <script src="/js/empty-states.js"></script>

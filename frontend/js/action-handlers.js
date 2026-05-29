@@ -135,6 +135,9 @@ const ActionHandlers = {
             case 'flip-detail-board':
                 flipDetailBoard();
                 break;
+            case 'flip-detail-fen':
+                FenFlip.flipFromDetail();
+                break;
             case 'random-from-detail':
                 randomFromDetail();
                 break;

@@ -51,6 +51,33 @@ function renderMiniBoard(fen, orientation) {
     return h + '</div>';
 }
 
+// Load a chess.js instance from a board position that may be a board-only or
+// otherwise-incomplete FEN (common for imported/OCR'd diagrams). chess.js can't
+// load a bare placement, which is why the analysis board used to silently reject
+// every move on such positions. We complete it: side-to-move from the board
+// orientation, neutral castling/en-passant. Falls back to the opposite side if
+// the oriented guess is illegal; returns null only if nothing loads.
+function loadChessFromBoardFen(rawFen, flipped) {
+    const fen = (rawFen || '').trim().replace(/\s+/g, ' ');
+    if (!fen) return null;
+    const board = fen.split(' ')[0];
+    const givenSide = fen.split(' ')[1];
+    const orientedSide = flipped ? 'b' : 'w';
+    const primarySide = (givenSide === 'b' || givenSide === 'w') ? givenSide : orientedSide;
+    const candidates = [
+        fen,
+        board + ' ' + primarySide + ' - - 0 1',
+        board + ' ' + (primarySide === 'w' ? 'b' : 'w') + ' - - 0 1'
+    ];
+    for (let i = 0; i < candidates.length; i++) {
+        try {
+            const chess = new Chess();
+            if (chess.load(candidates[i])) return chess;
+        } catch (e) { /* try next candidate */ }
+    }
+    return null;
+}
+
 const BoardManager = {
     boards: {},
 
@@ -107,7 +134,8 @@ const BoardManager = {
                     return true;
                 }
                 if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
-                    const chess = new Chess(board._fen);
+                    const chess = loadChessFromBoardFen(board._fen, board._flipped);
+                    if (!chess) return false;
                     const from = event.squareFrom;
                     const to = event.squareTo;
                     let promotion = undefined;

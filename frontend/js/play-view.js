@@ -85,5 +85,29 @@ window.PlayView = (function() {
         moveListEl.innerHTML = html || '<span class="no-moves">No moves yet</span>';
     }
 
-    return { eloLabel, renderMeta, renderStatus, renderMoveList };
+    /** Force a terminal status line (used for resign / end-game, where the
+     *  underlying game object is not in a game_over state). */
+    function renderFinalStatus(text) {
+        const statusEl = document.getElementById('play-status');
+        if (!statusEl) return;
+        statusEl.classList.remove('is-thinking');
+        statusEl.classList.add('is-over');
+        statusEl.textContent = text;
+    }
+
+    /** Show exactly one of the action button rows: 'active' (in-game),
+     *  'finished' (game over / resigned), or 'mark' (end-game result picker). */
+    function showActions(state) {
+        const rows = {
+            active: 'play-actions-active',
+            finished: 'play-actions-finished',
+            mark: 'play-actions-mark'
+        };
+        Object.keys(rows).forEach(function(key) {
+            const el = document.getElementById(rows[key]);
+            if (el) el.style.display = (key === state) ? '' : 'none';
+        });
+    }
+
+    return { eloLabel, renderMeta, renderStatus, renderMoveList, renderFinalStatus, showActions };
 })();

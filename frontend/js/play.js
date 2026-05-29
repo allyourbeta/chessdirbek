@@ -14,6 +14,8 @@ window.PlayMode = (function() {
     let engineElo = null;
     let thinking = false;
     let playSessionId = 0;
+    let ended = false;            // true once the game is concluded/resigned/ended
+    let boardOrientation = null;  // remembered so "Play again" reuses the same view
     
     
     async function start(options) {
@@ -23,6 +25,7 @@ window.PlayMode = (function() {
         playSessionId += 1;
         const sessionId = playSessionId;
         thinking = false;
+        ended = false;
 
         // Initialize game state. Normalize the saved FEN into a form chess.js
         // can actually play. Several saved positions are arbitrary diagrams; they
@@ -40,6 +43,7 @@ window.PlayMode = (function() {
         startFen = prepared.fen;
         userColor = normalizeUserColor(options.userColor, startFen);
         engineElo = options.engineElo;
+        boardOrientation = options.boardOrientation || null;
         game = prepared.game;
 
         if (window.console && console.info) {
@@ -74,6 +78,7 @@ window.PlayMode = (function() {
         updateMeta();
         updateStatus();
         updateMoveList();
+        PlayView.showActions('active');
         
         // If engine plays first (user is black and white to move, or vice versa)
         const sideToMove = startFen.split(' ')[1] || 'w';
@@ -87,6 +92,7 @@ window.PlayMode = (function() {
     
     function handleUserMove(event) {
         if (!game) return false;
+        if (ended) return false;
         if (thinking) return false; // Engine is thinking
         if (game.game_over()) return false;
         
@@ -122,7 +128,7 @@ window.PlayMode = (function() {
         
         // Check for game end
         if (game.game_over()) {
-            finalize();
+            concludeNatural();
         } else {
             // Engine's turn
             engineReply(playSessionId);
@@ -154,7 +160,7 @@ window.PlayMode = (function() {
             
             if (!response || !response.bestMove) {
                 // Engine has no move (game is over)
-                finalize();
+                concludeNatural();
                 return;
             }
             
@@ -182,7 +188,7 @@ window.PlayMode = (function() {
             
             // Check for game end
             if (game.game_over()) {
-                finalize();
+                concludeNatural();
             }
         } catch (error) {
             if (sessionId !== playSessionId) return;
@@ -288,52 +294,27 @@ window.PlayMode = (function() {
         return /^[a-h][36]$/.test(ep || '') ? ep : '-';
     }
     
-    function resign() {
-        if (!game || game.game_over()) return;
-        
-        // Determine result from user's perspective (loss)
-        const result = userColor === 'white' ? '0-1' : '1-0';
-        finalize({ result, outcome: 'resigned' });
+    // --- Game conclusion -----------------------------------------------------
+    // Three ways a game ends, all funnelling into a sticky "finished" panel
+    // (no more auto-navigation): natural end (checkmate/draw), Resign (a loss),
+    // and End game (user stops; result is then marked manually).
+
+    function computeNaturalResult() {
+        if (game.in_checkmate()) {
+            // "1-0" if black is mated, "0-1" if white is mated.
+            return { result: game.turn() === 'b' ? '1-0' : '0-1', outcome: 'checkmate' };
+        }
+        if (game.in_stalemate()) return { result: '1/2-1/2', outcome: 'stalemate' };
+        if (game.in_threefold_repetition()) return { result: '1/2-1/2', outcome: 'threefold' };
+        if (game.insufficient_material()) return { result: '1/2-1/2', outcome: 'insufficient' };
+        if (game.in_draw()) return { result: '1/2-1/2', outcome: 'fifty-move' };
+        return { result: '*', outcome: null };
     }
-    
-    async function finalize(overrides = {}) {
-        if (!game) return;
-        thinking = false;
+
+    async function saveGame(result, outcome) {
+        if (!game) return false;
         const history = game.history();
-        const moveCount = history.length;
-        
-        // Don't save empty games
-        if (moveCount < 1) {
-            toast('Game abandoned (no moves made)');
-            return;
-        }
-        
-        // Determine result and outcome
-        let result = '*';
-        let outcome = null;
-        
-        if (overrides.result) {
-            result = overrides.result;
-            outcome = overrides.outcome;
-        } else if (game.in_checkmate()) {
-            // Result: "1-0" if black is mated, "0-1" if white is mated
-            result = game.turn() === 'b' ? '1-0' : '0-1';
-            outcome = 'checkmate';
-        } else if (game.in_stalemate()) {
-            result = '1/2-1/2';
-            outcome = 'stalemate';
-        } else if (game.in_threefold_repetition()) {
-            result = '1/2-1/2';
-            outcome = 'threefold';
-        } else if (game.insufficient_material()) {
-            result = '1/2-1/2';
-            outcome = 'insufficient';
-        } else if (game.in_draw()) {
-            result = '1/2-1/2';
-            outcome = 'fifty-move';
-        }
-        
-        // Save the game
+        if (history.length < 1) return false; // never save an empty game
         try {
             await ApiClient.post('/engine-games', {
                 position_id: positionId,
@@ -344,21 +325,97 @@ window.PlayMode = (function() {
                 result: result,
                 outcome: outcome,
                 final_fen: game.fen(),
-                move_count: moveCount
+                move_count: history.length
             });
-            
-            toast('Game saved');
-            
-            // Navigate back to the position's detail view so the new game
-            // appears in its Past Games list.
-            const posType = (window.AppState && AppState.currentDetailType) || 'tabiya';
-            setTimeout(() => {
-                Router.navigate({ view: 'positionDetail', id: positionId, positionType: posType });
-            }, 1000);
+            return true;
         } catch (error) {
             console.error('Failed to save game:', error);
             toast('Failed to save game', 'error');
+            return false;
         }
+    }
+
+    // Freeze the board and switch to a terminal panel. Stays on the play screen
+    // so the user can study the final position and choose what to do next.
+    function enterFinished(statusText) {
+        ended = true;
+        thinking = false;
+        BoardManager.disableMoveInput('play-board');
+        if (statusText) {
+            PlayView.renderFinalStatus(statusText);
+        } else {
+            updateStatus(); // natural game_over → renderStatus shows the result
+        }
+        PlayView.showActions('finished');
+    }
+
+    async function concludeNatural() {
+        if (!game || ended) return;
+        ended = true;
+        thinking = false;
+        const { result, outcome } = computeNaturalResult();
+        const saved = await saveGame(result, outcome);
+        if (saved) toast('Game saved');
+        enterFinished();
+    }
+
+    async function resign() {
+        if (!game || game.game_over() || ended) return;
+        const result = userColor === 'white' ? '0-1' : '1-0';
+        const saved = await saveGame(result, 'resigned');
+        if (saved) toast('Game saved');
+        enterFinished('You resigned');
+    }
+
+    // User stops a game that isn't over. We don't save yet — we show the
+    // result picker so they can mark it (or leave it unfinished).
+    function endGame() {
+        if (!game || ended) return;
+        if (game.history().length < 1) {
+            // Nothing was played; there's nothing to mark or save.
+            backToDetail();
+            return;
+        }
+        ended = true;
+        thinking = false;
+        BoardManager.disableMoveInput('play-board');
+        PlayView.renderFinalStatus('Game ended — mark the result below');
+        PlayView.showActions('mark');
+    }
+
+    // Called from the result-picker buttons after End game.
+    async function markResult(kind) {
+        if (!game) return;
+        let result = '*';
+        let outcome = 'unfinished';
+        if (kind === 'win') {
+            result = userColor === 'white' ? '1-0' : '0-1';
+            outcome = 'manual';
+        } else if (kind === 'loss') {
+            result = userColor === 'white' ? '0-1' : '1-0';
+            outcome = 'manual';
+        } else if (kind === 'draw') {
+            result = '1/2-1/2';
+            outcome = 'manual';
+        }
+        const saved = await saveGame(result, outcome);
+        if (saved) toast('Game saved');
+        backToDetail();
+    }
+
+    function playAgain() {
+        start({
+            positionId: positionId,
+            startFen: startFen,
+            userColor: userColor,
+            engineElo: engineElo,
+            boardOrientation: boardOrientation
+        });
+    }
+
+    function backToDetail() {
+        const posType = (window.AppState && AppState.currentDetailType) || 'tabiya';
+        Router.navigate({ view: 'positionDetail', id: positionId, positionType: posType });
     }
     
     function updateMeta() {
@@ -390,6 +447,9 @@ window.PlayMode = (function() {
     return {
         start,
         resign,
+        endGame,
+        markResult,
+        playAgain,
         cleanup,
         getCurrentFen: function() { return game ? game.fen() : null; },
         validateStartFen: function(fen) { return preparePlayableFen(fen); }

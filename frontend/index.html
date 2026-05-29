@@ -585,10 +585,22 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
           <div id="play-move-list" class="moves-panel play-moves"></div>
         </div>
         <div class="card">
-          <div class="btn-row" style="margin:0;flex-wrap:wrap">
+          <div id="play-actions-active" class="btn-row" style="margin:0;flex-wrap:wrap">
             <button class="btn btn-danger" data-action="engine-play-resign">Resign</button>
+            <button class="btn" data-action="engine-play-end" title="Stop the game here and mark the result yourself">End game</button>
             <button class="btn" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Analyze on Lichess</button>
-            <button class="btn" data-action="play-back">Back</button>
+          </div>
+          <div id="play-actions-finished" class="btn-row" style="margin:0;flex-wrap:wrap;display:none">
+            <button class="btn btn-primary" data-action="engine-play-again">Play again</button>
+            <button class="btn" data-action="engine-play-back-detail">Back to position</button>
+            <button class="btn" data-action="analyze-on-lichess" title="Open final position in Lichess analysis">Analyze on Lichess</button>
+          </div>
+          <div id="play-actions-mark" class="btn-row" style="margin:0;flex-wrap:wrap;display:none;align-items:center">
+            <span class="text-muted" style="font-size:13px;margin-right:4px">Mark result:</span>
+            <button class="btn btn-success btn-sm" data-action="engine-play-mark" data-result="win">Win</button>
+            <button class="btn btn-danger btn-sm" data-action="engine-play-mark" data-result="loss">Loss</button>
+            <button class="btn btn-sm" data-action="engine-play-mark" data-result="draw">Draw</button>
+            <button class="btn btn-sm" data-action="engine-play-mark" data-result="unfinished">Leave unfinished</button>
           </div>
         </div>
       </div>

@@ -37,7 +37,7 @@ class EngineGameCreate(BaseModel):
     def validate_outcome(cls, v):
         if v is not None:
             allowed = {'checkmate', 'stalemate', 'insufficient', 'threefold', 
-                      'fifty-move', 'resigned', 'abandoned'}
+                      'fifty-move', 'resigned', 'abandoned', 'manual', 'unfinished'}
             if v not in allowed:
                 raise ValueError(f'outcome must be one of: {allowed}')
         return v

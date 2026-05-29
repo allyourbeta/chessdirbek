@@ -158,6 +158,24 @@ const ActionHandlers = {
                     PlayMode.resign();
                 }
                 break;
+            case 'engine-play-end':
+                if (window.PlayMode) {
+                    PlayMode.endGame();
+                }
+                break;
+            case 'engine-play-mark':
+                if (window.PlayMode) {
+                    PlayMode.markResult(target.dataset.result);
+                }
+                break;
+            case 'engine-play-again':
+                if (window.PlayMode) {
+                    PlayMode.playAgain();
+                }
+                break;
+            case 'engine-play-back-detail':
+                _backToDetailOrCategory();
+                break;
             case 'play-back':
                 if (confirm('Leave this game?')) {
                     _backToDetailOrCategory();

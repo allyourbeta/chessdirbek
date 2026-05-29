@@ -76,6 +76,14 @@ else
     echo ""
 fi
 
+# 4b2. Engine Lifecycle Tests (timeout / init-retry / stop-race)
+if command -v node >/dev/null 2>&1; then
+    run_test_section "Engine Lifecycle Tests" "node tests/engine/lifecycle.test.js"
+else
+    echo -e "${YELLOW}⚠️  node not found, skipping engine lifecycle tests${NC}"
+    echo ""
+fi
+
 # 4c. FEN Rotation Tests (Flip-FEN button)
 if command -v node >/dev/null 2>&1; then
     run_test_section "FEN Rotation Tests" "node tests/fen/rotate.test.js"

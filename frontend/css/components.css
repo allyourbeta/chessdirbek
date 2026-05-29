@@ -549,6 +549,16 @@
 #view-detail .board-controls .control-group {
   gap: var(--sp-2);
 }
+/* Thin separator that visually groups the top toolbar by function
+   (move-nav | board ops | random | external) without adding button colors.
+   The control-group's --sp-2 flex gap supplies the breathing room on each side. */
+.board-controls .ctl-sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 16px;
+  background: var(--border);
+  flex: 0 0 auto;
+}
 .radio-group {
   display: flex;
   gap: var(--sp-4);

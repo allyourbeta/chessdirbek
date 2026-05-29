@@ -308,9 +308,13 @@
         <div class="board-controls">
           <div class="control-group" id="detail-move-nav-wrap">
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
+            <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="flip-detail-board">Flip</button>
             <button class="btn btn-sm" data-action="flip-detail-fen" title="Flip FEN: rotate the position 180° and fix its orientation. Use this for boards captured from the wrong side (e.g. a Black-perspective screenshot read as White-on-bottom).">Flip FEN</button>
-            <button class="btn btn-sm" data-action="analyze-detail-on-lichess" title="Open in Lichess analysis board">Lichess</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" id="detail-random-btn" data-action="random-from-detail" title="Jump to a random position">Random<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="analyze-detail-on-lichess" title="Open in Lichess analysis board (opens a new tab)">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
           </div>
           <div class="control-group" title="Save the current board position without interrupting practice">
             <span class="text-muted" style="font-size:12px">Save current:</span>
@@ -318,9 +322,6 @@
             <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="puzzle">+ Tactic</button>
             <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="endgame">+ Ending</button>
             <button class="btn btn-success btn-sm" data-save-board="detail-board" data-position-type="strategy">+ Strategy</button>
-          </div>
-          <div class="control-group">
-            <button class="btn btn-sm" id="detail-random-btn" data-action="random-from-detail">Random</button>
           </div>
         </div>
         <div class="fen-bar detail-fen-legacy" style="display:none;margin-top:var(--sp-2)">

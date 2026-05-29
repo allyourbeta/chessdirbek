@@ -147,6 +147,9 @@ const ActionHandlers = {
             case 'analyze-on-lichess':
                 FenActions.analyzeOnLichess();
                 break;
+            case 'analyze-detail-on-lichess':
+                analyzeDetailOnLichess();
+                break;
             case 'engine-play-start':
                 startEnginePlay();
                 break;

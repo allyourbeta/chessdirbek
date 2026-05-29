@@ -84,6 +84,14 @@ else
     echo ""
 fi
 
+# 4d. Side-to-move Completion Tests (detail Lichess button)
+if command -v node >/dev/null 2>&1; then
+    run_test_section "Side-to-move Completion Tests" "node tests/fen/side-to-move.test.js"
+else
+    echo -e "${YELLOW}⚠️  node not found, skipping side-to-move tests${NC}"
+    echo ""
+fi
+
 # 5. Manual verification checks
 echo -e "${YELLOW}=== Manual Verification Checks ===${NC}"
 

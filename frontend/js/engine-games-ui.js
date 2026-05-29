@@ -142,6 +142,17 @@ function forceFenSideToMove(fen, color) {
     return parts.slice(0, 6).join(' ');
 }
 
+// Open the position currently on the detail board in Lichess analysis with the
+// correct side-to-move. Many saved diagrams are board-only FENs (no turn field),
+// so Lichess would otherwise default to White-to-move. We reuse the exact same
+// orientation→side-to-move resolution that Play-vs-Engine uses, so the Lichess
+// link and the engine game always agree on whose move it is.
+function analyzeDetailOnLichess() {
+    const fen = getVisibleDetailFen();
+    const color = getSavedSideToMoveColor(fen);
+    FenActions.analyzeOnLichessFen(forceFenSideToMove(fen, color));
+}
+
 async function loadEngineGames(positionId) {
     try {
         const games = await ApiClient.get(`/positions/${positionId}/engine-games`);
@@ -220,3 +231,8 @@ window.startEnginePlay = startEnginePlay;
 window.loadEngineGames = loadEngineGames;
 window.openEngineGame = openEngineGame;
 window.deleteEngineGame = deleteEngineGame;
+
+// Test-only export (no-op in the browser, where `module` is undefined).
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { forceFenSideToMove, getSideToMoveFromFen };
+}

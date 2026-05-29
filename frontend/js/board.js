@@ -7,48 +7,8 @@ import {Arrows, ARROW_TYPE}
 
 const CM_ASSETS = "https://cdn.jsdelivr.net/npm/cm-chessboard@8/assets/";
 
-function parseFenBoard(fen) {
-    const rows = fen.split(' ')[0].split('/');
-    const b = [];
-    for (const row of rows) {
-        const r = [];
-        for (const ch of row) {
-            if (ch >= '1' && ch <= '8') for (let i = 0; i < +ch; i++) r.push(null);
-            else r.push(ch);
-        }
-        b.push(r);
-    }
-    return b;
-}
-
 function _playBoardSound() {
     if (window.playMoveSound) window.playMoveSound();
-}
-
-function renderMiniBoard(fen, orientation) {
-    const b = parseFenBoard(fen);
-    const flipped = orientation === 'black';
-    let h = '<div class="mini-board">';
-    // When flipped (Black on bottom), iterate rows bottom-up and columns right-to-left
-    // so the visual ordering matches a board rotated 180°.
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            const r = flipped ? 7 - i : i;
-            const c = flipped ? 7 - j : j;
-            const l = (r + c) % 2 === 0;
-            const p = b[r][c];
-            // Try to use SVG sprite first, fallback to base64 if sprite not loaded
-            const pid = p ? pieceKey(p).toLowerCase() : '';
-            const spriteEl = document.getElementById('piece-sprites');
-            // SAFE_INNER_HTML: Reading SVG sprite content to check for piece availability
-            const useSprite = p && spriteEl && spriteEl.innerHTML.includes(`id="${pid}"`);
-            const img = p ? (useSprite 
-                ? `<svg viewBox="0 0 45 45" style="position:absolute;width:100%;height:100%"><use href="#${pid}"/></svg>`
-                : `<img src="${PIECE_SVG[pieceKey(p)]}" style="position:absolute;width:100%;height:100%">`) : '';
-            h += `<div class="mini-sq ${l ? 'light' : 'dark'}">${img}</div>`;
-        }
-    }
-    return h + '</div>';
 }
 
 // Load a chess.js instance from a board position that may be a board-only or
@@ -327,8 +287,6 @@ const BoardManager = {
     },
 };
 
-window.parseFenBoard = parseFenBoard;
-window.renderMiniBoard = renderMiniBoard;
 window.BoardManager = BoardManager;
 window.MARKER_TYPE = MARKER_TYPE;
 window.ARROW_TYPE = ARROW_TYPE;

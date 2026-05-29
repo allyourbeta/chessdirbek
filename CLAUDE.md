@@ -35,7 +35,7 @@ Vanilla JS (browser)
 - Single-user MVP (no auth). User ID hardcoded as 1.
 - Quiz order: random within filtered tag set.
 - Quiz history tracked from day one (for future spaced repetition).
-- Stockfish WASM was removed (2026-05-27) due to irreconcilable state bugs. Clean rebuild planned.
+- Engine: Stockfish WASM lives in `frontend/vendor/stockfish/`, wrapped by `engine.js` (see Troubleshooting → "Stockfish / Engine"). Play vs Engine + eval bar are active; analysis-tree nav is delegated to Lichess.
 - python-chess used server-side for FEN validation, pawn structure, etc.
 
 ## Database Backup Scripts
@@ -70,6 +70,11 @@ tags in `index.html`. Two files use `<script type="module">`:
 Split files (to honor 300-line limit):
 - `position-list.js` + `featured.js` — Position lists and featured board management
 - `practice-ui.js` + `practice-ui-actions.js` — Practice session UI and inline actions
+- `play.js` (game flow) + `play-view.js` (DOM rendering) — Play vs Engine
+- `piece-assets.js` (PIECE_SVG + pieceKey) + `ui-feedback.js` (toast/banner/notification)
+  + `mini-board.js` (thumbnail renderer) — extracted from `shared.js`/`board.js` so each
+  is one concern. All three are classic scripts loaded before `shared.js`; `mini-board.js`
+  depends on `piece-assets.js`, so it must load after it.
 
 ### cm-chessboard v8 API
 
@@ -93,30 +98,33 @@ The board editor uses click-to-place, NOT drag-and-drop:
 
 ## Troubleshooting
 
-### Stockfish / Engine Analysis — REMOVED
+### Stockfish / Engine — PRESENT (rebuilt)
 
-As of 2026-05-27, Stockfish WASM, engine-ui.js, stockfish-service.js, and
-practice-engine-service.js have been removed. The engine integration and
-analysis tree navigation had accumulated irreconcilable state-management bugs
-across 12+ competing state variables. A clean rebuild is planned.
+The old engine integration (`engine-ui.js`, `stockfish-service.js`,
+`practice-engine-service.js`) was removed on 2026-05-27 because it had
+accumulated irreconcilable state bugs across 12+ competing state variables.
+It was since rebuilt around a single, stateless wrapper, which is what the app
+uses today.
 
-What was removed:
-- `frontend/js/engine-ui.js` — engine panel UI (FEN toolbar, side pills, eval bar)
-- `frontend/js/stockfish-service.js` — WASM worker wrapper, UCI protocol, SAN conversion
-- `frontend/js/practice-engine-service.js` — separate worker for practice-vs-engine
-- `frontend/vendor/stockfish/` — WASM binary and JS loader
-- `BoardManager._analysisHistory` / `_analysisOrigin` / `undoAnalysis()` / `resetAnalysis()` / `setAnalysisOrigin()` — competing history that conflicted with MoveNavigator
+Current engine layout:
+- `frontend/vendor/stockfish/stockfish-18-lite-single.js` + `.wasm` — the engine (present).
+- `frontend/js/engine.js` — the only engine wrapper. Stateless "oracle behind a
+  Promise wall": `Engine.bestMove(fen, {elo, movetimeMs})`, `Engine.evaluate(fen,
+  {depth})`, `Engine.stop()`. Hardened against three hazards: a per-search
+  **timeout** (no more infinite "Engine thinking" hangs), **init retry** after a
+  failed boot, and a **stop-race drain** (a stale `bestmove` from a stopped
+  search can't resolve a newer request). Timeouts are overridable via
+  `Engine._test.setTimeouts(...)` for tests.
+- `frontend/js/eval-bar.js` — evaluation display, driven by `Engine.evaluate`.
+- `frontend/js/play.js` + `play-view.js` — Play vs Engine (logic / presentation split).
+- `frontend/js/game-replay.js` — replay with per-move eval.
 
-What still works:
-- Saving/loading positions, tags, annotations, all CRUD
-- Board display and drag-to-move in analysis mode
-- MoveNavigator (arrow keys, on-screen buttons) — now the sole history owner
-- Practice history (viewing past games)
-- Game viewer with move navigation
+Analysis-tree navigation was deliberately NOT rebuilt; "Analyze on Lichess"
+buttons (see `engine-games-ui.js`) hand the position off to Lichess instead.
 
-What is temporarily disabled:
-- Engine evaluation display (no eval bar, no engine lines)
-- Practice vs Stockfish ("Start Practice" shows a toast instead)
+What works: Play vs Engine at selectable Elo; a finished game shows a sticky
+panel (Play again / Back to position / Analyze) rather than auto-navigating;
+"End game" lets you stop early and mark the result (Win/Loss/Draw/Unfinished).
 
 ### Board editor not working
 

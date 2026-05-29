@@ -105,6 +105,9 @@ async function loadPositionDetail(id) {
     
     // Load engine games for this position
     loadEngineGames(id);
+
+    // Default the Play color to the side currently on the bottom of the board.
+    if (window.syncPlayColorToOrientation) syncPlayColorToOrientation();
 }
 
 function copyFen() {
@@ -182,6 +185,8 @@ function flipDetailBoard() {
     const flipped = BoardManager.isFlipped('detail-board');
     AppState.detailFlipped = flipped;
     AppState.currentDetailOrientation = flipped ? 'black' : 'white';
+    // Keep the Play color default pointed at the side now on the bottom.
+    if (window.syncPlayColorToOrientation) syncPlayColorToOrientation();
 }
 
 

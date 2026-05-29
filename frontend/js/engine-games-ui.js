@@ -109,6 +109,18 @@ function getVisibleDetailBoardOrientation() {
     return AppState.detailFlipped ? 'black' : 'white';
 }
 
+// Pre-select the Play color to match the side currently shown at the bottom of
+// the detail board (its live orientation), so launching a game defaults to the
+// side the user is studying — saving a click. Called when the detail page loads
+// and again whenever the board is flipped, so it always tracks the live view
+// rather than the position's stored orientation. The user can still override the
+// dropdown (e.g. to "side to move" or "random") before pressing Play.
+function syncPlayColorToOrientation() {
+    const select = document.getElementById('engine-color-select');
+    if (!select) return;
+    select.value = getVisibleDetailBoardOrientation(); // 'white' | 'black'
+}
+
 
 function getSavedSideToMoveColor(fen) {
     // Source of truth at click time: the actual detail board currently on screen.
@@ -216,3 +228,4 @@ window.startEnginePlay = startEnginePlay;
 window.loadEngineGames = loadEngineGames;
 window.openEngineGame = openEngineGame;
 window.deleteEngineGame = deleteEngineGame;
+window.syncPlayColorToOrientation = syncPlayColorToOrientation;

@@ -538,7 +538,7 @@
 }
 /* Comfortably-larger, more prominent buttons in the position-detail board
    toolbar only (nav arrows, Flip / Flip FEN / Lichess, Save-current chips,
-   Shuffle). Scoped to #view-detail so the games and search toolbars, which
+   Random). Scoped to #view-detail so the games and search toolbars, which
    share .board-controls, are left untouched. The #id + two classes outrank
    .btn-sm, so these win without !important. */
 #view-detail .board-controls .btn {

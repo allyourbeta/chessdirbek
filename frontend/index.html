@@ -57,8 +57,11 @@
         <div id="cat-featured-board" class="board-wrap board-wrap--fluid"></div>
         <div class="featured-board-controls">
           <button class="btn btn-md btn-ghost" data-action="flip-category-featured-board">Flip</button>
-          <button class="btn btn-md btn-ghost" data-action="shuffle-category-featured">Random</button>
-          <button class="btn btn-md btn-ghost" data-action="analyze-featured-on-lichess" title="Open this position in Lichess analysis">Lichess</button>
+          <span class="ctl-sep" aria-hidden="true"></span>
+          <button class="btn btn-md btn-ghost" data-action="shuffle-category-featured" title="Show a random position from this category">Random<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></button>
+          <span class="ctl-sep" aria-hidden="true"></span>
+          <button class="btn btn-md btn-ghost" data-action="analyze-featured-on-lichess" title="Open this position in Lichess analysis (opens a new tab)">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+          <span class="ctl-sep" aria-hidden="true"></span>
           <button class="btn btn-md btn-ghost" data-action="fork-category-featured" title="Fork — copy into a new position">⑂ Fork</button>
           <button class="btn btn-md btn-ghost" data-action="show-featured-detail">Details →</button>
         </div>

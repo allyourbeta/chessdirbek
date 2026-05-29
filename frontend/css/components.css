@@ -552,7 +552,8 @@
 /* Thin separator that visually groups the top toolbar by function
    (move-nav | board ops | random | external) without adding button colors.
    The control-group's --sp-2 flex gap supplies the breathing room on each side. */
-.board-controls .ctl-sep {
+.board-controls .ctl-sep,
+.featured-board-controls .ctl-sep {
   width: 1px;
   align-self: stretch;
   min-height: 16px;

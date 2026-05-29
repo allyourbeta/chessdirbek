@@ -100,6 +100,14 @@ else
     echo ""
 fi
 
+# 4e. FEN Utils Tests (consolidated fen-utils.js module)
+if command -v node >/dev/null 2>&1; then
+    run_test_section "FEN Utils Tests" "node tests/fen/fen-utils.test.js"
+else
+    echo -e "${YELLOW}⚠️  node not found, skipping fen-utils tests${NC}"
+    echo ""
+fi
+
 # 5. Manual verification checks
 echo -e "${YELLOW}=== Manual Verification Checks ===${NC}"
 

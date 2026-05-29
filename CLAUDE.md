@@ -75,6 +75,12 @@ Split files (to honor 300-line limit):
   + `mini-board.js` (thumbnail renderer) — extracted from `shared.js`/`board.js` so each
   is one concern. All three are classic scripts loaded before `shared.js`; `mini-board.js`
   depends on `piece-assets.js`, so it must load after it.
+- `fen-utils.js` — the single home for FEN reasoning (normalize, read/force side-to-move,
+  sanitize/complete partial FENs, `loadChessFromBoardFen`). `play.js`, `board.js`, and
+  `engine-games-ui.js` all call `FenUtils.*` instead of keeping their own copies. Pure
+  module (attaches to `window.FenUtils`, also `module.exports` for Node tests). Load before
+  its consumers. NOTE: `rotateFen180` lives in `fen-actions.js` (the clipboard/Lichess
+  actions module), not here — it is not duplicated anywhere.
 
 ### cm-chessboard v8 API
 

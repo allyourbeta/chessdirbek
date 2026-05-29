@@ -8,10 +8,10 @@
 
 const assert = require('assert');
 
-// engine-games-ui.js assigns a few names to `window` at load; provide it.
+// fen-utils.js attaches to `window` and also exports via module.exports.
 global.window = {};
 
-const { forceFenSideToMove } = require('../../frontend/js/engine-games-ui.js');
+const { forceFenSideToMove } = require('../../frontend/js/fen-utils.js');
 
 // 1. Board-only FEN + black to move → completed 6-field FEN with a 'b' token.
 //    (The real Black-perspective capture, post-rotation, is board-only.)

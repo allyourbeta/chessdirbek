@@ -21,7 +21,7 @@ async function startEnginePlay() {
         return;
     }
 
-    const fenSideToMove = getSideToMoveFromFen(rawFen);
+    const fenSideToMove = FenUtils.getSideToMoveColor(rawFen);
     const detailBoardOrientation = getVisibleDetailBoardOrientation();
 
     let userColor = selectedColor;
@@ -49,7 +49,7 @@ async function startEnginePlay() {
     // detail page. Do NOT flip the play board merely because userColor is black;
     // many imported/saved diagrams already encode black-at-bottom in the piece
     // placement while the board orientation itself is still white-at-bottom.
-    const startFen = forceFenSideToMove(rawFen, startSideToMove);
+    const startFen = FenUtils.forceFenSideToMove(rawFen, startSideToMove);
 
     const prepared = window.PlayMode && PlayMode.validateStartFen
         ? PlayMode.validateStartFen(startFen)
@@ -93,11 +93,6 @@ async function startEnginePlay() {
     });
 }
 
-function getSideToMoveFromFen(fen) {
-    const side = (fen || '').trim().split(/\s+/)[1];
-    return side === 'b' ? 'black' : 'white';
-}
-
 function getVisibleDetailFen() {
     const detailFenEl = document.getElementById('detail-fen');
     const textFen = detailFenEl && detailFenEl.textContent ? detailFenEl.textContent.trim() : '';
@@ -129,17 +124,7 @@ function getSavedSideToMoveColor(fen) {
 
     const orientation = AppState.currentDetailOrientation || (AppState.detailFlipped ? 'black' : 'white');
     if (orientation === 'black' || orientation === 'white') return orientation;
-    return getSideToMoveFromFen(fen);
-}
-
-function forceFenSideToMove(fen, color) {
-    const parts = (fen || '').trim().replace(/\s+/g, ' ').split(' ');
-    if (!parts[0]) return fen;
-    while (parts.length < 6) {
-        parts.push(parts.length === 1 ? 'w' : parts.length === 2 ? '-' : parts.length === 3 ? '-' : parts.length === 4 ? '0' : '1');
-    }
-    parts[1] = color === 'black' ? 'b' : 'w';
-    return parts.slice(0, 6).join(' ');
+    return FenUtils.getSideToMoveColor(fen);
 }
 
 // Open the position currently on the detail board in Lichess analysis with the
@@ -150,7 +135,7 @@ function forceFenSideToMove(fen, color) {
 function analyzeDetailOnLichess() {
     const fen = getVisibleDetailFen();
     const color = getSavedSideToMoveColor(fen);
-    FenActions.analyzeOnLichessFen(forceFenSideToMove(fen, color));
+    FenActions.analyzeOnLichessFen(FenUtils.forceFenSideToMove(fen, color));
 }
 
 async function loadEngineGames(positionId) {
@@ -231,8 +216,3 @@ window.startEnginePlay = startEnginePlay;
 window.loadEngineGames = loadEngineGames;
 window.openEngineGame = openEngineGame;
 window.deleteEngineGame = deleteEngineGame;
-
-// Test-only export (no-op in the browser, where `module` is undefined).
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { forceFenSideToMove, getSideToMoveFromFen };
-}

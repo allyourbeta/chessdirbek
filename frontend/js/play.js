@@ -81,7 +81,7 @@ window.PlayMode = (function() {
         PlayView.showActions('active');
         
         // If engine plays first (user is black and white to move, or vice versa)
-        const sideToMove = startFen.split(' ')[1] || 'w';
+        const sideToMove = FenUtils.getSideToMove(startFen);
         const enginePlaysFirst = (userColor === 'black' && sideToMove === 'w') ||
                                 (userColor === 'white' && sideToMove === 'b');
         
@@ -202,20 +202,14 @@ window.PlayMode = (function() {
         }
     }
 
-    function normalizeFen(fen) {
-        return (fen || '').trim().replace(/\s+/g, ' ');
-    }
-
     function normalizeUserColor(color, fen) {
         if (color === 'white' || color === 'black') return color;
-        const side = normalizeFen(fen).split(' ')[1];
-        return side === 'b' ? 'black' : 'white';
+        return FenUtils.getSideToMoveColor(fen);
     }
 
-
     function preparePlayableFen(rawFen) {
-        const originalFen = normalizeFen(rawFen);
-        const normalizedFen = completeAndSanitizeFen(originalFen);
+        const originalFen = FenUtils.normalizeFen(rawFen);
+        const normalizedFen = FenUtils.completeAndSanitizeFen(originalFen);
         const attempts = [];
 
         function tryLoad(label, fen) {
@@ -246,52 +240,6 @@ window.PlayMode = (function() {
         }
 
         return { ok: false, fen: normalizedFen, originalFen, attempts };
-    }
-
-    function completeAndSanitizeFen(fen) {
-        const parts = normalizeFen(fen).split(' ');
-        const board = parts[0] || '';
-        const turn = parts[1] === 'b' ? 'b' : 'w';
-        const requestedCastling = parts[2] && parts[2] !== '-' ? parts[2] : '-';
-        const castling = sanitizeCastlingRights(board, requestedCastling);
-        const ep = sanitizeEnPassant(parts[3]);
-        const halfmove = /^\d+$/.test(parts[4] || '') ? parts[4] : '0';
-        const fullmove = /^[1-9]\d*$/.test(parts[5] || '') ? parts[5] : '1';
-        return [board, turn, castling, ep, halfmove, fullmove].join(' ');
-    }
-
-    function sanitizeCastlingRights(board, requested) {
-        if (!requested || requested === '-') return '-';
-        const pieces = fenPieceMap(board);
-        let rights = '';
-        if (requested.includes('K') && pieces.e1 === 'K' && pieces.h1 === 'R') rights += 'K';
-        if (requested.includes('Q') && pieces.e1 === 'K' && pieces.a1 === 'R') rights += 'Q';
-        if (requested.includes('k') && pieces.e8 === 'k' && pieces.h8 === 'r') rights += 'k';
-        if (requested.includes('q') && pieces.e8 === 'k' && pieces.a8 === 'r') rights += 'q';
-        return rights || '-';
-    }
-
-    function fenPieceMap(board) {
-        const map = {};
-        const rows = (board || '').split('/');
-        for (let r = 0; r < rows.length; r += 1) {
-            let fileIndex = 0;
-            const rank = 8 - r;
-            for (const ch of rows[r]) {
-                if (/[1-8]/.test(ch)) {
-                    fileIndex += Number(ch);
-                } else {
-                    const file = 'abcdefgh'[fileIndex];
-                    if (file) map[file + rank] = ch;
-                    fileIndex += 1;
-                }
-            }
-        }
-        return map;
-    }
-
-    function sanitizeEnPassant(ep) {
-        return /^[a-h][36]$/.test(ep || '') ? ep : '-';
     }
     
     // --- Game conclusion -----------------------------------------------------

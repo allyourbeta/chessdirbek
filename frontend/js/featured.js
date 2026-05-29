@@ -62,6 +62,23 @@ function flipCategoryFeaturedBoard() {
     BoardManager.flip('cat-featured-board');
 }
 
+// Open the featured position directly in Lichess analysis, skipping the detail
+// page. Mirrors analyzeDetailOnLichess: read the LIVE featured board (the user
+// may have flipped it or moved pieces), use its orientation as the side to move
+// (our convention: you study from the side you intend to play), and force that
+// into the FEN so Lichess opens from the correct side even when the stored FEN's
+// turn field is stale/missing.
+function analyzeFeaturedOnLichess() {
+    const pos = AppState.allPositions.find(function(p) { return p.id === AppState.featuredCategoryId; });
+    const liveFen = (window.BoardManager && BoardManager.getPosition)
+        ? BoardManager.getPosition('cat-featured-board') : null;
+    const fen = liveFen || (pos && pos.fen);
+    if (!fen) return;
+    const orientation = (window.BoardManager && BoardManager.isFlipped
+        && BoardManager.isFlipped('cat-featured-board')) ? 'black' : 'white';
+    FenActions.analyzeOnLichessFen(FenUtils.forceFenSideToMove(fen, orientation));
+}
+
 function shuffleCategoryFeatured() {
     loadRandomCategoryFeatured();
 }
@@ -164,6 +181,7 @@ function loadFeaturedTabiyaById(id) {
 window.loadRandomCategoryFeatured = loadRandomCategoryFeatured;
 window.loadCategoryFeaturedById = loadCategoryFeaturedById;
 window.flipCategoryFeaturedBoard = flipCategoryFeaturedBoard;
+window.analyzeFeaturedOnLichess = analyzeFeaturedOnLichess;
 window.shuffleCategoryFeatured = shuffleCategoryFeatured;
 window.forkCategoryFeatured = forkCategoryFeatured;
 window.editFeaturedPosition = editFeaturedPosition;

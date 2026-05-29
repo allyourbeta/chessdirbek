@@ -39,6 +39,12 @@ const ActionHandlers = {
             case 'fork-category-featured':
                 forkCategoryFeatured();
                 break;
+            case 'analyze-featured-on-lichess':
+                analyzeFeaturedOnLichess();
+                break;
+            case 'randomize-position-list':
+                randomizePositionList();
+                break;
             case 'save-position':
                 savePosition();
                 break;

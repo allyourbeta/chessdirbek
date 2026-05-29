@@ -229,12 +229,32 @@ function _handlePositionListClick(event) {
     }
 }
 
+// Re-order the currently-loaded list into a new random order, in place.
+// Uses a Fisher–Yates shuffle: walk from the last index down to the first, and
+// at each position i swap with a randomly chosen earlier-or-equal index j. That
+// produces an unbiased permutation in a single pass. Math.random() reseeds every
+// call, so each click yields a different order (and a different set on top). This
+// is purely client-side on the already-fetched array — no server round-trip — and
+// works as a button because a <select> won't re-fire when its value is unchanged.
+function randomizePositionList() {
+    const arr = AppState.allPositions;
+    if (!arr || arr.length < 2) return;
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+    if (AppState.currentCategory) renderCategoryList(AppState.currentCategory);
+}
+
 window.loadCategoryPositions = loadCategoryPositions;
 window.mountCategoryTagFilter = mountCategoryTagFilter;
 window.renderCategoryList = renderCategoryList;
 window.showDetail = showDetail;
 window.deleteFromList = deleteFromList;
 window.randomFromList = randomFromList;
+window.randomizePositionList = randomizePositionList;
 
 // Keep legacy functions for backward compatibility
 window.loadPositions = loadPositions;

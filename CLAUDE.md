@@ -68,9 +68,16 @@ tags in `index.html`. Two files use `<script type="module">`:
   might navigate to the editor view.
 
 Split files (to honor 300-line limit):
-- `position-list.js` + `featured.js` — Position lists and featured board management
+- `position-list.js` (list rendering) + `position-list-selection.js` (multi-select &
+  bulk star/unstar) + `featured.js` — Position lists and featured board management
+- `position-form.js` (form CRUD + board controls) + `position-form-puzzle.js`
+  (prev/next puzzle navigation) — Add/edit position form
 - `practice-ui.js` + `practice-ui-actions.js` — Practice session UI and inline actions
-- `play.js` (game flow) + `play-view.js` (DOM rendering) — Play vs Engine
+- `play.js` (game flow/state) + `play-view.js` (DOM rendering) + `play-result.js`
+  (result rules + persistence) — Play vs Engine. NOTE: `play.js` is a cohesive stateful
+  controller; the pure/loader pieces were extracted (to `fen-utils.js` and `play-result.js`)
+  but the controller itself sits a little over 300 lines, as splitting it further would
+  require threading its game state through another module.
 - `piece-assets.js` (PIECE_SVG + pieceKey) + `ui-feedback.js` (toast/banner/notification)
   + `mini-board.js` (thumbnail renderer) — extracted from `shared.js`/`board.js` so each
   is one concern. All three are classic scripts loaded before `shared.js`; `mini-board.js`

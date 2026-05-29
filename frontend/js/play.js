@@ -31,7 +31,7 @@ window.PlayMode = (function() {
         // can actually play. Several saved positions are arbitrary diagrams; they
         // display fine in cm-chessboard, but their FEN metadata can contain stale
         // castling/en-passant fields that make chess.js reject the whole FEN.
-        const prepared = preparePlayableFen(options.startFen);
+        const prepared = FenUtils.preparePlayableFen(options.startFen);
         if (!prepared.ok) {
             console.error('[PlayMode.start] Refusing to start invalid FEN', prepared);
             toast('Invalid FEN position — staying on the selected position', 'error');
@@ -207,80 +207,26 @@ window.PlayMode = (function() {
         return FenUtils.getSideToMoveColor(fen);
     }
 
-    function preparePlayableFen(rawFen) {
-        const originalFen = FenUtils.normalizeFen(rawFen);
-        const normalizedFen = FenUtils.completeAndSanitizeFen(originalFen);
-        const attempts = [];
-
-        function tryLoad(label, fen) {
-            const chess = new Chess();
-            let loaded = false;
-            try {
-                loaded = !!(fen && chess.load(fen));
-            } catch (error) {
-                attempts.push({ label, fen, ok: false, error: String(error) });
-                return null;
-            }
-            attempts.push({ label, fen, ok: loaded });
-            return loaded ? chess : null;
-        }
-
-        let chess = tryLoad('sanitized', normalizedFen);
-        if (chess) {
-            return { ok: true, fen: normalizedFen, game: chess, originalFen, attempts };
-        }
-
-        // Last-resort metadata scrub: keep the board and side-to-move, but remove
-        // optional state that is often wrong in hand-entered / editor-created diagrams.
-        const parts = normalizedFen.split(' ');
-        const scrubbedFen = [parts[0], parts[1] || 'w', '-', '-', '0', parts[5] || '1'].join(' ');
-        chess = tryLoad('scrubbed', scrubbedFen);
-        if (chess) {
-            return { ok: true, fen: scrubbedFen, game: chess, originalFen, attempts };
-        }
-
-        return { ok: false, fen: normalizedFen, originalFen, attempts };
-    }
-    
     // --- Game conclusion -----------------------------------------------------
     // Three ways a game ends, all funnelling into a sticky "finished" panel
     // (no more auto-navigation): natural end (checkmate/draw), Resign (a loss),
     // and End game (user stops; result is then marked manually).
 
-    function computeNaturalResult() {
-        if (game.in_checkmate()) {
-            // "1-0" if black is mated, "0-1" if white is mated.
-            return { result: game.turn() === 'b' ? '1-0' : '0-1', outcome: 'checkmate' };
-        }
-        if (game.in_stalemate()) return { result: '1/2-1/2', outcome: 'stalemate' };
-        if (game.in_threefold_repetition()) return { result: '1/2-1/2', outcome: 'threefold' };
-        if (game.insufficient_material()) return { result: '1/2-1/2', outcome: 'insufficient' };
-        if (game.in_draw()) return { result: '1/2-1/2', outcome: 'fifty-move' };
-        return { result: '*', outcome: null };
-    }
-
     async function saveGame(result, outcome) {
         if (!game) return false;
         const history = game.history();
         if (history.length < 1) return false; // never save an empty game
-        try {
-            await ApiClient.post('/engine-games', {
-                position_id: positionId,
-                start_fen: startFen,
-                moves_san: history.join(' '),
-                user_color: userColor,
-                engine_elo: engineElo,
-                result: result,
-                outcome: outcome,
-                final_fen: game.fen(),
-                move_count: history.length
-            });
-            return true;
-        } catch (error) {
-            console.error('Failed to save game:', error);
-            toast('Failed to save game', 'error');
-            return false;
-        }
+        return PlayResult.saveEngineGame({
+            position_id: positionId,
+            start_fen: startFen,
+            moves_san: history.join(' '),
+            user_color: userColor,
+            engine_elo: engineElo,
+            result: result,
+            outcome: outcome,
+            final_fen: game.fen(),
+            move_count: history.length
+        });
     }
 
     // Freeze the board and switch to a terminal panel. Stays on the play screen
@@ -301,7 +247,7 @@ window.PlayMode = (function() {
         if (!game || ended) return;
         ended = true;
         thinking = false;
-        const { result, outcome } = computeNaturalResult();
+        const { result, outcome } = PlayResult.computeNaturalResult(game);
         const saved = await saveGame(result, outcome);
         if (saved) toast('Game saved');
         enterFinished();
@@ -334,18 +280,7 @@ window.PlayMode = (function() {
     // Called from the result-picker buttons after End game.
     async function markResult(kind) {
         if (!game) return;
-        let result = '*';
-        let outcome = 'unfinished';
-        if (kind === 'win') {
-            result = userColor === 'white' ? '1-0' : '0-1';
-            outcome = 'manual';
-        } else if (kind === 'loss') {
-            result = userColor === 'white' ? '0-1' : '1-0';
-            outcome = 'manual';
-        } else if (kind === 'draw') {
-            result = '1/2-1/2';
-            outcome = 'manual';
-        }
+        const { result, outcome } = PlayResult.resultForOutcome(kind, userColor);
         const saved = await saveGame(result, outcome);
         if (saved) toast('Game saved');
         backToDetail();
@@ -400,6 +335,6 @@ window.PlayMode = (function() {
         playAgain,
         cleanup,
         getCurrentFen: function() { return game ? game.fen() : null; },
-        validateStartFen: function(fen) { return preparePlayableFen(fen); }
+        validateStartFen: function(fen) { return FenUtils.preparePlayableFen(fen); }
     };
 })();

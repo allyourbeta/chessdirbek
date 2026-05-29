@@ -121,6 +121,47 @@
         return null;
     }
 
+    // Turn a saved/arbitrary FEN into one chess.js will actually play. Many saved
+    // diagrams display fine in cm-chessboard but carry stale castling/en-passant
+    // metadata that makes chess.js reject the whole FEN; we first try the
+    // sanitized form, then a last-resort scrub (board + side-to-move only).
+    // Returns { ok, fen, game?, originalFen, attempts } — `game` is a loaded
+    // Chess instance when ok. Requires the global `Chess`.
+    function preparePlayableFen(rawFen) {
+        const originalFen = normalizeFen(rawFen);
+        const normalizedFen = completeAndSanitizeFen(originalFen);
+        const attempts = [];
+
+        function tryLoad(label, fen) {
+            const chess = new Chess();
+            let loaded = false;
+            try {
+                loaded = !!(fen && chess.load(fen));
+            } catch (error) {
+                attempts.push({ label, fen, ok: false, error: String(error) });
+                return null;
+            }
+            attempts.push({ label, fen, ok: loaded });
+            return loaded ? chess : null;
+        }
+
+        let chess = tryLoad('sanitized', normalizedFen);
+        if (chess) {
+            return { ok: true, fen: normalizedFen, game: chess, originalFen, attempts };
+        }
+
+        // Last-resort metadata scrub: keep the board and side-to-move, but remove
+        // optional state that is often wrong in hand-entered / editor-created diagrams.
+        const parts = normalizedFen.split(' ');
+        const scrubbedFen = [parts[0], parts[1] || 'w', '-', '-', '0', parts[5] || '1'].join(' ');
+        chess = tryLoad('scrubbed', scrubbedFen);
+        if (chess) {
+            return { ok: true, fen: scrubbedFen, game: chess, originalFen, attempts };
+        }
+
+        return { ok: false, fen: normalizedFen, originalFen, attempts };
+    }
+
     const FenUtils = {
         normalizeFen,
         getSideToMove,
@@ -131,7 +172,8 @@
         sanitizeEnPassant,
         completeAndSanitizeFen,
         forceFenSideToMove,
-        loadChessFromBoardFen
+        loadChessFromBoardFen,
+        preparePlayableFen
     };
 
     if (typeof window !== 'undefined') window.FenUtils = FenUtils;

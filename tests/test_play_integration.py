@@ -3,7 +3,7 @@ import re
 
 
 def test_play_js_exists_and_loaded():
-    """Verify play.js is created and loaded before main.js."""
+    """Verify play.js is created and loaded before main.js (and play-result.js before play.js)."""
     # Check file exists
     with open('frontend/js/play.js', 'r') as f:
         content = f.read()
@@ -12,20 +12,28 @@ def test_play_js_exists_and_loaded():
         assert 'handleUserMove' in content
         assert 'engineReply' in content
         assert 'game.game_over()' in content  # Uses snake_case chess.js 0.10.3
-        assert 'game.in_checkmate()' in content
-    
+
+    # The game-result rules were extracted to play-result.js.
+    with open('frontend/js/play-result.js', 'r') as f:
+        result_content = f.read()
+        assert 'window.PlayResult' in result_content
+        assert 'game.in_checkmate()' in result_content
+
     # Check loaded in index.html before main.js
     with open('frontend/index.html', 'r') as f:
         html = f.read()
         # Find script positions
         engine_pos = html.find('src="/js/engine.js"')
+        result_pos = html.find('src="/js/play-result.js"')
         play_pos = html.find('src="/js/play.js"')
         main_pos = html.find('src="/js/main.js"')
-        
+
         assert engine_pos > 0, "engine.js not found in index.html"
+        assert result_pos > 0, "play-result.js not found in index.html"
         assert play_pos > 0, "play.js not found in index.html"
         assert main_pos > 0, "main.js not found in index.html"
         assert engine_pos < play_pos < main_pos, "Scripts must load in order: engine -> play -> main"
+        assert result_pos < play_pos, "play-result.js must load before play.js"
 
 
 def test_play_view_html_structure():
@@ -62,18 +70,25 @@ def test_action_handlers_registered():
 
 
 def test_chess_js_snake_case_methods():
-    """Verify play.js uses chess.js 0.10.3 snake_case methods."""
+    """Verify the play flow uses chess.js 0.10.3 snake_case methods.
+
+    The result predicates now live in play-result.js (extracted from play.js),
+    so we check both files together.
+    """
     with open('frontend/js/play.js', 'r') as f:
-        content = f.read()
-        
-        # Should use snake_case
-        assert 'game.game_over()' in content
-        assert 'game.in_checkmate()' in content
-        assert 'game.in_stalemate()' in content
-        assert 'game.in_threefold_repetition()' in content
-        assert 'game.insufficient_material()' in content or 'game.in_draw()' in content
-        
-        # Should NOT use camelCase (newer version)
+        play = f.read()
+    with open('frontend/js/play-result.js', 'r') as f:
+        result = f.read()
+
+    # Snake_case methods, in whichever file now owns them.
+    assert 'game.game_over()' in play
+    assert 'game.in_checkmate()' in result
+    assert 'game.in_stalemate()' in result
+    assert 'game.in_threefold_repetition()' in result
+    assert 'game.insufficient_material()' in result or 'game.in_draw()' in result
+
+    # Should NOT use camelCase (newer chess.js) anywhere in the play flow.
+    for content in (play, result):
         assert 'isGameOver()' not in content
         assert 'isCheckmate()' not in content
         assert 'isStalemate()' not in content

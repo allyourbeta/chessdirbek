@@ -46,3 +46,6 @@ chessquiz.db-journal
 *.db.backup*
 *.backup-*
 backups/
+
+# Vendored OCR recognizer (cloned by scripts/setup_ocr.sh)
+backend/vendor/

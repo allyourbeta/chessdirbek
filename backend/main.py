@@ -14,6 +14,7 @@ from backend.api import (
     engine_games_router,
     games_router,
     opening_tree_router,
+    ocr_router,
     positions_router,
     positions_extra_router,
     tags_router,
@@ -45,6 +46,7 @@ app.include_router(games_router, prefix="/api")
 app.include_router(collections_router, prefix="/api")
 app.include_router(opening_tree_router, prefix="/api")
 app.include_router(engine_games_router, prefix="/api")
+app.include_router(ocr_router, prefix="/api")
 
 
 # During local development the browser (and PWA service worker) aggressively

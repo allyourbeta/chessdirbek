@@ -124,10 +124,20 @@
           <div class="btn-row">
             <button class="btn btn-primary btn-md" data-action="save-position">Save Position</button>
             <button class="btn btn-md" data-action="load-fen">Load Board</button>
+            <button class="btn btn-md" data-action="ocr-paste-image" title="Paste a copied board image and recognize it into a FEN">Paste board image</button>
             <button class="btn btn-md" data-action="set-start-pos">Starting Position</button>
             <button class="btn btn-md" data-action="flip-board">Flip Board</button>
             <button class="btn btn-md" data-action="open-editor-from-form">Editor</button>
             <button class="btn btn-md" data-action="cancel-add-position">Cancel</button>
+          </div>
+          <div id="ocr-debug" style="margin-top:16px;padding:12px;border:1px dashed var(--border);border-radius:8px">
+            <div style="font-weight:600;margin-bottom:8px;font-size:13px">OCR debug (board image &rarr; FEN)</div>
+            <div class="btn-row" style="margin-bottom:8px">
+              <button class="btn btn-sm" data-action="ocr-check-status">Check status</button>
+              <button class="btn btn-sm" data-action="ocr-download-models">Download models</button>
+              <input type="file" id="ocr-file" accept="image/*" style="font-size:12px">
+            </div>
+            <pre id="ocr-debug-out" style="white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;margin:0;color:var(--text-secondary)">Click "Check status" to see whether OCR is ready.</pre>
           </div>
         </div>
       </div>
@@ -693,6 +703,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/play.js"></script>
 <script src="/js/game-replay.js"></script>
 <script src="/js/engine-games-ui.js"></script>
+<script src="/js/ocr-import.js"></script>
 <script src="/js/build-stamp.js"></script>
 <script type="module" src="/js/main.js"></script>
 <script>

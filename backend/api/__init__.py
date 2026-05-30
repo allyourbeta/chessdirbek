@@ -6,6 +6,7 @@ from backend.api.positions import router as positions_router
 from backend.api.positions_extra import router as positions_extra_router
 from backend.api.tags_and_chess import chess_router, tags_router
 from backend.api.engine_games import router as engine_games_router
+from backend.api.ocr import router as ocr_router
 
 __all__ = [
     "annotations_router",
@@ -17,4 +18,5 @@ __all__ = [
     "collections_router",
     "opening_tree_router",
     "engine_games_router",
+    "ocr_router",
 ]

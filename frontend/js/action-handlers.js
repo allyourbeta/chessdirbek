@@ -51,6 +51,15 @@ const ActionHandlers = {
             case 'load-fen':
                 loadFen();
                 break;
+            case 'ocr-paste-image':
+                OcrImport.pasteFromButton(target);
+                break;
+            case 'ocr-check-status':
+                OcrImport.checkStatus();
+                break;
+            case 'ocr-download-models':
+                OcrImport.downloadModels(target);
+                break;
             case 'set-start-pos':
                 setStartPos();
                 break;

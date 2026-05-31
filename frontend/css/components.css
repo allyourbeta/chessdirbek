@@ -624,6 +624,7 @@
 }
 #view-detail .board-controls .control-group {
   gap: var(--sp-2);
+  flex-wrap: wrap;
 }
 /* Thin separator that visually groups the top toolbar by function
    (move-nav | board ops | random | external) without adding button colors.

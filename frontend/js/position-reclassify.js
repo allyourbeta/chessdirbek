@@ -60,49 +60,8 @@ function _showReclassifyUndo(toLabel, onUndo) {
     });
 }
 
-/* ---- From the detail view (dropdown) ---- */
-
-function toggleReclassifyMenu() {
-    var menu = document.getElementById('reclassify-menu');
-    if (!menu) return;
-    var opening = (menu.style.display === 'none' || menu.style.display === '');
-    var cur = AppState.currentDetailType || 'tabiya';
-    menu.querySelectorAll('[data-reclassify]').forEach(function (b) {
-        b.style.display = (b.dataset.reclassify === cur) ? 'none' : '';
-    });
-    menu.style.display = opening ? 'block' : 'none';
-}
-
-function closeReclassifyMenu() {
-    var menu = document.getElementById('reclassify-menu');
-    if (menu) menu.style.display = 'none';
-}
-
-async function reclassifyFromDetail(newType) {
-    closeReclassifyMenu();
-    var id = AppState.currentDetailId;
-    if (!id) return;
-    var oldType = AppState.currentDetailType || 'tabiya';
-    if (newType === oldType) return;
-
-    var undoPayload = AppState.currentDetailUndo || { position_type: oldType };
-    var body = _reclassifyBody(newType);
-    if (!body) return;
-
-    try { await ApiClient.put('/positions/' + id, body); }
-    catch (e) { toast('Reclassify failed', 'error'); return; }
-
-    var sourceCat = (TYPE_TO_CATEGORY && TYPE_TO_CATEGORY[oldType]) || 'tabiya';
-    Router.navigate({ view: sourceCat }); // file and return to where you were triaging
-    _showReclassifyUndo(_categoryLabelForType(newType), async function () {
-        await ApiClient.put('/positions/' + id, undoPayload);
-        Router.navigate({ view: sourceCat });
-    });
-}
-
-document.addEventListener('click', function (e) {
-    if (!e.target.closest('#reclassify-dropdown')) closeReclassifyMenu();
-});
+/* ---- From the detail view: removed. Reclassify is now list-only (per-card
+   Move button). Shared helpers above are reused by the list path below. ---- */
 
 /* ---- From the category list (per-card Move button) ---- */
 
@@ -173,9 +132,6 @@ document.addEventListener('click', function (e) {
 });
 window.addEventListener('scroll', closeListMoveMenu, true);
 
-window.toggleReclassifyMenu = toggleReclassifyMenu;
-window.closeReclassifyMenu = closeReclassifyMenu;
-window.reclassifyFromDetail = reclassifyFromDetail;
 window.openListMoveMenu = openListMoveMenu;
 window.closeListMoveMenu = closeListMoveMenu;
 window.reclassifyFromList = reclassifyFromList;

@@ -87,8 +87,9 @@ var MoveNavigator = (function () {
         el.innerHTML =
             '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="first">|&lt;</button>' +
             '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="prev">&lt;</button>' +
-            '<span class="text-muted" style="font-size:12px;min-width:48px;text-align:center">' +
-                (len > 1 ? (inst.idx + 1) + '/' + len : '') + '</span>' +
+            (len > 1
+                ? '<span class="text-muted" style="font-size:12px;min-width:48px;text-align:center">' + (inst.idx + 1) + '/' + len + '</span>'
+                : '') +
             '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-nav="next">&gt;</button>' +
             '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-nav="last">&gt;|</button>';
         el.onclick = function (e) {

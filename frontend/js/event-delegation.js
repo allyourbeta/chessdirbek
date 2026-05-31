@@ -40,13 +40,6 @@ function handleClick(event) {
         return;
     }
     
-    // Handle data-reclassify attributes (move a position to another category)
-    const reclassify = target.dataset.reclassify;
-    if (reclassify) {
-        reclassifyFromDetail(reclassify);
-        return;
-    }
-    
     // Handle data-nav-cancel attributes
     const navCancel = target.dataset.navCancel;
     if (navCancel) {

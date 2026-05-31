@@ -3,12 +3,6 @@ async function loadPositionDetail(id) {
     AppState.currentDetailId = id;
     AppState.currentDetailFen = pos.fen;
     AppState.currentDetailType = pos.position_type || 'tabiya';
-    // Snapshot the fields reclassify can change, for a faithful Undo.
-    AppState.currentDetailUndo = {
-        position_type: pos.position_type,
-        solution_san: pos.solution_san,
-        theme: pos.theme,
-    };
     AppState.currentDetailOrientation = pos.orientation || 'white';
     // Honor the saved per-position orientation (default 'white' if missing).
     const flipped = pos.orientation === 'black';

@@ -36,10 +36,6 @@ async function loadPositionDetail(id) {
     if (pos.position_type === 'puzzle') {
         document.getElementById('detail-stockfish-card').style.display = 'none';
         document.getElementById('detail-stats-card').style.display = 'none';
-        document.getElementById('practice-section').style.display = 'none';
-        document.getElementById('practice-history-section').style.display = 'none';
-        document.getElementById('aggregate-stats-section').style.display = 'none';
-        document.getElementById('your-moves-section').style.display = 'none';
         
         var catKey = TYPE_TO_CATEGORY[pos.position_type] || 'tabiya';
         var backLabel = CATEGORIES[catKey] ? CATEGORIES[catKey].label : 'Tabiya';
@@ -53,10 +49,6 @@ async function loadPositionDetail(id) {
     } else {
         document.getElementById('detail-stockfish-card').style.display = 'none';
         document.getElementById('detail-stats-card').style.display = 'none';
-        document.getElementById('practice-section').style.display = '';
-        document.getElementById('practice-history-section').style.display = '';
-        document.getElementById('aggregate-stats-section').style.display = '';
-        document.getElementById('your-moves-section').style.display = '';
         
         var catKey = TYPE_TO_CATEGORY[pos.position_type] || 'tabiya';
         var backLabel = CATEGORIES[catKey] ? CATEGORIES[catKey].label : 'Tabiya';

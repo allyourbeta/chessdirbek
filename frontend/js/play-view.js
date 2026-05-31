@@ -34,6 +34,8 @@ window.PlayView = (function() {
 
     /** Render the large status line (your move / thinking / result). */
     function renderStatus(game, userColor, thinking) {
+        const playFen = document.getElementById('play-fen');
+        if (playFen) playFen.textContent = game.fen();
         const statusEl = document.getElementById('play-status');
         if (!statusEl) return;
         statusEl.classList.remove('is-thinking', 'is-over');

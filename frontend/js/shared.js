@@ -88,7 +88,7 @@ function renderRoute(route) {
             loadPositionDetail(route.id);
             break;
         case 'play':
-            _activateView('play', 'Play vs Engine');
+            _activateView('play', 'Practice');
             // PlayMode.start is called by the action handler after navigation
             break;
         case 'replay':

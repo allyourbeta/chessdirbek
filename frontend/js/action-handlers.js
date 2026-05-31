@@ -159,6 +159,11 @@ const ActionHandlers = {
             case 'copy-fen':
                 copyFen();
                 break;
+            case 'copy-play-fen': {
+                const _pf = document.getElementById('play-fen');
+                if (_pf && window.FenActions) FenActions.copyFen(_pf.textContent);
+                break;
+            }
             case 'analyze-on-lichess':
                 FenActions.analyzeOnLichess();
                 break;
@@ -217,23 +222,11 @@ const ActionHandlers = {
             case 'detail-back':
                 Navigation.cancelToFallback({view: TYPE_TO_CATEGORY[AppState.currentDetailType] || 'tabiya'});
                 break;
-            case 'practice-start-from-detail':
-                Practice.startFromDetail();
-                break;
-            case 'practice-clear-filters':
-                Practice.clearFilters();
-                break;
-            case 'practice-show-more':
-                Practice.showMore();
-                break;
             case 'bulk-add-run':
                 BulkAdd.run();
                 break;
             case 'bulk-add-cancel':
                 Navigation.cancelToFallback({view: TYPE_TO_CATEGORY[BulkAdd.currentType()] || 'tabiya'});
-                break;
-            case 'practice-discard':
-                Practice.discard();
                 break;
             // Modal actions
             case 'save-pos-confirm':

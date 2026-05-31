@@ -91,6 +91,7 @@ class PositionBrief(BaseModel):
     orientation: str
     starred: bool
     tags: list[TagOut]
+    created_at: datetime  # Surfaced as a debug tooltip in the list; confirms order/adds
 
     class Config:
         from_attributes = True

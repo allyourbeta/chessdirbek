@@ -22,6 +22,15 @@ Vanilla JS (browser)
 ## File Limits
 - No file over 300 lines. Split immediately if exceeded.
 
+## Build Stamp (automatic — do not hand-edit)
+The build ID (`YYYYMMDD-HHMM`) is stamped into `frontend/js/build-stamp.js`
+(`BUILD_ID`) and `backend/api/ocr.py` (`BACKEND_BUILD`) automatically by a
+pre-commit hook at `scripts/hooks/pre-commit`. Do NOT bump these by hand.
+One-time setup per clone: `git config core.hooksPath scripts/hooks`.
+The frontend shows it as a small ⓘ marker in the header (full string on hover);
+the backend echoes it at `/api/ocr/status`. If the two ever disagree, you're on
+a stale cache — fix the cache, don't debug the logic.
+
 ## Backend Structure
 - `models/` — SQLAlchemy models
 - `api/` — FastAPI route handlers (all DB calls here)

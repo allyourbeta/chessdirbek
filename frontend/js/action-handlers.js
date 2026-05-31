@@ -214,6 +214,9 @@ const ActionHandlers = {
             case 'delete-from-detail':
                 deleteFromDetail();
                 break;
+            case 'toggle-reclassify-menu':
+                toggleReclassifyMenu();
+                break;
             case 'detail-back':
                 Navigation.cancelToFallback({view: TYPE_TO_CATEGORY[AppState.currentDetailType] || 'tabiya'});
                 break;

@@ -7,11 +7,16 @@
 //
 // Convention: BUILD_ID = "NN-short-label" (e.g. "04-arrow-capture").
 (function () {
-    var BUILD_ID = '24-ocr-quick-capture';
+    var BUILD_ID = '20260530-2209';
 
     function paint() {
         var el = document.getElementById('build-stamp');
-        if (el) el.textContent = 'build ' + BUILD_ID;
+        if (!el) return;
+        // Unobtrusive marker; the actual build string lives in the hover tooltip
+        // (native title) so it confirms which code is loaded without taking up
+        // header space permanently.
+        el.textContent = '\u24d8'; // circled small 'i'
+        el.title = 'build ' + BUILD_ID;
     }
 
     if (document.readyState === 'loading') {

@@ -46,7 +46,7 @@
     </div>
     <button class="mute-btn" data-action="toggle-mute" id="mute-btn" title="Toggle sound">&#x1f50a;</button>
     <span id="build-stamp" title="Build identifier — confirms which code is loaded"
-          style="font-size:11px;font-family:monospace;color:var(--text-muted);padding:2px 6px;border:1px solid var(--border-color,#ccc);border-radius:4px;white-space:nowrap"></span>
+          style="font-size:11px;font-family:monospace;color:var(--text-muted);opacity:.5;cursor:default;padding:0 4px;user-select:none"></span>
   </div>
 </header>
 <div id="notification-banner" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:1000;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:16px;font-weight:500;text-align:center;min-width:300px;max-width:500px"></div>
@@ -370,6 +370,15 @@
           </div>
           <div class="btn-row" style="margin:0">
             <button class="btn" id="prev-puzzle-btn" data-navigate-puzzle="previous" style="display:none">← Previous</button>
+            <div class="nav-dropdown" id="reclassify-dropdown" style="display:inline-block">
+              <button class="btn" data-action="toggle-reclassify-menu" title="Move this position to another category">Move to ▾</button>
+              <div class="nav-dropdown-menu" id="reclassify-menu" style="display:none">
+                <button data-reclassify="puzzle">Tactics</button>
+                <button data-reclassify="tabiya">Tabiya</button>
+                <button data-reclassify="endgame">Endings</button>
+                <button data-reclassify="strategy">Strategy</button>
+              </div>
+            </div>
             <button class="btn" data-action="edit-position">Edit</button>
             <button class="btn btn-danger btn-sm" data-action="delete-from-detail">Delete</button>
             <button class="btn" id="detail-back-btn" data-action="detail-back">Back</button>
@@ -673,6 +682,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
 <script src="/js/position-list-selection.js"></script>
 <script src="/js/featured.js"></script>
 <script src="/js/position-detail.js"></script>
+<script src="/js/position-reclassify.js"></script>
 <script src="/js/position-form.js"></script>
 <script src="/js/position-form-puzzle.js"></script>
 <script src="/js/move-count.js"></script>

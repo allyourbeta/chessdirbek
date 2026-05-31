@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#
+# Auto-stamp the build ID into BOTH halves of the app on every commit, so the
+# frontend badge and the backend /api/ocr/status can never silently disagree
+# and a stale cache is always obvious.
+#
+# Build ID format: YYYYMMDD-HHMM (commit time). Monotonic, sortable, and tells
+# you build *freshness* at a glance — which is exactly what you want when a bug
+# turns out to be an old cached build.
+#
+# One-time install (hooks live outside the repo by default, so point git at the
+# version-controlled copy):
+#
+#     git config core.hooksPath scripts/hooks
+#
+# After that this runs automatically on `git commit`. It restages the two
+# stamped files so the new build ID is part of the commit.
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+BUILD_ID="$(date +%Y%m%d-%H%M)"
+
+STAMP_JS="$ROOT/frontend/js/build-stamp.js"
+OCR_PY="$ROOT/backend/api/ocr.py"
+
+# Frontend: replace the value in `var BUILD_ID = '...';`
+if [ -f "$STAMP_JS" ]; then
+    perl -i -pe "s/^(\s*var BUILD_ID = ').*?(';)/\${1}${BUILD_ID}\${2}/" "$STAMP_JS"
+    git add "$STAMP_JS"
+fi
+
+# Backend: replace the value in `BACKEND_BUILD = "..."`
+if [ -f "$OCR_PY" ]; then
+    perl -i -pe "s/^(BACKEND_BUILD = \").*?(\")/\${1}${BUILD_ID}\${2}/" "$OCR_PY"
+    git add "$OCR_PY"
+fi
+
+echo "[pre-commit] stamped build ${BUILD_ID}"

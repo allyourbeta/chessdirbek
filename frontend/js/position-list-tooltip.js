@@ -51,3 +51,14 @@ function _onListMouseOut(event) {
 window._onListMouseOver = _onListMouseOver;
 window._onListMouseOut = _onListMouseOut;
 window._hidePosTip = _hidePosTip;
+
+// Format created_at for display. The server sends naive UTC (no tz marker), so we
+// mark it UTC before converting — otherwise the browser reads UTC wall-clock as
+// local and the time lands hours in the future.
+function _formatAddedLocal(iso) {
+    if (!iso) return '';
+    var hasTz = /[zZ]|[+-]\d{2}:?\d{2}$/.test(iso);
+    var d = new Date(hasTz ? iso : iso + 'Z');
+    return isNaN(d.getTime()) ? '' : 'Added ' + d.toLocaleString();
+}
+window._formatAddedLocal = _formatAddedLocal;

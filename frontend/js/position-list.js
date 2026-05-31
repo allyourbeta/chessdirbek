@@ -56,15 +56,8 @@ function mountCategoryTagFilter(categoryKey) {
         });
     }
 
-    // Mount sort dropdown
-    const sortSelect = document.getElementById('position-sort');
-    if (sortSelect) {
-        sortSelect.value = AppState.positionSort || 'newest';
-        sortSelect.addEventListener('change', function() {
-            AppState.positionSort = this.value;
-            loadCategoryPositions(categoryKey);
-        });
-    }
+    // Mount sort pill (Newest / Oldest / Shuffle)
+    _setupSortPill(categoryKey);
 
     // Mount selection controls
     _setupSelectionControls(categoryKey);
@@ -120,7 +113,7 @@ function renderCategoryList(categoryKey) {
         // (position-list-tooltip.js), used to confirm a position saved and the
         // order is right. The Move button (top-left, opposite Delete) reclassifies
         // the card to another category without opening the detail view.
-        const addedTitle = p.created_at ? 'Added ' + new Date(p.created_at).toLocaleString() : '';
+        const addedTitle = _formatAddedLocal(p.created_at);
         return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}" data-added="${Html.escape(addedTitle)}">${renderMiniBoard(p.fen, p.orientation)}<button class="btn btn-sm btn-ghost pos-item-move" data-move-id="${p.id}" title="Move to another category" aria-label="Move to another category"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7.5V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7"></path><path d="M2 13h10"></path><path d="m9 16 3-3-3-3"></path></svg></button><div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-flip" data-flip-id="${p.id}" title="Flip FEN — rotate the position 180° to fix a board captured from the wrong side"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
     
@@ -251,6 +244,40 @@ function randomizePositionList() {
         arr[j] = tmp;
     }
     if (AppState.currentCategory) renderCategoryList(AppState.currentCategory);
+}
+
+// Sort pill: Newest / Oldest re-fetch with that server order; Shuffle reorders the
+// loaded list client-side. Only the active segment is highlighted. Reset to the
+// current server sort on each mount (navigation) so the highlight stays honest.
+function _setupSortPill(categoryKey) {
+    const pill = document.getElementById('sort-pill');
+    if (!pill) return;
+    AppState.sortMode = AppState.positionSort || 'newest';
+    _renderSortPill();
+    pill.querySelectorAll('.sort-pill-seg').forEach(function (seg) {
+        // onclick (not addEventListener) so re-mounting a category can't stack handlers
+        seg.onclick = function () {
+            const mode = seg.dataset.sortMode;
+            AppState.sortMode = mode;
+            _renderSortPill();
+            if (mode === 'shuffle') {
+                randomizePositionList();
+            } else {
+                AppState.positionSort = mode;
+                loadCategoryPositions(categoryKey);
+            }
+        };
+    });
+}
+
+function _renderSortPill() {
+    const pill = document.getElementById('sort-pill');
+    if (!pill) return;
+    pill.querySelectorAll('.sort-pill-seg').forEach(function (seg) {
+        const active = seg.dataset.sortMode === AppState.sortMode;
+        seg.classList.toggle('is-active', active);
+        seg.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
 }
 
 window.loadCategoryPositions = loadCategoryPositions;

@@ -156,6 +156,34 @@
   padding: 8px 14px;
   font-size: 14px;
 }
+/* 3-segment sort pill: Newest / Oldest / Shuffle — only one active */
+.sort-pill {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.sort-pill-seg {
+  flex: 1 1 0;
+  min-width: 72px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.sort-pill-seg:last-child { border-right: none; }
+.sort-pill-seg:hover { background: var(--primary-050); }
+.sort-pill-seg.is-active {
+  background: var(--primary-500);
+  color: #fff;
+}
 .pos-item .mini-board {
   opacity: 0.60;
   transition: opacity 0.15s ease;

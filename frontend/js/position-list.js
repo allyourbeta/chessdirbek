@@ -103,20 +103,11 @@ function renderCategoryList(categoryKey) {
         return;
     }
     
-    // Put featured position first so it's always easy to find
-    // Then starred positions, then everything else
+    // Order comes straight from the server (Sort dropdown: newest/oldest). We do
+    // NOT float featured/starred to the top — that made "Newest" look unsorted.
+    // The featured board above is unaffected; the Starred filter still narrows
+    // the list to starred-only when you want that.
     const featuredId = AppState.featuredCategoryId;
-    positions.sort(function(a, b) {
-        // Featured always first
-        if (featuredId) {
-            if (a.id === featuredId) return -1;
-            if (b.id === featuredId) return 1;
-        }
-        // Starred before unstarred
-        if (a.starred && !b.starred) return -1;
-        if (!a.starred && b.starred) return 1;
-        return 0; // preserve existing order within same group
-    });
     
     // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for titles
     el.innerHTML = positions.map(p => {
@@ -125,10 +116,12 @@ function renderCategoryList(categoryKey) {
         const isSelected = SelectionManager && SelectionManager.isSelected(p.id);
         const selectedClass = isSelected ? ' pos-item--selected' : '';
         const starHtml = StarControl.renderPositionStar(p);
-        // Date is intentionally not shown inline — it lives in a hover tooltip,
-        // used only to confirm a position actually saved and the list order is right.
+        // Date lives on data-added and is shown via a reliable custom tooltip
+        // (position-list-tooltip.js), used to confirm a position saved and the
+        // order is right. The Move button (top-left, opposite Delete) reclassifies
+        // the card to another category without opening the detail view.
         const addedTitle = p.created_at ? 'Added ' + new Date(p.created_at).toLocaleString() : '';
-        return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}" title="${Html.escape(addedTitle)}">${renderMiniBoard(p.fen, p.orientation)}<div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-flip" data-flip-id="${p.id}" title="Flip FEN — rotate the position 180° to fix a board captured from the wrong side"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+        return `<div class="pos-item${featuredClass}${selectedClass}" data-pos-id="${p.id}" data-added="${Html.escape(addedTitle)}">${renderMiniBoard(p.fen, p.orientation)}<button class="btn btn-sm btn-ghost pos-item-move" data-move-id="${p.id}" title="Move to another category" aria-label="Move to another category"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7.5V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7"></path><path d="M2 13h10"></path><path d="m9 16 3-3-3-3"></path></svg></button><div class="pos-item-body"><div class="title">${starHtml}${Html.escape(p.title || 'Untitled')}</div></div><button class="btn btn-sm btn-ghost pos-item-flip" data-flip-id="${p.id}" title="Flip FEN — rotate the position 180° to fix a board captured from the wrong side"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button><button class="btn btn-sm btn-ghost pos-item-delete" data-delete-id="${p.id}" title="Delete"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     }).join('');
     
     // Set up event delegation for the position list
@@ -197,17 +190,26 @@ function renderPositionsList() {
 }
 
 function _setupPositionListEvents(container) {
-    // Remove existing event listener to prevent duplicates
+    // Remove existing event listeners to prevent duplicates
     container.removeEventListener('click', _handlePositionListClick);
-    // Add event delegation for position list clicks
     container.addEventListener('click', _handlePositionListClick);
+    // Reliable "date added" tooltip (custom; native title was too slow/flaky)
+    container.removeEventListener('mouseover', _onListMouseOver);
+    container.addEventListener('mouseover', _onListMouseOver);
+    container.removeEventListener('mouseout', _onListMouseOut);
+    container.addEventListener('mouseout', _onListMouseOut);
 }
 
 function _handlePositionListClick(event) {
-    const target = event.target.closest('.pos-item-delete, .pos-item-flip, .pos-item');
+    const target = event.target.closest('.pos-item-move, .pos-item-delete, .pos-item-flip, .pos-item');
     if (!target) return;
 
-    if (target.classList.contains('pos-item-delete')) {
+    if (target.classList.contains('pos-item-move')) {
+        // Open the reclassify menu; must not also open the position.
+        event.stopPropagation();
+        const positionId = parseInt(target.dataset.moveId, 10);
+        if (positionId) openListMoveMenu(target, positionId);
+    } else if (target.classList.contains('pos-item-delete')) {
         // Handle delete button click
         event.stopPropagation();
         const positionId = parseInt(target.dataset.deleteId, 10);

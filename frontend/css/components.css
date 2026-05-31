@@ -122,6 +122,40 @@
 .pos-item:hover .pos-item-flip {
   opacity: 1;
 }
+.pos-item-move {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  background: rgba(255,255,255,0.85);
+  border-radius: var(--radius);
+  padding: 4px 6px;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 5;
+}
+.pos-item:hover .pos-item-move {
+  opacity: 1;
+}
+/* Reliable custom "date added" tooltip (body-anchored; escapes card overflow) */
+.pos-tip {
+  position: fixed;
+  z-index: 1200;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: monospace;
+  pointer-events: none;
+  white-space: nowrap;
+}
+/* Per-card Move menu reuses nav-dropdown look but is fixed-positioned + compact */
+.list-move-menu button {
+  padding: 8px 14px;
+  font-size: 14px;
+}
 .pos-item .mini-board {
   opacity: 0.60;
   transition: opacity 0.15s ease;

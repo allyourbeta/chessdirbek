@@ -1,15 +1,14 @@
 /**
- * Reclassify a position from the detail view: move it between categories
- * (Tactics/Tabiya/Endings/Strategy). Backend already supports this via
- * PUT /positions/{id} with a new position_type.
+ * Reclassify a position between categories (Tactics/Tabiya/Endings/Strategy),
+ * from either the detail view (dropdown) or the category list (per-card Move
+ * button). Backend supports it via PUT /positions/{id} with a new position_type.
  *
- * UX model = "file and return": apply the change, drop back to the SOURCE
- * category list (where the position now disappears), and show a toast that
- * confirms where it went with a one-click Undo. Split out of position-detail.js
- * to honor the 300-line file limit.
+ * UX = "file and return": apply the change, refresh the list / return to the
+ * source, and show a toast with a one-click Undo. Split out of position-detail.js
+ * and position-list.js to honor the 300-line file limit.
  *
  * Depends on globals: AppState, CATEGORIES, TYPE_TO_CATEGORY, ApiClient, Router,
- * toast (all loaded before this script).
+ * loadCategoryPositions, toast.
  */
 
 function _categoryLabelForType(type) {
@@ -17,11 +16,56 @@ function _categoryLabelForType(type) {
     return (CATEGORIES[catKey] && CATEGORIES[catKey].label) || 'Tabiya';
 }
 
+// [position_type, label] pairs for every category, derived from the central
+// CATEGORIES map (no duplicated label strings).
+function _reclassifyTargets() {
+    return Object.keys(TYPE_TO_CATEGORY).map(function (type) {
+        return [type, _categoryLabelForType(type)];
+    });
+}
+
+// Moving TO a tactic needs a solution move. Returns the body to PUT, or null if
+// the user cancelled the solution prompt.
+function _reclassifyBody(newType) {
+    var body = { position_type: newType };
+    if (newType === 'puzzle') {
+        var sol = (window.prompt('Solution move (SAN, e.g. "Qxh7+") \u2014 required for a tactic:') || '').trim();
+        if (!sol) { toast('Move cancelled \u2014 a tactic needs a solution', 'warn'); return null; }
+        body.solution_san = sol;
+    }
+    return body;
+}
+
+// Toast confirming the move, with an Undo that runs the supplied callback.
+function _showReclassifyUndo(toLabel, onUndo) {
+    var el = document.createElement('div');
+    el.className = 'toast';
+    var msg = document.createElement('span');
+    msg.textContent = '\u2713 Moved to ' + toLabel + '  \u00b7  ';
+    var btn = document.createElement('button');
+    btn.className = 'toast-undo';
+    btn.textContent = 'Undo';
+    el.appendChild(msg);
+    el.appendChild(btn);
+    document.body.appendChild(el);
+
+    var done = false;
+    var timer = setTimeout(function () { if (!done) el.remove(); }, 6000);
+    btn.addEventListener('click', async function () {
+        done = true;
+        clearTimeout(timer);
+        el.remove();
+        try { await onUndo(); toast('Move undone'); }
+        catch (e) { toast('Undo failed', 'error'); }
+    });
+}
+
+/* ---- From the detail view (dropdown) ---- */
+
 function toggleReclassifyMenu() {
     var menu = document.getElementById('reclassify-menu');
     if (!menu) return;
     var opening = (menu.style.display === 'none' || menu.style.display === '');
-    // Hide the option matching the current type — you can't move to where you are.
     var cur = AppState.currentDetailType || 'tabiya';
     menu.querySelectorAll('[data-reclassify]').forEach(function (b) {
         b.style.display = (b.dataset.reclassify === cur) ? 'none' : '';
@@ -41,65 +85,97 @@ async function reclassifyFromDetail(newType) {
     var oldType = AppState.currentDetailType || 'tabiya';
     if (newType === oldType) return;
 
-    // Snapshot the pre-change state so Undo can fully restore it (a tactic that
-    // loses its solution on the way out gets it back on Undo).
     var undoPayload = AppState.currentDetailUndo || { position_type: oldType };
+    var body = _reclassifyBody(newType);
+    if (!body) return;
 
-    var body = { position_type: newType };
-    // Moving TO a tactic requires a solution move (backend enforces this too).
-    if (newType === 'puzzle') {
-        var sol = (window.prompt('Solution move (SAN, e.g. "Qxh7+") — required for a tactic:') || '').trim();
-        if (!sol) { toast('Reclassify cancelled — a tactic needs a solution', 'warn'); return; }
-        body.solution_san = sol;
-    }
+    try { await ApiClient.put('/positions/' + id, body); }
+    catch (e) { toast('Reclassify failed', 'error'); return; }
 
-    try {
-        await ApiClient.put('/positions/' + id, body);
-    } catch (e) {
-        toast('Reclassify failed', 'error');
-        return;
-    }
-
-    var toLabel = _categoryLabelForType(newType);
     var sourceCat = (TYPE_TO_CATEGORY && TYPE_TO_CATEGORY[oldType]) || 'tabiya';
-    // File and return: land back where you were triaging.
-    Router.navigate({ view: sourceCat });
-    _showReclassifyUndo(id, undoPayload, toLabel, sourceCat);
-}
-
-function _showReclassifyUndo(id, undoPayload, toLabel, sourceCat) {
-    var el = document.createElement('div');
-    el.className = 'toast';
-    var msg = document.createElement('span');
-    msg.textContent = '\u2713 Moved to ' + toLabel + '  \u00b7  ';
-    var btn = document.createElement('button');
-    btn.className = 'toast-undo';
-    btn.textContent = 'Undo';
-    el.appendChild(msg);
-    el.appendChild(btn);
-    document.body.appendChild(el);
-
-    var done = false;
-    var timer = setTimeout(function () { if (!done) el.remove(); }, 6000);
-    btn.addEventListener('click', async function () {
-        done = true;
-        clearTimeout(timer);
-        el.remove();
-        try {
-            await ApiClient.put('/positions/' + id, undoPayload);
-            toast('Move undone');
-            Router.navigate({ view: sourceCat });
-        } catch (e) {
-            toast('Undo failed', 'error');
-        }
+    Router.navigate({ view: sourceCat }); // file and return to where you were triaging
+    _showReclassifyUndo(_categoryLabelForType(newType), async function () {
+        await ApiClient.put('/positions/' + id, undoPayload);
+        Router.navigate({ view: sourceCat });
     });
 }
 
-// Close the menu on any outside click (mirrors the New-menu behavior).
 document.addEventListener('click', function (e) {
     if (!e.target.closest('#reclassify-dropdown')) closeReclassifyMenu();
 });
 
+/* ---- From the category list (per-card Move button) ---- */
+
+var _listMoveMenu = null;
+
+function closeListMoveMenu() {
+    if (_listMoveMenu) { _listMoveMenu.remove(); _listMoveMenu = null; }
+}
+
+function openListMoveMenu(button, id) {
+    closeListMoveMenu();
+    var item = (AppState.allPositions || []).find(function (p) { return p.id === id; });
+    var currentType = item ? item.position_type : null;
+
+    var menu = document.createElement('div');
+    menu.className = 'nav-dropdown-menu list-move-menu';
+    menu.style.position = 'fixed';
+    menu.style.right = 'auto';
+    menu.style.minWidth = '150px';
+    _reclassifyTargets().forEach(function (t) {
+        if (t[0] === currentType) return;
+        var b = document.createElement('button');
+        b.textContent = t[1];
+        b.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeListMoveMenu();
+            reclassifyFromList(id, t[0]);
+        });
+        menu.appendChild(b);
+    });
+    document.body.appendChild(menu);
+    _listMoveMenu = menu;
+
+    // Anchor below the button, clamped to the viewport.
+    var r = button.getBoundingClientRect();
+    var mw = menu.offsetWidth, mh = menu.offsetHeight;
+    var left = Math.min(r.left, window.innerWidth - 8 - mw);
+    var top = r.bottom + 4;
+    if (top + mh > window.innerHeight - 8) top = r.top - 4 - mh;
+    menu.style.left = Math.max(8, left) + 'px';
+    menu.style.top = Math.max(8, top) + 'px';
+}
+
+async function reclassifyFromList(id, newType) {
+    var item = (AppState.allPositions || []).find(function (p) { return p.id === id; });
+    if (!item) return;
+    var oldType = item.position_type;
+    if (newType === oldType) return;
+
+    var undoPayload = { position_type: oldType, solution_san: item.solution_san, theme: item.theme };
+    var body = _reclassifyBody(newType);
+    if (!body) return;
+
+    try { await ApiClient.put('/positions/' + id, body); }
+    catch (e) { toast('Move failed', 'error'); return; }
+
+    if (AppState.currentCategory) await loadCategoryPositions(AppState.currentCategory);
+    _showReclassifyUndo(_categoryLabelForType(newType), async function () {
+        await ApiClient.put('/positions/' + id, undoPayload);
+        if (AppState.currentCategory) await loadCategoryPositions(AppState.currentCategory);
+    });
+}
+
+document.addEventListener('click', function (e) {
+    if (_listMoveMenu && !e.target.closest('.list-move-menu') && !e.target.closest('.pos-item-move')) {
+        closeListMoveMenu();
+    }
+});
+window.addEventListener('scroll', closeListMoveMenu, true);
+
 window.toggleReclassifyMenu = toggleReclassifyMenu;
 window.closeReclassifyMenu = closeReclassifyMenu;
 window.reclassifyFromDetail = reclassifyFromDetail;
+window.openListMoveMenu = openListMoveMenu;
+window.closeListMoveMenu = closeListMoveMenu;
+window.reclassifyFromList = reclassifyFromList;

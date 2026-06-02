@@ -4,7 +4,7 @@ set -euo pipefail
 PROJECT_ROOT="$HOME/Droppbox/programming/projects/chessquiz"
 DB_FILE="$PROJECT_ROOT/chessdirbek.db"
 BACKUP_DIR="$PROJECT_ROOT/backups"
-RETENTION_DAYS=30
+RETENTION_COUNT=10   # keep the newest N backups (daily + manual share this budget)
 
 mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -20,9 +20,18 @@ src.close()
 dst.close()
 "
 
-# Prune old backups beyond retention window
-find "$BACKUP_DIR" -name "chessdirbek-*.db" -mtime +$RETENTION_DAYS -delete
+# --- Retention: keep only the newest $RETENTION_COUNT backups ---
+# Count-based (not day-based) so the folder size stays predictable regardless of
+# how many manual backups you take. Operates on ALL .db backups so it also trims
+# manual ones and any old-prefix stragglers, but never deletes the BEFORE-RESTORE
+# safety copies created by restore_database.sh.
+{
+  ls -t "$BACKUP_DIR"/*.db 2>/dev/null \
+    | grep -v -- '-BEFORE-RESTORE-' \
+    | tail -n +$((RETENTION_COUNT + 1)) \
+    | while IFS= read -r old; do rm -f -- "$old"; done
+} || true
 
 echo "Backup created: $BACKUP_FILE"
-echo "Retained backups:"
-ls -lht "$BACKUP_DIR"/chessdirbek-*.db 2>/dev/null | head -5 || echo "  No backups found yet"
+echo "Retained backups (newest $RETENTION_COUNT):"
+ls -lht "$BACKUP_DIR"/*.db 2>/dev/null | head -5 || echo "  No backups found yet"

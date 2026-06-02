@@ -50,7 +50,7 @@ a stale cache — fix the cache, don't debug the logic.
 ## Database Backup Scripts
 Chessdirbek has automated backup scripts for data safety:
 
-- `scripts/backup_database.sh` — Automated nightly backup at 3am via launchd. Uses SQLite's native backup API. Keeps 30 days of backups.
+- `scripts/backup_database.sh` — Automated nightly backup at 3am via launchd. Uses SQLite's native backup API. Keeps the newest 10 backups (RETENTION_COUNT).
 - `scripts/backup_now.sh` — Manual backup wrapper for use before risky operations. Creates backups with MANUAL prefix.
 - `scripts/restore_database.sh <backup-filename>` — Interactive restore with confirmation prompt. Creates safety backup before restore.
 

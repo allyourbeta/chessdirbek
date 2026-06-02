@@ -7,7 +7,7 @@
 //
 // Convention: BUILD_ID = "NN-short-label" (e.g. "04-arrow-capture").
 (function () {
-    var BUILD_ID = '20260531-0145';
+    var BUILD_ID = '20260602-0027';
 
     function paint() {
         var el = document.getElementById('build-stamp');

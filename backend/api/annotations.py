@@ -19,7 +19,8 @@ def _normalize_fen_key(full_fen: str) -> str:
 
 class AnnotationPut(BaseModel):
     fen: str
-    note_text: str
+    note_text: str = ""
+    question_text: str = ""
 
 
 class AnnotationBatchRequest(BaseModel):
@@ -31,33 +32,49 @@ def get_annotation(fen: str = Query(...), db: Session = Depends(get_db)):
     key = _normalize_fen_key(fen)
     row = db.query(FenAnnotation).filter(FenAnnotation.fen_key == key).first()
     if row:
-        return {"fen_key": key, "note_text": row.note_text, "exists": True}
-    return {"fen_key": key, "note_text": "", "exists": False}
+        return {
+            "fen_key": key,
+            "note_text": row.note_text,
+            "question_text": row.question_text or "",
+            "exists": True,
+        }
+    return {"fen_key": key, "note_text": "", "question_text": "", "exists": False}
 
 
 @router.put("/")
 def put_annotation(body: AnnotationPut, db: Session = Depends(get_db)):
     key = _normalize_fen_key(body.fen)
-    trimmed = body.note_text.strip()
+    note = body.note_text.strip()
+    question = body.question_text.strip()
     row = db.query(FenAnnotation).filter(FenAnnotation.fen_key == key).first()
 
-    if not trimmed:
+    # A row only exists to hold a note and/or a question. If both are empty,
+    # there's nothing to store — drop the row.
+    if not note and not question:
         if row:
             db.delete(row)
             db.commit()
-        return {"fen_key": key, "note_text": "", "saved": True}
+        return {"fen_key": key, "note_text": "", "question_text": "", "saved": True}
 
     if row:
-        if row.note_text.strip() == trimmed:
-            return {"fen_key": key, "note_text": row.note_text, "saved": True}
         row.note_text = body.note_text
+        row.question_text = body.question_text
     else:
-        row = FenAnnotation(fen_key=key, note_text=body.note_text)
+        row = FenAnnotation(
+            fen_key=key,
+            note_text=body.note_text,
+            question_text=body.question_text,
+        )
         db.add(row)
 
     db.commit()
     db.refresh(row)
-    return {"fen_key": key, "note_text": row.note_text, "saved": True}
+    return {
+        "fen_key": key,
+        "note_text": row.note_text,
+        "question_text": row.question_text or "",
+        "saved": True,
+    }
 
 
 @router.post("/batch")

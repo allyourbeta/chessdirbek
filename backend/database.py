@@ -30,6 +30,15 @@ def run_lightweight_migrations():
 
     if "fen_annotations" not in table_names:
         FenAnnotation.__table__.create(engine)
+    else:
+        # Existing DB: additively add the question_text column if missing.
+        cols = {c["name"] for c in insp.get_columns("fen_annotations")}
+        with engine.begin() as conn:
+            if "question_text" not in cols:
+                conn.execute(text(
+                    "ALTER TABLE fen_annotations "
+                    "ADD COLUMN question_text TEXT NOT NULL DEFAULT ''"
+                ))
     
     # Migrate games table
     if "games" in table_names:

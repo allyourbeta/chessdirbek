@@ -3,6 +3,8 @@ const AnnotationPanel = (function () {
     let _currentFen = null;
     let _loadedText = '';
     let _draftText = '';
+    let _loadedQuestion = '';
+    let _draftQuestion = '';
     let _isDirty = false;
     let _isSaving = false;
     let _loadVersion = 0;
@@ -17,9 +19,14 @@ const AnnotationPanel = (function () {
         if (!container) return;
         _containerId = containerId;
 
-        // SAFE_INNER_HTML: Static template with controlled button actions
+        // SAFE_INNER_HTML: Static template with controlled button actions.
+        // The question is a prompt to focus your thinking (never blurred);
+        // the note below it is the answer (blurred until clicked).
         container.innerHTML =
             '<div class="annotation-panel">' +
+                '<label class="annotation-label" for="annotation-question">Question (optional)</label>' +
+                '<textarea class="annotation-question" id="annotation-question" ' +
+                    'placeholder="Optional prompt to focus your thinking here..."></textarea>' +
                 '<label class="annotation-label">Position notes</label>' +
                 '<textarea class="annotation-textarea" id="annotation-textarea" ' +
                     'placeholder="Notes for this position..."></textarea>' +
@@ -32,23 +39,31 @@ const AnnotationPanel = (function () {
             ta.addEventListener('blur', _onBlur);
             ta.addEventListener('click', _onRevealClick);
         }
+        var q = document.getElementById('annotation-question');
+        if (q) {
+            q.addEventListener('input', _onQuestionInput);
+            q.addEventListener('blur', _onBlur);
+        }
     }
 
     function setPosition(fen) {
         if (!_containerId) return;
         if (_isDirty && _currentFen) {
-            _save(_currentFen, _draftText);
+            _save(_currentFen);
         }
         _currentFen = fen;
         _loadedText = '';
         _draftText = '';
+        _loadedQuestion = '';
+        _draftQuestion = '';
         _isDirty = false;
         _clearDebounce();
         _loadVersion++;
         var myVersion = _loadVersion;
         _setTextarea('');
+        _setQuestion('');
         _setStatus('');
-        
+
         // Clear blur class at start (before async load)
         var ta = document.getElementById('annotation-textarea');
         if (ta) {
@@ -60,9 +75,13 @@ const AnnotationPanel = (function () {
                 if (myVersion !== _loadVersion) return;
                 _loadedText = data.note_text || '';
                 _draftText = _loadedText;
+                _loadedQuestion = data.question_text || '';
+                _draftQuestion = _loadedQuestion;
                 _setTextarea(_loadedText);
-                
-                // Apply blur if notes exist (after data loads)
+                _setQuestion(_loadedQuestion);
+
+                // Apply blur to the NOTE only (the answer). The question is a
+                // prompt and is always shown.
                 var ta = document.getElementById('annotation-textarea');
                 if (ta) {
                     if (_loadedText) {
@@ -82,7 +101,7 @@ const AnnotationPanel = (function () {
     function unmount() {
         if (!_containerId) return;
         if (_isDirty && _currentFen) {
-            _save(_currentFen, _draftText);
+            _save(_currentFen);
         }
         _clearDebounce();
         var ta = document.getElementById('annotation-textarea');
@@ -91,6 +110,11 @@ const AnnotationPanel = (function () {
             ta.removeEventListener('blur', _onBlur);
             ta.removeEventListener('click', _onRevealClick);
         }
+        var q = document.getElementById('annotation-question');
+        if (q) {
+            q.removeEventListener('input', _onQuestionInput);
+            q.removeEventListener('blur', _onBlur);
+        }
         var container = document.getElementById(_containerId);
         // SAFE_INNER_HTML: Clearing element content
         if (container) container.innerHTML = '';
@@ -98,6 +122,8 @@ const AnnotationPanel = (function () {
         _currentFen = null;
         _loadedText = '';
         _draftText = '';
+        _loadedQuestion = '';
+        _draftQuestion = '';
         _isDirty = false;
         _isSaving = false;
         _loadVersion = 0;
@@ -114,27 +140,38 @@ const AnnotationPanel = (function () {
         }
     }
 
-    function _onInput() {
-        var ta = document.getElementById('annotation-textarea');
-        if (!ta) return;
-        _draftText = ta.value;
-        _isDirty = (_draftText !== _loadedText);
+    function _recomputeDirty() {
+        _isDirty = (_draftText !== _loadedText) || (_draftQuestion !== _loadedQuestion);
         _clearDebounce();
         if (_isDirty) {
             _debounceTimer = setTimeout(_debounceSave, 1500);
         }
     }
 
+    function _onInput() {
+        var ta = document.getElementById('annotation-textarea');
+        if (!ta) return;
+        _draftText = ta.value;
+        _recomputeDirty();
+    }
+
+    function _onQuestionInput() {
+        var q = document.getElementById('annotation-question');
+        if (!q) return;
+        _draftQuestion = q.value;
+        _recomputeDirty();
+    }
+
     function _onBlur() {
         if (_isDirty && _currentFen) {
             _clearDebounce();
-            _save(_currentFen, _draftText);
+            _save(_currentFen);
         }
     }
 
     function _debounceSave() {
         if (_isDirty && _currentFen) {
-            _save(_currentFen, _draftText);
+            _save(_currentFen);
         }
     }
 
@@ -145,14 +182,22 @@ const AnnotationPanel = (function () {
         }
     }
 
-    function _save(fen, text) {
+    function _save(fen) {
         if (_isSaving) return;
         _isSaving = true;
         _setStatus('Saving...');
 
-        ApiClient.put('/annotations/', { fen: fen, note_text: text })
+        var noteToSave = _draftText;
+        var questionToSave = _draftQuestion;
+
+        ApiClient.put('/annotations/', {
+            fen: fen,
+            note_text: noteToSave,
+            question_text: questionToSave,
+        })
             .then(function () {
-                _loadedText = text;
+                _loadedText = noteToSave;
+                _loadedQuestion = questionToSave;
                 _isDirty = false;
                 _isSaving = false;
                 _showSaved();
@@ -175,6 +220,11 @@ const AnnotationPanel = (function () {
     function _setTextarea(val) {
         var ta = document.getElementById('annotation-textarea');
         if (ta) ta.value = val;
+    }
+
+    function _setQuestion(val) {
+        var q = document.getElementById('annotation-question');
+        if (q) q.value = val;
     }
 
     function _setStatus(msg) {

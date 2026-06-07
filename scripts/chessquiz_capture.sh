@@ -39,8 +39,17 @@ if [ ! -s "$PNG" ]; then
 fi
 
 # 2. Pick a category ----------------------------------------------------------
+# `choose from list` already pre-highlights "Tactic" via `default items`, but
+# when osascript is launched from a hotkey/Shortcut the dialog appears WITHOUT
+# keyboard focus — so Return does nothing until you click it. Hosting the dialog
+# inside a `tell application "System Events"` + `activate` brings it to the front
+# *with* focus, so Tactic is pre-selected and Return saves it immediately (or
+# ↑/↓ then Return picks another category). No click needed.
 CHOICE=$(osascript \
-  -e 'set c to choose from list {"Tactic","Tabiya","Ending","Strategy"} with prompt "Save this board to:" default items {"Tactic"}' \
+  -e 'tell application "System Events"' \
+  -e '  activate' \
+  -e '  set c to choose from list {"Tactic","Tabiya","Ending","Strategy"} with prompt "Save this board to:" default items {"Tactic"}' \
+  -e 'end tell' \
   -e 'if c is false then return ""' \
   -e 'return item 1 of c')
 [ -z "$CHOICE" ] && { echo "Cancelled."; exit 0; }

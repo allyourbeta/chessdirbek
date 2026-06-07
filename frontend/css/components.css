@@ -475,6 +475,28 @@
   border-color: var(--primary-300);
   box-shadow: 0 0 0 2px var(--primary-050);
 }
+.annotation-question {
+  width: 100%;
+  min-height: 38px;
+  max-height: 120px;
+  resize: vertical;
+  font-size: var(--fs-13);
+  font-family: inherit;
+  font-style: italic;
+  padding: 6px var(--sp-2);
+  margin-bottom: var(--sp-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary-300);
+  border-radius: var(--radius-sm);
+  background: var(--primary-050, var(--surface));
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.annotation-question:focus {
+  outline: none;
+  border-color: var(--primary-300);
+  box-shadow: 0 0 0 2px var(--primary-050);
+}
 .annotation-status {
   font-size: var(--fs-11);
   color: var(--success-600, var(--text-muted));

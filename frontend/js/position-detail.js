@@ -176,9 +176,17 @@ function flipDetailBoard() {
     // saved positions have stale FEN side-to-move metadata.
     const flipped = BoardManager.isFlipped('detail-board');
     AppState.detailFlipped = flipped;
-    AppState.currentDetailOrientation = flipped ? 'black' : 'white';
+    const orientation = flipped ? 'black' : 'white';
+    AppState.currentDetailOrientation = orientation;
     // Keep the Play color default pointed at the side now on the bottom.
     if (window.syncPlayColorToOrientation) syncPlayColorToOrientation();
+    // Persist the orientation so the flip is retained when the user navigates
+    // away and returns (loadPositionDetail re-reads pos.orientation from the DB).
+    const id = AppState.currentDetailId;
+    if (id) {
+        ApiClient.put('/positions/' + id, { orientation: orientation })
+            .catch(function () { toast('Failed to save board orientation', 'error'); });
+    }
 }
 
 

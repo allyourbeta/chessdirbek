@@ -69,6 +69,10 @@ const AnnotationPanel = (function () {
         if (ta) {
             ta.classList.remove('blurred');
         }
+        var q0 = document.getElementById('annotation-question');
+        if (q0) {
+            q0.classList.remove('has-question');
+        }
 
         ApiClient.get('/annotations/', { fen })
             .then(function (data) {
@@ -79,6 +83,7 @@ const AnnotationPanel = (function () {
                 _draftQuestion = _loadedQuestion;
                 _setTextarea(_loadedText);
                 _setQuestion(_loadedQuestion);
+                _applyQuestionProminence();
 
                 // Apply blur to the NOTE only (the answer). The question is a
                 // prompt and is always shown.
@@ -159,7 +164,18 @@ const AnnotationPanel = (function () {
         var q = document.getElementById('annotation-question');
         if (!q) return;
         _draftQuestion = q.value;
+        _applyQuestionProminence();
         _recomputeDirty();
+    }
+
+    function _applyQuestionProminence() {
+        var q = document.getElementById('annotation-question');
+        if (!q) return;
+        if (q.value.trim()) {
+            q.classList.add('has-question');
+        } else {
+            q.classList.remove('has-question');
+        }
     }
 
     function _onBlur() {

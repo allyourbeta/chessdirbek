@@ -482,20 +482,34 @@
   resize: vertical;
   font-size: var(--fs-13);
   font-family: inherit;
-  font-style: italic;
   padding: 6px var(--sp-2);
   margin-bottom: var(--sp-2);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--primary-300);
   border-radius: var(--radius-sm);
-  background: var(--primary-050, var(--surface));
+  background: var(--surface);
   line-height: 1.5;
   box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .annotation-question:focus {
   outline: none;
   border-color: var(--primary-300);
   box-shadow: 0 0 0 2px var(--primary-050);
+}
+/* When a question exists, make it impossible to miss — the eye should land
+   here before the board. Quiet (above) when empty so the majority of
+   question-less positions don't shout. */
+.annotation-question.has-question {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--text);
+  background: var(--warning-050);
+  border: 1px solid var(--warning-100);
+  border-left: 4px solid var(--warning-500);
+}
+.annotation-question.has-question:focus {
+  border-color: var(--warning-500);
+  box-shadow: 0 0 0 2px var(--warning-100);
 }
 .annotation-status {
   font-size: var(--fs-11);

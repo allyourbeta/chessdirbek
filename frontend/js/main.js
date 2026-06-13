@@ -30,5 +30,13 @@ if (window.KeyboardNavigation) {
     KeyboardNavigation.initTopNav();
 }
 
+// Idle reset (see idle-reset.js): if we're returning after a long break and the
+// URL still points at a detail page, redirect to the Tactics list. This MUST run
+// before Router.init() so the first render is home, not the stale detail page.
+IdleReset.applyColdStart();
+
 // Start the router — all globals are guaranteed to exist at this point.
 Router.init();
+
+// Idle reset: wire the live "came back" listeners now that routing is active.
+IdleReset.init();

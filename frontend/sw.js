@@ -1,7 +1,7 @@
 // Chessdirbek Service Worker — enables PWA install (Add to Dock)
 // Network-first strategy: always fetch from server, fall back to cache
 
-const CACHE_NAME = 'chessdirbek-v8';
+const CACHE_NAME = 'chessdirbek-v9';
 
 // Precache critical files for offline play
 const PRECACHE_FILES = [

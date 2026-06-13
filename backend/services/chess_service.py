@@ -15,6 +15,29 @@ def validate_fen(fen: str) -> tuple[bool, str]:
         return False, str(e)
 
 
+def set_side_to_move(fen: str, side: str) -> str:
+    """Return `fen` with its side-to-move field set to `side` ('w' or 'b').
+
+    Used by the image importer. The recognizer can't see whose turn it is in a
+    still diagram, so it always emits 'w'; when a board is captured from Black's
+    perspective we set it to 'b' to honour this app's capture convention (the
+    side shown at the bottom is the side to move).
+
+    python-chess accepts legally-incomplete positions (missing kings, pawns on
+    the back rank, etc.) that the recognizer can produce, so this is safe for OCR
+    output. If `side` is not 'w'/'b', or the FEN can't be parsed at all, the
+    original FEN is returned unchanged so a bad recognition never aborts an import.
+    """
+    if side not in ("w", "b"):
+        return fen
+    try:
+        board = chess.Board(fen)
+    except (ValueError, IndexError):
+        return fen
+    board.turn = chess.WHITE if side == "w" else chess.BLACK
+    return board.fen()
+
+
 def get_board_info(fen: str) -> dict:
     """Extract useful info from a FEN position."""
     board = chess.Board(fen)

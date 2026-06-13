@@ -21,6 +21,8 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from . import chess_service
+
 _MODELS_URL = "https://github.com/tsoj/Chess_diagram_to_FEN/releases/download/1.0/models.zip"
 
 _get_fen = None  # cached only on success
@@ -108,13 +110,37 @@ def _orientation_from(result, fen):
         val = getattr(result, attr, None)
         if isinstance(val, str) and val.lower() in ("white", "black"):
             return val.lower()
-    flipped = getattr(result, "is_black_perspective", None)
+    # The tsoj recognizer exposes the perspective it detected as `board_is_flipped`
+    # (True when the diagram was captured from Black's side). This is the real
+    # orientation signal; everything below is a defensive fallback only.
+    flipped = getattr(result, "board_is_flipped", None)
     if isinstance(flipped, bool):
         return "black" if flipped else "white"
     try:
         return "black" if fen.split()[1] == "b" else "white"
     except (IndexError, AttributeError):
         return "white"
+
+
+def _build_result(result):
+    """Map a recognizer result to {'fen', 'orientation'} (pure, no I/O).
+
+    Capture convention (personal app): the side shown at the bottom of the photo
+    is also the side to move. The recognizer returns a canonical white-on-bottom
+    FEN — and, because it can't see whose turn it is, always with 'w' to move —
+    plus a perspective flag. We map that one signal to BOTH fields:
+
+        Black's perspective -> orientation 'black' AND side-to-move 'b'
+        White's perspective -> orientation 'white' AND side-to-move 'w'  (FEN unchanged)
+
+    Kept separate from recognize_fen() so it can be unit-tested without a model
+    or a real image.
+    """
+    fen = getattr(result, "fen", None) or str(result)
+    orientation = _orientation_from(result, fen)
+    if orientation == "black":
+        fen = chess_service.set_side_to_move(fen, "b")
+    return {"fen": fen, "orientation": orientation}
 
 
 def recognize_fen(image_bytes):
@@ -131,5 +157,4 @@ def recognize_fen(image_bytes):
             auto_rotate_image=True,
             auto_rotate_board=True,
         )
-    fen = getattr(result, "fen", None) or str(result)
-    return {"fen": fen, "orientation": _orientation_from(result, fen)}
+    return _build_result(result)

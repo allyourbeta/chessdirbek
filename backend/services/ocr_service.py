@@ -92,7 +92,7 @@ def download_models():
     """Download + extract the pretrained models (pure Python, no wget)."""
     pkg = _package_dir()
     pkg.mkdir(parents=True, exist_ok=True)
-    req = urllib.request.Request(_MODELS_URL, headers={"User-Agent": "chessquiz-ocr"})
+    req = urllib.request.Request(_MODELS_URL, headers={"User-Agent": "chessdirbek-ocr"})
     with urllib.request.urlopen(req, timeout=300) as resp, \
             tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
         shutil.copyfileobj(resp, tmp)

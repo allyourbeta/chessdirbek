@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.pool import StaticPool
 
 DATABASE_URL = os.environ.get("CHESSDIRBEK_DB_URL", "sqlite:///./chessdirbek.db")
-# Note: if migrating from ChessQuiz, rename chessquiz.db to chessdirbek.db
 
 _connect_args = {"check_same_thread": False}
 _extra = {}

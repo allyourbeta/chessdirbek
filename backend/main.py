@@ -103,6 +103,16 @@ def serve_icon_512():
     return FileResponse(FRONTEND_DIR / "icon-512.png", media_type="image/png")
 
 
+@app.get("/icon-1024.png")
+def serve_icon_1024():
+    return FileResponse(FRONTEND_DIR / "icon-1024.png", media_type="image/png")
+
+
+@app.get("/apple-touch-icon.png")
+def serve_apple_touch_icon():
+    return FileResponse(FRONTEND_DIR / "apple-touch-icon.png", media_type="image/png")
+
+
 @app.get("/")
 def serve_frontend():
     return FileResponse(FRONTEND_DIR / "index.html")

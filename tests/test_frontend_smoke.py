@@ -36,7 +36,10 @@ def test_pwa_manifest_references_existing_icons():
     manifest = client.get("/manifest.json")
     assert manifest.status_code == 200
     data = manifest.json()
-    icon_paths = [icon["src"] for icon in data["icons"]]
+    # Icon srcs carry a ?v=<hash> content-version query string (see
+    # ~/Droppbox/programming/dev-kit/pwa-icons/CHECKLIST.md) so bump it
+    # whenever the icon artwork changes.
+    icon_paths = [icon["src"].split("?")[0] for icon in data["icons"]]
     assert "/icon-192.png" in icon_paths
     assert "/icon-512.png" in icon_paths
     for path in icon_paths:

@@ -60,6 +60,9 @@ echo ""
 # 3. Frontend Integration Tests
 run_test_section "Frontend Integration Tests" "python -m pytest tests/test_frontend_smoke.py -v"
 
+# 3b. PWA Manifest/Icon Contract
+run_test_section "PWA Icon Contract" "python -m pytest tests/test_pwa_icon_contract.py -v"
+
 # 4. Comprehensive Smoke Tests
 if command -v pytest >/dev/null 2>&1 || python -m pytest --version >/dev/null 2>&1; then
     run_test_section "Comprehensive Frontend Tests" "python -m pytest tests/test_frontend_smoke_comprehensive.py -v --tb=short"

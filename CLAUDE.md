@@ -217,3 +217,7 @@ If adding new functionality:
 * prefer extending existing helpers/services
 * avoid creating parallel ownership paths
 * preserve stabilization invariants
+
+**Tenzing backlog.** File findings as you go, not batched into a report: `tenzing backlog add dq "<title>"`. Close what you finish in the same commit as the work that finished it: `tenzing backlog done <ref>`. If either command fails for any reason (network, lock, whatever), that is not a reason to stop the task -- note it and continue; do not block the actual work on Tenzing's own plumbing.
+
+**Test economy.** Run only the tests covering what you just changed. Run the full suite once, at the end of the session, not after every phase. Never re-run a passing tier to confirm it still passes. Live-model tests are the slowest and most expensive -- run each one once unless it failed or its input changed.

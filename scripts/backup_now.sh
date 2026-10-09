@@ -4,7 +4,7 @@ set -euo pipefail
 PROJECT_ROOT="$HOME/Droppbox/programming/projects/chessdirbek"
 DB_FILE="$PROJECT_ROOT/chessdirbek.db"
 BACKUP_DIR="$PROJECT_ROOT/backups"
-RETENTION_COUNT=10   # keep the newest N backups (daily + manual share this budget)
+RETENTION_COUNT=7   # keep the newest N backups (daily + manual share this budget)
 
 mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)

@@ -81,6 +81,18 @@ def test_lichess_analysis_integration():
     assert "lichess.org/analysis" in fen_actions
 
 
+def test_detail_save_buttons_reclassify_in_place():
+    """The detail-page '+ Category' buttons move the open position instead of
+    always saving a copy; saveBoardPosition must branch to reclassifyFromDetail
+    for boardId 'detail-board', and that function must actually exist."""
+    shared_js = (FRONTEND / "js" / "shared.js").read_text()
+    reclassify_js = (FRONTEND / "js" / "position-reclassify.js").read_text()
+
+    assert "boardId === 'detail-board'" in shared_js
+    assert "reclassifyFromDetail(positionType)" in shared_js
+    assert "function reclassifyFromDetail(" in reclassify_js
+
+
 def test_editor_cancel_button_structure():
     """Editor pages contain cancel button structure.""" 
     html = client.get("/add").text

@@ -16,6 +16,12 @@
         return (fen || '').trim().replace(/\s+/g, ' ');
     }
 
+    // True when two FENs share the same piece placement (field 1), ignoring
+    // side-to-move/castling/ep/counters and whether either is board-only.
+    function samePlacement(a, b) {
+        return normalizeFen(a).split(' ')[0] === normalizeFen(b).split(' ')[0];
+    }
+
     // FEN field 2 as the raw token ('w' | 'b'); defaults to 'w'.
     function getSideToMove(fen) {
         return normalizeFen(fen).split(' ')[1] === 'b' ? 'b' : 'w';
@@ -164,6 +170,7 @@
 
     const FenUtils = {
         normalizeFen,
+        samePlacement,
         getSideToMove,
         getSideToMoveColor,
         sideFromOrientation,

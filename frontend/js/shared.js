@@ -189,6 +189,12 @@ async function saveBoardPosition(boardId, positionType) {
     // Use getCurrentFen to get actual visible position, fallback to specific board
     var fen = BoardManager.getCurrentFen() || BoardManager.getPosition(boardId);
     if (!fen) { toast('No position on board', true); return; }
+    // On the detail page, with the board still showing the saved position
+    // unchanged, the green buttons MOVE it to the category instead of saving a
+    // copy. Stepping through moves first still saves a new position (fen differs).
+    if (boardId === 'detail-board' && AppState.currentDetailId && FenUtils.samePlacement(fen, AppState.currentDetailFen)) {
+        return reclassifyFromDetail(positionType);
+    }
     var title;
     if (AppState.currentGame) {
         var g = AppState.currentGame, ply = AppState.currentPly;

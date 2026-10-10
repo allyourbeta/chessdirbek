@@ -60,8 +60,33 @@ function _showReclassifyUndo(toLabel, onUndo) {
     });
 }
 
-/* ---- From the detail view: removed. Reclassify is now list-only (per-card
-   Move button). Shared helpers above are reused by the list path below. ---- */
+/* ---- From the detail view: the green "+ Category" buttons move the open
+   position when the board still shows it unchanged; see saveBoardPosition in
+   shared.js for the dispatch. Shared helpers above are reused here too. ---- */
+
+async function reclassifyFromDetail(newType) {
+    var id = AppState.currentDetailId;
+    var oldType = AppState.currentDetailType;
+    if (!id) return;
+    if (newType === oldType) { toast('Already in ' + _categoryLabelForType(oldType), 'warn'); return; }
+
+    var current;
+    try { current = await ApiClient.get('/positions/' + id); }
+    catch (e) { toast('Move failed', 'error'); return; }
+    var undoPayload = { position_type: oldType, solution_san: current.solution_san, theme: current.theme };
+
+    var body = _reclassifyBody(newType);
+    if (!body) return;
+
+    try { await ApiClient.put('/positions/' + id, body); }
+    catch (e) { toast('Move failed', 'error'); return; }
+
+    Router.navigate({ view: 'positionDetail', id: id, positionType: newType }, { replace: true });
+    _showReclassifyUndo(_categoryLabelForType(newType), async function () {
+        await ApiClient.put('/positions/' + id, undoPayload);
+        Router.navigate({ view: 'positionDetail', id: id, positionType: oldType }, { replace: true });
+    });
+}
 
 /* ---- From the category list (per-card Move button) ---- */
 
@@ -135,3 +160,4 @@ window.addEventListener('scroll', closeListMoveMenu, true);
 window.openListMoveMenu = openListMoveMenu;
 window.closeListMoveMenu = closeListMoveMenu;
 window.reclassifyFromList = reclassifyFromList;
+window.reclassifyFromDetail = reclassifyFromDetail;

@@ -45,11 +45,20 @@ fi
 # inside a `tell application "System Events"` + `activate` brings it to the front
 # *with* focus, so Tactic is pre-selected and Return saves it immediately (or
 # ↑/↓ then Return picks another category). No click needed.
+#
+# Activating the picker steals focus from whatever app you were in (e.g. the
+# browser tab you just screenshotted). We record that app's bundle id before
+# activating, then re-activate it after the picker closes — whether you picked
+# a category or cancelled — so focus returns to where you were.
 CHOICE=$(osascript \
+  -e 'tell application "System Events" to set prevID to bundle identifier of first application process whose frontmost is true' \
   -e 'tell application "System Events"' \
   -e '  activate' \
   -e '  set c to choose from list {"Tactic","Tabiya","Ending","Strategy"} with prompt "Save this board to:" default items {"Tactic"}' \
   -e 'end tell' \
+  -e 'try' \
+  -e '  tell application id prevID to activate' \
+  -e 'end try' \
   -e 'if c is false then return ""' \
   -e 'return item 1 of c')
 [ -z "$CHOICE" ] && { echo "Cancelled."; exit 0; }

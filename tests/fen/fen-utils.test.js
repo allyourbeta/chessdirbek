@@ -60,4 +60,25 @@ assert.strictEqual(
 );
 console.log('\u2713 completeAndSanitizeFen (scrub)');
 
+console.log('samePlacement compares only the board field...');
+assert.strictEqual(
+    F.samePlacement(
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 12 7'
+    ),
+    true
+); // same placement, different side/castling/counters
+assert.strictEqual(
+    F.samePlacement(
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+    ),
+    true
+); // board-only vs full FEN
+assert.strictEqual(
+    F.samePlacement(START, '8/8/8/8/8/8/8/8 w - - 0 1'),
+    false
+); // different placement
+console.log('\u2713 samePlacement');
+
 console.log('\n\u2705 All fen-utils tests passed!');

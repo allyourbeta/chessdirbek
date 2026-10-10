@@ -22,6 +22,8 @@ failed = 0
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 PUZZLE_FEN = "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1"  # Rook endgame
 TABIYA_FEN = "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3"  # Italian Game
+TABIYA_TO_ENDGAME_FEN = "8/8/4k3/8/8/4K3/4P3/8 w - - 0 1"  # unique: detail-page reclassify target
+PUZZLE_NO_SOLUTION_FEN = "4k3/8/8/8/8/8/4P3/4K3 w - - 0 1"  # unique: PUT-to-puzzle-without-solution target
 
 
 def check(name, condition, detail=""):
@@ -144,6 +146,46 @@ def test_change_puzzle_to_tabiya():
         # Check that theme was preserved as a tag
         tag_names = [t["name"] for t in pos["tags"]]
         check("theme preserved as tag", "endgame" in tag_names)
+
+
+def test_change_tabiya_to_endgame():
+    """PUT position_type=endgame on a tabiya -> success (detail-page reclassify target)."""
+    data = {
+        "fen": TABIYA_TO_ENDGAME_FEN,
+        "title": "Reclassify To Endgame Test",
+        "position_type": "tabiya"
+    }
+    r = c.post("/api/positions/", json=data)
+    if r.status_code != 201:
+        check("change_tabiya_to_endgame", False, f"Failed to create tabiya: {r.status_code}")
+        return
+    pos_id = r.json()["id"]
+
+    r = c.put(f"/api/positions/{pos_id}", json={"position_type": "endgame"})
+    check("change_tabiya_to_endgame",
+          r.status_code == 200,
+          f"Status: {r.status_code}, Response: {r.text[:100]}")
+    if r.status_code == 200:
+        check("changed to endgame type", r.json()["position_type"] == "endgame")
+
+
+def test_put_puzzle_without_solution_rejected():
+    """PUT position_type=puzzle with no solution_san -> 400 (not just on create)."""
+    data = {
+        "fen": PUZZLE_NO_SOLUTION_FEN,
+        "title": "PUT Without Solution Test",
+        "position_type": "tabiya"
+    }
+    r = c.post("/api/positions/", json=data)
+    if r.status_code != 201:
+        check("put_puzzle_without_solution_rejected", False, f"Failed to create tabiya: {r.status_code}")
+        return
+    pos_id = r.json()["id"]
+
+    r = c.put(f"/api/positions/{pos_id}", json={"position_type": "puzzle"})
+    check("put_puzzle_without_solution_rejected",
+          r.status_code == 400,
+          f"Status: {r.status_code}, Response: {r.text[:100]}")
 
 
 def test_bulk_reclassify():
@@ -349,6 +391,8 @@ def main():
     test_create_tabiya()
     test_change_tabiya_to_puzzle()
     test_change_puzzle_to_tabiya()
+    test_change_tabiya_to_endgame()
+    test_put_puzzle_without_solution_rejected()
     test_bulk_reclassify()
     test_filter_by_type()
     test_migration_defaults()

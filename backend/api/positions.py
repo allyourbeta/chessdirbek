@@ -218,12 +218,12 @@ def update_position(
     # Handle position type changes
     if data.position_type is not None and data.position_type != position.position_type:
         if data.position_type == PositionType.puzzle:
-            # Changing to puzzle - require solution
-            if not data.solution_san:
-                raise HTTPException(status_code=400, detail="Puzzles must have a solution")
+            # Changing to puzzle - solution is optional
             position.position_type = data.position_type
-            position.solution_san = data.solution_san
-            position.theme = data.theme
+            if data.solution_san is not None:
+                position.solution_san = data.solution_san
+            if data.theme is not None:
+                position.theme = data.theme
         else:
             # Changing to tabiya - clear puzzle fields
             position.position_type = data.position_type

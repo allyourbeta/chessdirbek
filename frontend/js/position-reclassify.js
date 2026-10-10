@@ -24,16 +24,10 @@ function _reclassifyTargets() {
     });
 }
 
-// Moving TO a tactic needs a solution move. Returns the body to PUT, or null if
-// the user cancelled the solution prompt.
+// Moving TO a tactic needs no solution move; the backend allows it unsolved,
+// same as creating one. Returns the body to PUT.
 function _reclassifyBody(newType) {
-    var body = { position_type: newType };
-    if (newType === 'puzzle') {
-        var sol = (window.prompt('Solution move (SAN, e.g. "Qxh7+") \u2014 required for a tactic:') || '').trim();
-        if (!sol) { toast('Move cancelled \u2014 a tactic needs a solution', 'warn'); return null; }
-        body.solution_san = sol;
-    }
-    return body;
+    return { position_type: newType };
 }
 
 // Toast confirming the move, with an Undo that runs the supplied callback.
@@ -76,7 +70,6 @@ async function reclassifyFromDetail(newType) {
     var undoPayload = { position_type: oldType, solution_san: current.solution_san, theme: current.theme };
 
     var body = _reclassifyBody(newType);
-    if (!body) return;
 
     try { await ApiClient.put('/positions/' + id, body); }
     catch (e) { toast('Move failed', 'error'); return; }
@@ -138,7 +131,6 @@ async function reclassifyFromList(id, newType) {
 
     var undoPayload = { position_type: oldType, solution_san: item.solution_san, theme: item.theme };
     var body = _reclassifyBody(newType);
-    if (!body) return;
 
     try { await ApiClient.put('/positions/' + id, body); }
     catch (e) { toast('Move failed', 'error'); return; }

@@ -38,18 +38,16 @@ def bulk_reclassify(
     failure_count = 0
     errors = []
     
-    # Validate puzzle requirements
-    if request.new_type == PositionType.puzzle and not request.solution_san:
-        raise HTTPException(status_code=400, detail="Solution required when changing to puzzle type")
-    
     positions = db.query(Position).filter(Position.id.in_(request.position_ids)).all()
-    
+
     for position in positions:
         try:
             if request.new_type == PositionType.puzzle:
                 position.position_type = PositionType.puzzle
-                position.solution_san = request.solution_san
-                position.theme = request.theme
+                if request.solution_san is not None:
+                    position.solution_san = request.solution_san
+                if request.theme is not None:
+                    position.theme = request.theme
             else:
                 position.position_type = request.new_type
                 # Preserve theme as tag if exists

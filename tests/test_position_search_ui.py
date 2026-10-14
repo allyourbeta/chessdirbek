@@ -148,3 +148,91 @@ class TestPositionSearchDropdown:
             assert dropdown.locator(".tagfilter-pos").count() == 0
         finally:
             page.close()
+
+
+class TestCategoryUrlCorrection:
+    """SPEC-CATEGORY-URL.md: a position always opens under its real category,
+    regardless of which path opened it or what the URL claimed."""
+
+    def _cottage_id(self, seeded):
+        client = httpx.Client(base_url=seeded, timeout=10)
+        try:
+            rows = client.get("/api/positions/", params={"title_q": "swift-cottage"}).json()
+        finally:
+            client.close()
+        assert len(rows) == 1, rows
+        return rows[0]["id"]
+
+    def test_dropdown_open_lands_on_real_category(self, seeded, browser):
+        """swift-cottage is an endgame; opening it from the search dropdown must
+        not leave it looking like a Tabiya (dq-xhin4b)."""
+        page = browser.new_page()
+        try:
+            page.goto(seeded + "/tactics")
+            tag_input = page.locator("#cat-tag-filters .tagfilter-input")
+            tag_input.wait_for(state="visible")
+            tag_input.fill("cottage")
+
+            dropdown = page.locator("#cat-tag-filters .tagfilter-dropdown")
+            dropdown.locator(".tagfilter-pos").first.wait_for(state="visible")
+            dropdown.locator(".tagfilter-pos").first.click()
+
+            detail_title = page.locator("#detail-title")
+            detail_title.wait_for(state="visible")
+            assert "swift-cottage" in detail_title.inner_text()
+
+            assert page.evaluate("location.pathname").startswith("/endings/")
+            endings_btn = page.locator('nav button[data-nav="endings"]')
+            assert "active" in (endings_btn.get_attribute("class") or "")
+        finally:
+            page.close()
+
+    def test_direct_load_with_wrong_category_url_self_corrects(self, seeded, browser):
+        """A link naming the wrong category (e.g. bookmarked before a recategorize,
+        or just hand-typed) is quietly corrected, without growing history."""
+        page = browser.new_page()
+        try:
+            cottage_id = self._cottage_id(seeded)
+            page.goto(seeded + "/tactics")
+            baseline_length = page.evaluate("history.length")
+
+            page.goto(seeded + f"/tabiya/{cottage_id}")
+            length_after_nav = page.evaluate("history.length")
+            assert length_after_nav == baseline_length + 1
+
+            detail_title = page.locator("#detail-title")
+            detail_title.wait_for(state="visible")
+            assert "swift-cottage" in detail_title.inner_text()
+
+            assert page.evaluate("location.pathname") == f"/endings/{cottage_id}"
+            endings_btn = page.locator('nav button[data-nav="endings"]')
+            assert "active" in (endings_btn.get_attribute("class") or "")
+            # The correction must use replaceState: no new history entry past
+            # the one the navigation itself created.
+            assert page.evaluate("history.length") == length_after_nav
+        finally:
+            page.close()
+
+    def test_back_after_dropdown_open_returns_to_originating_list(self, seeded, browser):
+        """The URL correction uses replaceState, so Back must still return to the
+        list the position was opened from, not get stuck on the detail page."""
+        page = browser.new_page()
+        try:
+            page.goto(seeded + "/tactics")
+            tag_input = page.locator("#cat-tag-filters .tagfilter-input")
+            tag_input.wait_for(state="visible")
+            tag_input.fill("cottage")
+
+            dropdown = page.locator("#cat-tag-filters .tagfilter-dropdown")
+            dropdown.locator(".tagfilter-pos").first.wait_for(state="visible")
+            dropdown.locator(".tagfilter-pos").first.click()
+
+            detail_title = page.locator("#detail-title")
+            detail_title.wait_for(state="visible")
+            assert page.evaluate("location.pathname").startswith("/endings/")
+
+            page.go_back()
+            page.wait_for_timeout(200)
+            assert page.evaluate("location.pathname") == "/tactics"
+        finally:
+            page.close()

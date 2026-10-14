@@ -25,7 +25,7 @@ router = APIRouter(tags=["ocr"])
 
 # Bump alongside the frontend build stamp so the status URL proves which backend
 # code is actually loaded (catches a stale, not-yet-reloaded server).
-BACKEND_BUILD = "20261013-2138"
+BACKEND_BUILD = "20261013-2244"
 
 # Friendly category names (what the hotkey chooser shows) -> stored type.
 _CATEGORY_TO_TYPE = {

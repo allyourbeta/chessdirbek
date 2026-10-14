@@ -135,7 +135,8 @@
                 opt.addEventListener('mousedown', e => {
                     e.preventDefault();
                     if (opt.dataset.kind === 'position') {
-                        openPosition(+opt.dataset.id);
+                        const p = positionResults[i - suggestions.length];
+                        openPosition(+opt.dataset.id, p && p.position_type);
                     } else {
                         applyTag(opt.dataset.name);
                     }
@@ -158,8 +159,8 @@
             hideDropdown();
         }
 
-        function openPosition(id) {
-            Router.navigate({ view: 'positionDetail', id: id });
+        function openPosition(id, positionType) {
+            Router.navigate({ view: 'positionDetail', id: id, positionType: positionType });
             input.value = '';
             suggestions = [];
             positionResults = [];
@@ -204,7 +205,8 @@
                 if (highlight >= 0 && highlight < suggestions.length) {
                     applyTag(suggestions[highlight].name);
                 } else if (highlight >= suggestions.length && positionResults[highlight - suggestions.length]) {
-                    openPosition(positionResults[highlight - suggestions.length].id);
+                    const p = positionResults[highlight - suggestions.length];
+                    openPosition(p.id, p.position_type);
                 } else if (input.value.trim()) {
                     applyTag(input.value);
                 }

@@ -1,5 +1,24 @@
 async function loadPositionDetail(id) {
     const pos = await ApiClient.get('/positions/' + id);
+
+    // The route that opened this page may carry a wrong positionType (e.g. the
+    // search dropdown and the duplicate-position redirect don't pass one, so the
+    // router defaults to Tabiya). Correct the address bar and top tab to match
+    // the server's real category, but only if we're still on this same route —
+    // a slow fetch must not rewrite the URL of a page the user already left.
+    const currentRoute = Router.current();
+    if (currentRoute.view === 'positionDetail' && Number(currentRoute.id) === Number(id) &&
+        currentRoute.positionType !== pos.position_type) {
+        Router.syncUrl({
+            view: 'positionDetail',
+            id: currentRoute.id,
+            positionType: pos.position_type,
+            params: currentRoute.params,
+        });
+        const realCatKey = TYPE_TO_CATEGORY[pos.position_type] || 'tabiya';
+        _activateView('detail', CATEGORIES[realCatKey] ? CATEGORIES[realCatKey].label : 'Tabiya');
+    }
+
     AppState.currentDetailId = id;
     AppState.currentDetailFen = pos.fen;
     AppState.currentDetailType = pos.position_type || 'tabiya';

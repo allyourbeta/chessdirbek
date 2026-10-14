@@ -14,18 +14,38 @@ acceptable.
 
 import contextlib
 import io
+import logging
 import os
 import shutil
 import tempfile
+import threading
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
 
 from . import chess_service
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    # uvicorn configures its own "uvicorn.*" loggers but leaves the root
+    # logger's level at WARNING, so an INFO call here would otherwise be
+    # silently dropped in the real server process. Attach our own handler so
+    # the warm-up line always reaches stderr (-> /tmp/chessdirbek.log via the
+    # LaunchAgent), independent of whatever the root logger is doing.
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(logging.Formatter("%(asctime)s %(name)s: %(message)s"))
+    logger.addHandler(_handler)
+
 _MODELS_URL = "https://github.com/tsoj/Chess_diagram_to_FEN/releases/download/1.0/models.zip"
 
 _get_fen = None  # cached only on success
+
+# Guards the one-time import of the recognizer AND every call into it: the
+# recognizer's own `_in_package_dir()` changes the process-wide cwd, so two
+# overlapping calls (e.g. a warm-up and a real capture) must never interleave.
+_lock = threading.Lock()
 
 
 class OcrUnavailable(RuntimeError):
@@ -66,8 +86,8 @@ def models_present():
     return d.is_dir() and any(d.glob("*.pth"))
 
 
-def _load():
-    """Return None on success, or the import error string (not cached)."""
+def _load_locked():
+    """Same as `_load()`, but assumes `_lock` is already held."""
     global _get_fen
     if _get_fen is not None:
         return None
@@ -78,6 +98,14 @@ def _load():
         return None
     except Exception as exc:
         return str(exc)
+
+
+def _load():
+    """Return None on success, or the import error string (not cached)."""
+    if _get_fen is not None:
+        return None
+    with _lock:
+        return _load_locked()
 
 
 def import_error():
@@ -145,16 +173,45 @@ def _build_result(result):
 
 def recognize_fen(image_bytes):
     """Recognize a chess diagram. Returns {'fen': str, 'orientation': str}."""
-    if _load() is not None:
-        raise OcrUnavailable(_load() or "OCR engine is not installed")
     from PIL import Image  # lazy
 
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    with _in_package_dir():
-        result = _get_fen(
-            img=img,
-            game="chess",
-            auto_rotate_image=True,
-            auto_rotate_board=True,
-        )
+    with _lock:
+        err = _load_locked()
+        if err is not None:
+            raise OcrUnavailable(err or "OCR engine is not installed")
+        with _in_package_dir():
+            result = _get_fen(
+                img=img,
+                game="chess",
+                auto_rotate_image=True,
+                auto_rotate_board=True,
+            )
     return _build_result(result)
+
+
+def _blank_image_bytes():
+    """A tiny blank PNG, just to exercise the recognizer's model setup."""
+    from PIL import Image  # lazy
+
+    buf = io.BytesIO()
+    Image.new("RGB", (8, 8), color=(255, 255, 255)).save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def warm_up():
+    """Load the recognizer and run it once, so the hotkey's first real
+    capture never pays for lazy model setup. Safe to call from a background
+    thread at server startup; never raises.
+    """
+    start = time.monotonic()
+    err = _load()
+    if err is not None:
+        logger.info("OCR warm-up skipped: %s", err)
+        return
+    try:
+        recognize_fen(_blank_image_bytes())
+    except Exception as exc:
+        logger.info("OCR warm-up done in %.1fs (blank-image check raised: %s)", time.monotonic() - start, exc)
+        return
+    logger.info("OCR warm-up done in %.1fs", time.monotonic() - start)

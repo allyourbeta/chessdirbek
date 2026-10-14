@@ -68,8 +68,9 @@ CAT=$(echo "$CHOICE" | tr '[:upper:]' '[:lower:]')
 notify "chessdirbek" "Recognizing board…"
 B64=$(base64 -i "$PNG" | tr -d '\n')
 printf '{"image_base64":"%s","category":"%s"}' "$B64" "$CAT" > "$TMP/payload.json"
-RESP=$(curl -s -m 60 -w $'\n%{http_code}' -X POST "$URL" \
+RESP=$(curl -s -m 120 -w $'\n%{http_code}' -X POST "$URL" \
        -H 'Content-Type: application/json' --data @"$TMP/payload.json")
+CURL_EXIT=$?
 CODE=$(printf '%s' "$RESP" | tail -n1)
 BODY=$(printf '%s' "$RESP" | sed '$d')
 
@@ -84,6 +85,13 @@ case "$CODE" in
     notify "chessdirbek" "$MSG"
     echo "Duplicate." ;;
   503) notify "chessdirbek ✗" "OCR not ready — check the app's OCR debug panel"; echo "OCR not ready: $BODY" ;;
-  000) notify "chessdirbek ✗" "Can't reach the server — is chessdirbek running on :8000?"; echo "Server unreachable." ;;
+  000)
+    if [ "$CURL_EXIT" -eq 28 ]; then
+      notify "chessdirbek ✗" "Server is still starting — try again in a minute"
+      echo "Server starting (timeout)."
+    else
+      notify "chessdirbek ✗" "Can't reach the server — is chessdirbek running on :8000?"
+      echo "Server unreachable."
+    fi ;;
   *)   notify "chessdirbek ✗" "Error $CODE"; echo "Error $CODE: $BODY" ;;
 esac

@@ -1,5 +1,7 @@
 """Chessdirbek API — main entry point."""
 
+import os
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -20,6 +22,7 @@ from backend.api import (
     tags_router,
 )
 from backend.database import Base, engine, run_lightweight_migrations
+from backend.services import ocr_service
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -47,6 +50,15 @@ app.include_router(collections_router, prefix="/api")
 app.include_router(opening_tree_router, prefix="/api")
 app.include_router(engine_games_router, prefix="/api")
 app.include_router(ocr_router, prefix="/api")
+
+
+@app.on_event("startup")
+def _warm_up_ocr():
+    # Loads the OCR model in the background so the first real capture after a
+    # restart doesn't pay for lazy model setup. Startup itself never waits.
+    if os.environ.get("CHESSDIRBEK_OCR_WARMUP") == "0":
+        return
+    threading.Thread(target=ocr_service.warm_up, daemon=True).start()
 
 
 # During local development the browser (and PWA service worker) aggressively

@@ -44,13 +44,14 @@ def create_position(data: PositionCreate, db: Session = Depends(get_db)):
     # Check for duplicate position with same FEN (global check)
     existing = db.query(Position).filter(Position.fen == data.fen).first()
     if existing:
-        existing_category = existing.position_type.value  # e.g. "tabiya", "endgame"
+        existing_title = existing.title or "(untitled)"
         # Return existing position data in the response so frontend can navigate to it
         raise HTTPException(
             status_code=409,
             detail={
-                "message": f"This position already exists (in {existing_category}).",
-                "existing_id": existing.id
+                "message": f"Already saved as {existing_title}",
+                "existing_id": existing.id,
+                "existing_title": existing_title,
             }
         )
     
@@ -120,13 +121,15 @@ def list_positions(
     tag: str | None = None,
     tags: list[str] | None = Query(default=None),
     search: str | None = None,
+    title_q: str | None = None,
+    limit: int | None = None,
     position_type: Optional[PositionType] = None,
     sort: str = "newest",  # "newest" or "oldest"
     db: Session = Depends(get_db),
 ):
-    """List positions, optionally filtered by tag(s), search text, or type."""
+    """List positions, optionally filtered by tag(s), search text, title, or type."""
     query = db.query(Position).options(joinedload(Position.tags))
-    
+
     # Filter by position type if specified
     if position_type:
         query = query.filter(Position.position_type == position_type)
@@ -147,8 +150,16 @@ def list_positions(
             Position.title.ilike(pattern) | Position.notes.ilike(pattern)
         )
 
+    if title_q:
+        query = query.filter(Position.title.ilike(f"%{title_q}%"))
+
     order = Position.created_at.desc() if sort != "oldest" else Position.created_at.asc()
-    return query.order_by(order).all()
+    query = query.order_by(order)
+
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.all()
 
 
 @router.get("/random", response_model=PositionBrief)

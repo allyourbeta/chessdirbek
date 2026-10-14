@@ -212,7 +212,7 @@ async function saveBoardPosition(boardId, positionType) {
         toast('\u2713 Saved as ' + (savedCat ? savedCat.label.toLowerCase() : positionType));
     } catch (e) {
         if (e.status === 409) {
-            toast('Position already saved', 'warn');
+            toast(e.message, 'warn');
         } else {
             toast(e.data?.detail || e.message || 'Error saving', 'error');
         }

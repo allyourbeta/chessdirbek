@@ -224,6 +224,26 @@ def audit_business_logic_duplication():
         print("✅ No business logic duplication detected")
         return True
 
+def audit_duplicate_messages():
+    """Check that the old fixed duplicate-position wording hasn't crept back in."""
+    print("\n=== Duplicate Message Wording Audit ===")
+    violations = []
+    forbidden = ["Position already saved", "Position already exists"]
+    for js_file in FRONTEND_JS.rglob("*.js"):
+        content = js_file.read_text(errors="ignore")
+        for literal in forbidden:
+            if literal in content:
+                violations.append(f"{js_file.relative_to(ROOT)}: found old literal '{literal}'")
+
+    if violations:
+        print("OLD DUPLICATE WORDING FOUND:")
+        for v in violations:
+            print(f"  {v}")
+        return False
+    else:
+        print("✅ No old duplicate-message wording detected")
+        return True
+
 def main():
     """Run all static audits."""
     print("Phase 9 Static Regression Audits")
@@ -238,7 +258,8 @@ def main():
         audit_worker_creation,
         audit_clipboard_writes,
         audit_inner_html_safety,
-        audit_business_logic_duplication
+        audit_business_logic_duplication,
+        audit_duplicate_messages
     ]
     
     for audit in audits:

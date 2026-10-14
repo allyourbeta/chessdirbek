@@ -97,6 +97,62 @@ class TestPositionCRUD:
         assert len(positions) == 1
 
 
+class TestDuplicateMessageAndTitleSearch:
+    def test_duplicate_returns_existing_title_in_message(self, test_client):
+        """409 on a FEN duplicate includes existing_title and names it in the message."""
+        fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
+        r1 = test_client.post("/api/positions/", json={
+            "fen": fen, "title": "Named One", "position_type": "tabiya"
+        })
+        assert r1.status_code == 201
+
+        r2 = test_client.post("/api/positions/", json={
+            "fen": fen, "title": "Named Two", "position_type": "tabiya"
+        })
+        assert r2.status_code == 409
+        detail = r2.json()["detail"]
+        assert detail["existing_title"] == "Named One"
+        assert detail["message"] == "Already saved as Named One"
+
+    def test_duplicate_of_auto_named_position_returns_generated_name(self, test_client):
+        """409 on a duplicate of an auto-named (title omitted) position names the generated title."""
+        fen = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2"
+        r1 = test_client.post("/api/positions/", json={
+            "fen": fen, "position_type": "tabiya"
+        })
+        assert r1.status_code == 201
+        generated_title = r1.json()["title"]
+        assert generated_title
+
+        r2 = test_client.post("/api/positions/", json={
+            "fen": fen, "position_type": "tabiya"
+        })
+        assert r2.status_code == 409
+        detail = r2.json()["detail"]
+        assert detail["existing_title"] == generated_title
+        assert detail["message"] == f"Already saved as {generated_title}"
+
+    def test_title_q_and_limit_filter_title_only(self, test_client):
+        """title_q matches only the title, not notes, and limit caps results."""
+        test_client.post("/api/positions/", json={
+            "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+            "title": "swift-otter",
+            "position_type": "tabiya",
+        })
+        test_client.post("/api/positions/", json={
+            "fen": "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+            "title": "no match here",
+            "notes": "mentions otter",
+            "position_type": "tabiya",
+        })
+
+        r = test_client.get("/api/positions/?title_q=otter&limit=1")
+        assert r.status_code == 200
+        positions = r.json()
+        assert len(positions) == 1
+        assert positions[0]["title"] == "swift-otter"
+
+
 class TestChessServices:
     def test_uci_to_san(self, test_client):
         """Convert UCI moves to SAN notation."""

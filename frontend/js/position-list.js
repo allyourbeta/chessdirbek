@@ -37,7 +37,8 @@ function mountCategoryTagFilter(categoryKey) {
             }
             loadCategoryPositions(categoryKey);
         },
-        placeholder: 'Filter by tag...',
+        placeholder: 'Tag or position name...',
+        searchPositions: true,
     });
 
     // Mount starred filter toggle button

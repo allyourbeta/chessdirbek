@@ -65,7 +65,7 @@ var BulkAdd = (function () {
         progressEl.style.display = 'block';
         resultsEl.style.display = 'none';
 
-        var imported = 0, duplicates = 0, errors = [];
+        var imported = 0, duplicates = 0, duplicateNames = [], errors = [];
 
         for (var j = 0; j < fens.length; j++) {
             progressText.textContent = 'Importing...';
@@ -84,6 +84,7 @@ var BulkAdd = (function () {
                 } catch (apiErr) {
                     if (apiErr.status === 409) {
                         duplicates++;
+                        duplicateNames.push(apiErr.existingTitle || '(untitled)');
                     } else {
                         errors.push({ fen: fens[j], error: apiErr.data?.detail || apiErr.message || 'Error' });
                     }
@@ -95,15 +96,18 @@ var BulkAdd = (function () {
 
         progressText.textContent = 'Done';
         btn.disabled = false;
-        _showResults(imported, duplicates, errors, fens.length);
+        _showResults(imported, duplicates, duplicateNames, errors, fens.length);
     }
 
-    function _showResults(imported, duplicates, errors, total) {
+    function _showResults(imported, duplicates, duplicateNames, errors, total) {
         var el = document.getElementById('bulk-results');
         var html = '<div style="font-size:14px;margin-bottom:8px"><strong>Import Complete</strong></div>';
         html += '<div style="font-size:13px">';
         html += '<div>\u2713 Imported: <strong>' + imported + '</strong> / ' + total + '</div>';
-        if (duplicates > 0) html += '<div style="color:var(--text-muted)">\u2022 Duplicates skipped: ' + duplicates + '</div>';
+        if (duplicates > 0) {
+            var names = duplicateNames.map(_esc).join(', ');
+            html += '<div style="color:var(--text-muted)">\u2022 Duplicates skipped: ' + duplicates + ' (' + names + ')</div>';
+        }
         if (errors.length > 0) {
             html += '<div style="color:var(--danger)">\u2717 Errors: ' + errors.length + '</div>';
             html += '<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px">Error details</summary>';

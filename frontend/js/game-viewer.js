@@ -143,7 +143,7 @@ async function doSavePosition() {
         toast('Position saved!');
         hideSavePositionModal();
     } catch (e) {
-        toast(e.data?.detail || e.message || 'Error saving', true);
+        toast(e.message || 'Error saving', true);
     }
 }
 

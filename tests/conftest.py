@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Set test database URL before any imports
 os.environ["CHESSDIRBEK_DB_URL"] = "sqlite:///:memory:"
@@ -18,9 +19,10 @@ def test_client():
     """Create test client with fresh in-memory database for each test."""
     # Create a new in-memory database for this test
     test_engine = create_engine(
-        "sqlite:///:memory:", 
+        "sqlite:///:memory:",
         echo=False,
-        connect_args={"check_same_thread": False}
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
     
     # Create all tables

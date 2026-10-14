@@ -88,6 +88,21 @@
   background: var(--primary-050);
   color: var(--primary-700);
 }
+.tagfilter-section {
+  padding: 6px 10px 2px;
+  font-size: var(--fs-11);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+.tagfilter-pos {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tagfilter-pos-cat {
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+}
 .tagfilter-reset {
   font-family: inherit;
   font-size: var(--fs-11);

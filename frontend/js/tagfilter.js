@@ -5,10 +5,18 @@
 // mutates state.tags and invokes onChange(state.tags) whenever the list
 // changes (chip added/removed/cleared).
 //
+// Opt-in option `searchPositions: true` (only position-list.js's category
+// filter box uses this) additionally matches the query against position
+// titles and lists them below the tags, under a "Positions" label. Tag
+// and position results share one highlight index, so arrow keys move
+// through both as a single list.
+//
 // Runtime sequence notes:
 //  - keyup on input debounces 180ms then fetches /tags/?q=... (race: a newer
 //    fetch must not be overwritten by a stale one; we track a request id).
-//  - Enter commits the highlighted suggestion OR the raw input text.
+//    With searchPositions on, the title lookup rides the same request id.
+//  - Enter commits the highlighted tag or opens the highlighted position;
+//    with nothing highlighted it commits the raw input text as a tag.
 //  - Clicking outside the dropdown closes it (mousedown on document).
 //  - Chips have unique class so the container can also host the input.
 
@@ -24,7 +32,22 @@
         }
     }
 
-    function mount({ containerId, state, onChange, placeholder }) {
+    async function fetchPositionMatches(q, searchPositions) {
+        if (!searchPositions || !q || !q.trim()) return [];
+        try {
+            return await ApiClient.get('/positions/', { title_q: q.trim(), limit: 8 });
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function categoryLabelFor(positionType) {
+        const catKey = TYPE_TO_CATEGORY[positionType];
+        const cat = catKey && CATEGORIES[catKey];
+        return cat ? cat.label : positionType;
+    }
+
+    function mount({ containerId, state, onChange, placeholder, searchPositions }) {
         const el = document.getElementById(containerId);
         if (!el) return;
         state.tags = state.tags || [];
@@ -62,6 +85,7 @@
         el.appendChild(resetBtn);
 
         let suggestions = [];
+        let positionResults = [];
         let highlight = -1;
         let reqId = 0;
         let debounceTimer = null;
@@ -90,18 +114,34 @@
         }
 
         function renderDropdown() {
-            if (!suggestions.length) { hideDropdown(); return; }
-            // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for all tag suggestions
-            dropdown.innerHTML = suggestions.map((s, i) =>
-                `<div class="tagfilter-option ${i === highlight ? 'active' : ''}" data-name="${Html.escape(s.name)}">#${Html.escape(s.name)}</div>`
+            if (!suggestions.length && !positionResults.length) { hideDropdown(); return; }
+            let html = suggestions.map((s, i) =>
+                `<div class="tagfilter-option" data-kind="tag" data-name="${Html.escape(s.name)}">#${Html.escape(s.name)}</div>`
             ).join('');
-            dropdown.style.display = 'block';
-            dropdown.querySelectorAll('.tagfilter-option').forEach(opt => {
+            if (positionResults.length) {
+                html += '<div class="tagfilter-section">Positions</div>';
+                html += positionResults.map((p, i) => {
+                    const title = p.title || '(untitled)';
+                    return `<div class="tagfilter-option tagfilter-pos" data-kind="position" data-id="${p.id}">` +
+                        `<span>${Html.escape(title)}</span>` +
+                        `<span class="tagfilter-pos-cat">${Html.escape(categoryLabelFor(p.position_type))}</span></div>`;
+                }).join('');
+            }
+            // SAFE_INNER_HTML: Template with escaped content - Html.escape() used for all tag/position text
+            dropdown.innerHTML = html;
+            const options = dropdown.querySelectorAll('.tagfilter-option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('active', i === highlight);
                 opt.addEventListener('mousedown', e => {
                     e.preventDefault();
-                    applyTag(opt.dataset.name);
+                    if (opt.dataset.kind === 'position') {
+                        openPosition(+opt.dataset.id);
+                    } else {
+                        applyTag(opt.dataset.name);
+                    }
                 });
             });
+            dropdown.style.display = 'block';
         }
 
         function applyTag(name) {
@@ -114,41 +154,57 @@
             }
             input.value = '';
             suggestions = [];
+            positionResults = [];
+            hideDropdown();
+        }
+
+        function openPosition(id) {
+            Router.navigate({ view: 'positionDetail', id: id });
+            input.value = '';
+            suggestions = [];
+            positionResults = [];
             hideDropdown();
         }
 
         async function runSearch() {
             const q = input.value;
             const mine = ++reqId;
-            const results = await fetchSuggestions(q);
+            const [tagResults, posResults] = await Promise.all([
+                fetchSuggestions(q),
+                fetchPositionMatches(q, searchPositions),
+            ]);
             if (mine !== reqId) return; // stale response; ignore
             // Filter out already-applied tags
-            suggestions = results.filter(r => !state.tags.includes(r.name));
-            highlight = suggestions.length ? 0 : -1;
+            suggestions = tagResults.filter(r => !state.tags.includes(r.name));
+            positionResults = posResults;
+            highlight = (suggestions.length || positionResults.length) ? 0 : -1;
             renderDropdown();
         }
 
         input.addEventListener('input', () => {
             clearTimeout(debounceTimer);
-            if (!input.value.trim()) { suggestions = []; hideDropdown(); return; }
+            if (!input.value.trim()) { suggestions = []; positionResults = []; hideDropdown(); return; }
             debounceTimer = setTimeout(runSearch, DEBOUNCE_MS);
         });
 
         input.addEventListener('keydown', e => {
+            const total = suggestions.length + positionResults.length;
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                if (!suggestions.length) return;
-                highlight = (highlight + 1) % suggestions.length;
+                if (!total) return;
+                highlight = (highlight + 1) % total;
                 renderDropdown();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                if (!suggestions.length) return;
-                highlight = (highlight - 1 + suggestions.length) % suggestions.length;
+                if (!total) return;
+                highlight = (highlight - 1 + total) % total;
                 renderDropdown();
             } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (highlight >= 0 && suggestions[highlight]) {
+                if (highlight >= 0 && highlight < suggestions.length) {
                     applyTag(suggestions[highlight].name);
+                } else if (highlight >= suggestions.length && positionResults[highlight - suggestions.length]) {
+                    openPosition(positionResults[highlight - suggestions.length].id);
                 } else if (input.value.trim()) {
                     applyTag(input.value);
                 }
@@ -182,6 +238,8 @@
             clear() {
                 state.tags.length = 0;
                 input.value = '';
+                suggestions = [];
+                positionResults = [];
                 renderChips();
                 hideDropdown();
             },

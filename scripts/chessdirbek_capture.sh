@@ -76,10 +76,13 @@ BODY=$(printf '%s' "$RESP" | sed '$d')
 # 4. Report -------------------------------------------------------------------
 case "$CODE" in
   200|201)
-    TITLE=$(printf '%s' "$BODY" | sed -n 's/.*"title":"\([^"]*\)".*/\1/p')
+    TITLE=$(printf '%s' "$BODY" | sed -n 's/.*"title":"\([^"]*\)".*/\1/p' | tr -d '"\\')
     notify "chessdirbek ✓" "Saved to $CAT: ${TITLE:-position}"
     echo "Saved to $CAT: ${TITLE:-position}" ;;
-  409) notify "chessdirbek" "Already saved (duplicate position)"; echo "Duplicate." ;;
+  409)
+    MSG=$(printf '%s' "$BODY" | python3 "$(dirname "$0")/capture_message.py")
+    notify "chessdirbek" "$MSG"
+    echo "Duplicate." ;;
   503) notify "chessdirbek ✗" "OCR not ready — check the app's OCR debug panel"; echo "OCR not ready: $BODY" ;;
   000) notify "chessdirbek ✗" "Can't reach the server — is chessdirbek running on :8000?"; echo "Server unreachable." ;;
   *)   notify "chessdirbek ✗" "Error $CODE"; echo "Error $CODE: $BODY" ;;

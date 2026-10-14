@@ -29,18 +29,21 @@ const ApiClient = (function () {
             // Handle both string and object detail formats
             let message = 'Request failed';
             let existingId = null;
+            let existingTitle = null;
             if (data && data.detail) {
                 if (typeof data.detail === 'string') {
                     message = data.detail;
                 } else if (data.detail.message) {
                     message = data.detail.message;
                     existingId = data.detail.existing_id;
+                    existingTitle = data.detail.existing_title;
                 }
             }
             const err = new Error(message);
             err.status = res.status;
             err.data = data;
             err.existingId = existingId;
+            err.existingTitle = existingTitle;
             throw err;
         }
         return data;

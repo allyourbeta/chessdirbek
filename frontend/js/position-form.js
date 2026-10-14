@@ -52,7 +52,7 @@ async function savePosition() {
         
         // Handle duplicate position - navigate to existing position
         if (err.status === 409 && err.existingId) {
-            toast('Position already exists — opening saved position.');
+            toast(err.message + ' — opening it.');
             clearForm();
             Router.navigate({ view: 'positionDetail', id: err.existingId });
         } else {

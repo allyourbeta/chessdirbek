@@ -16,6 +16,29 @@ class TestHealthAndStatic:
         assert r.status_code == 200
 
 
+@pytest.fixture
+def two_positions(test_client):
+    """Create the two standard CRUD-test positions through the real API; return their ids."""
+    r1 = test_client.post("/api/positions/", json={
+        "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+        "title": "King's Pawn",
+        "notes": "1.e4 opening",
+        "tags": ["opening", "e4"],
+        "position_type": "tabiya"
+    })
+    assert r1.status_code == 201
+
+    r2 = test_client.post("/api/positions/", json={
+        "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+        "title": "King's Pawn Game",
+        "tags": ["opening"],
+        "position_type": "tabiya"
+    })
+    assert r2.status_code == 201
+
+    return r1.json()["id"], r2.json()["id"]
+
+
 class TestPositionCRUD:
     def test_create_position(self, test_client):
         """Create position with valid FEN."""
@@ -50,14 +73,14 @@ class TestPositionCRUD:
         })
         assert r.status_code == 400
 
-    def test_list_positions(self, test_client):
+    def test_list_positions(self, test_client, two_positions):
         """List all positions."""
         r = test_client.get("/api/positions/")
         assert r.status_code == 200
         positions = r.json()
         assert len(positions) >= 2
 
-    def test_filter_by_tag(self, test_client):
+    def test_filter_by_tag(self, test_client, two_positions):
         """Filter positions by tag."""
         r = test_client.get("/api/positions/?tags=e4")
         assert r.status_code == 200
@@ -65,7 +88,7 @@ class TestPositionCRUD:
         # Should find the first position which has "e4" tag
         assert len(positions) >= 1
 
-    def test_list_tags(self, test_client):
+    def test_list_tags(self, test_client, two_positions):
         """List all tags."""
         r = test_client.get("/api/tags/")
         assert r.status_code == 200
@@ -74,9 +97,10 @@ class TestPositionCRUD:
         assert "opening" in tag_names
         assert "e4" in tag_names
 
-    def test_update_position(self, test_client):
+    def test_update_position(self, test_client, two_positions):
         """Update existing position."""
-        r = test_client.put("/api/positions/1", json={
+        id1, _ = two_positions
+        r = test_client.put(f"/api/positions/{id1}", json={
             "notes": "Updated!",
             "tags": ["openings", "e4", "beginner"]
         })
@@ -84,13 +108,12 @@ class TestPositionCRUD:
         data = r.json()
         assert len(data["tags"]) == 3
 
-    def test_delete_position(self, test_client):
-        """Delete position."""
-        r = test_client.delete("/api/positions/1")
+    def test_cascade_delete(self, test_client, two_positions):
+        """Deleting one of two positions leaves the other."""
+        id1, _ = two_positions
+        r = test_client.delete(f"/api/positions/{id1}")
         assert r.status_code == 204
 
-    def test_cascade_delete(self, test_client):
-        """Verify position was deleted."""
         r = test_client.get("/api/positions/")
         assert r.status_code == 200
         positions = r.json()

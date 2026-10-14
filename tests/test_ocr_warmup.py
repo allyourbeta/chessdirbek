@@ -136,3 +136,47 @@ def test_recognize_fen_waits_for_warm_up():
     # The real call's recognizer invocation must not start until warm-up's
     # own invocation finished -- proof the lock serializes them.
     assert starts[1] >= ends[0], "recognize_fen ran concurrently with warm_up instead of waiting"
+
+
+def test_app_startup_runs_warm_up_once(monkeypatch):
+    """The real app's startup handler (lifespan) starts warm_up exactly once."""
+    calls = []
+
+    def fake_get_fen(**kwargs):
+        calls.append(1)
+        return _fake_result()
+
+    sys.modules["chess_diagram_to_fen"] = types.SimpleNamespace(get_fen=fake_get_fen)
+    monkeypatch.delenv("CHESSDIRBEK_OCR_WARMUP", raising=False)
+
+    from fastapi.testclient import TestClient
+    from backend.main import app
+
+    with TestClient(app):
+        deadline = time.monotonic() + 2
+        while ocr_service._get_fen is None and time.monotonic() < deadline:
+            time.sleep(0.01)
+
+    assert len(calls) == 1, calls
+    assert ocr_service._get_fen is not None
+
+
+def test_app_startup_skips_warm_up_when_disabled(monkeypatch):
+    """CHESSDIRBEK_OCR_WARMUP=0 means startup never touches the recognizer."""
+    calls = []
+
+    def fake_get_fen(**kwargs):
+        calls.append(1)
+        return _fake_result()
+
+    sys.modules["chess_diagram_to_fen"] = types.SimpleNamespace(get_fen=fake_get_fen)
+    monkeypatch.setenv("CHESSDIRBEK_OCR_WARMUP", "0")
+
+    from fastapi.testclient import TestClient
+    from backend.main import app
+
+    with TestClient(app):
+        time.sleep(0.2)
+
+    assert calls == []
+    assert ocr_service._get_fen is None

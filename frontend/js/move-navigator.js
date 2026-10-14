@@ -83,19 +83,24 @@ var MoveNavigator = (function () {
         var len = inst.fens.length;
         var atFirst = inst.idx <= 0;
         var atLast = inst.idx >= len - 1;
+        // data-move-nav (NOT data-nav): event-delegation.js's document-level click
+        // handler treats any data-nav attribute as a top-level view name
+        // (Router.navigate({view: ...})) -- reusing that name here collided with
+        // it, so clicking these buttons crashed the app instead of stepping
+        // through history.
         // SAFE_INNER_HTML: Static template with controlled numeric values (indices and lengths)
         el.innerHTML =
-            '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="first">|&lt;</button>' +
-            '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-nav="prev">&lt;</button>' +
+            '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-move-nav="first">|&lt;</button>' +
+            '<button class="btn btn-sm"' + (atFirst ? ' disabled' : '') + ' data-move-nav="prev">&lt;</button>' +
             (len > 1
                 ? '<span class="text-muted" style="font-size:12px;min-width:48px;text-align:center">' + (inst.idx + 1) + '/' + len + '</span>'
                 : '') +
-            '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-nav="next">&gt;</button>' +
-            '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-nav="last">&gt;|</button>';
+            '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-move-nav="next">&gt;</button>' +
+            '<button class="btn btn-sm"' + (atLast ? ' disabled' : '') + ' data-move-nav="last">&gt;|</button>';
         el.onclick = function (e) {
-            var btn = e.target.closest('[data-nav]');
+            var btn = e.target.closest('[data-move-nav]');
             if (!btn || btn.disabled) return;
-            var a = btn.dataset.nav;
+            var a = btn.dataset.moveNav;
             if (a === 'first') first(inst.id);
             else if (a === 'prev') prev(inst.id);
             else if (a === 'next') next(inst.id);

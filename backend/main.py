@@ -1,5 +1,6 @@
 """Chessdirbek API — main entry point."""
 
+import contextlib
 import os
 import threading
 from pathlib import Path
@@ -29,7 +30,17 @@ Base.metadata.create_all(bind=engine)
 # Apply additive column migrations (ELO, etc.) for existing databases
 run_lightweight_migrations()
 
-app = FastAPI(title="Chessdirbek", version="0.1.0")
+
+@contextlib.asynccontextmanager
+async def _lifespan(app: FastAPI):
+    # Loads the OCR model in the background so the first real capture after a
+    # restart doesn't pay for lazy model setup. Startup itself never waits.
+    if os.environ.get("CHESSDIRBEK_OCR_WARMUP") != "0":
+        threading.Thread(target=ocr_service.warm_up, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="Chessdirbek", version="0.1.0", lifespan=_lifespan)
 
 # CORS for local React dev server
 app.add_middleware(
@@ -50,15 +61,6 @@ app.include_router(collections_router, prefix="/api")
 app.include_router(opening_tree_router, prefix="/api")
 app.include_router(engine_games_router, prefix="/api")
 app.include_router(ocr_router, prefix="/api")
-
-
-@app.on_event("startup")
-def _warm_up_ocr():
-    # Loads the OCR model in the background so the first real capture after a
-    # restart doesn't pay for lazy model setup. Startup itself never waits.
-    if os.environ.get("CHESSDIRBEK_OCR_WARMUP") == "0":
-        return
-    threading.Thread(target=ocr_service.warm_up, daemon=True).start()
 
 
 # During local development the browser (and PWA service worker) aggressively

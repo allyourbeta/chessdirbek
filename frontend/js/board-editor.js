@@ -21,7 +21,7 @@ var BoardEditor = (function () {
         var raw = _chess.fen();
         var parts = raw.split(' ');
         parts[1] = _turn;
-        return parts.join(' ');
+        return FenUtils.completeAndSanitizeFen(parts.join(' '));
     }
     function _createBoard(fen) {
         var el = document.getElementById(BOARD_ID);
@@ -94,7 +94,7 @@ var BoardEditor = (function () {
             if (existingPiece && existingPiece.color === selectedPiece.color && existingPiece.type === selectedPiece.type) {
                 _chess.remove(square);
             } else {
-                _chess.put(selectedPiece, square);
+                FenUtils.placePiece(_chess, selectedPiece, square);
             }
         }
         var fen = _getFen();
@@ -219,6 +219,7 @@ var BoardEditor = (function () {
     }
     function search(searchType) {
         var fen = _getFen();
+        AppState.searchFen = fen;
         Router.navigate({ view: 'search' });
         setTimeout(function () {
             var fenInput = document.getElementById('search-fen');

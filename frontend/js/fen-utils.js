@@ -37,6 +37,33 @@
         return orientation === 'black' ? 'b' : 'w';
     }
 
+    const ALL_SQUARES = (function () {
+        const squares = [];
+        for (let rank = 1; rank <= 8; rank += 1) {
+            for (const file of 'abcdefgh') squares.push(file + rank);
+        }
+        return squares;
+    })();
+
+    // Place `piece` on `square` of a chess.js instance. Clears whatever already
+    // occupies `square`, and when placing a king, also clears any other king of
+    // that colour first — chess.js remembers one king location per colour and
+    // silently refuses a second, even after the first king's square is
+    // overwritten with another piece. Does not handle toggle-off; callers
+    // already short-circuit "same piece clicked again" before calling this.
+    function placePiece(chess, piece, square) {
+        chess.remove(square);
+        if (piece.type === 'k') {
+            for (const sq of ALL_SQUARES) {
+                const existing = chess.get(sq);
+                if (existing && existing.type === 'k' && existing.color === piece.color) {
+                    chess.remove(sq);
+                }
+            }
+        }
+        chess.put(piece, square);
+    }
+
     // Map each occupied square (e.g. "e1") to its piece char, from a board field.
     function fenPieceMap(board) {
         const map = {};
@@ -174,6 +201,7 @@
         getSideToMove,
         getSideToMoveColor,
         sideFromOrientation,
+        placePiece,
         fenPieceMap,
         sanitizeCastlingRights,
         sanitizeEnPassant,

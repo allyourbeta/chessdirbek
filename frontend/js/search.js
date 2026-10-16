@@ -87,7 +87,7 @@ function searchOnSquareClick(square) {
         if (existingPiece && existingPiece.color === selectedPiece.color && existingPiece.type === selectedPiece.type) {
             searchChess.remove(square);
         } else {
-            searchChess.put(selectedPiece, square);
+            FenUtils.placePiece(searchChess, selectedPiece, square);
         }
     }
     const fen = searchChess.fen();

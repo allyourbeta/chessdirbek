@@ -168,6 +168,9 @@ def _build_result(result):
     orientation = _orientation_from(result, fen)
     if orientation == "black":
         fen = chess_service.set_side_to_move(fen, "b")
+    parts = fen.split()
+    parts[2] = chess_service.supported_castling(parts[0])
+    fen = " ".join(parts)
     return {"fen": fen, "orientation": orientation}
 
 

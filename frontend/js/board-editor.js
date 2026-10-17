@@ -21,6 +21,7 @@ var BoardEditor = (function () {
         var raw = _chess.fen();
         var parts = raw.split(' ');
         parts[1] = _turn;
+        parts[2] = 'KQkq'; // request every right; the sanitizer below trims to what's placed
         return FenUtils.completeAndSanitizeFen(parts.join(' '));
     }
     function _createBoard(fen) {

@@ -119,6 +119,8 @@ async function loadPositionDetail(id) {
 
     // Default the Play color to the side currently on the bottom of the board.
     if (window.syncPlayColorToOrientation) syncPlayColorToOrientation();
+
+    if (window.CastlingToggle) CastlingToggle.sync(pos);
 }
 
 function copyFen() {

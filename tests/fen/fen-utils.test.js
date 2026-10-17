@@ -46,6 +46,12 @@ assert.strictEqual(F.sanitizeCastlingRights('8/8/8/8/8/8/8/8', 'KQkq'), '-');
 assert.strictEqual(F.sanitizeCastlingRights('8/8/8/8/8/8/8/4K2R', 'KQ'), 'K');
 console.log('\u2713 sanitizeCastlingRights');
 
+console.log('supportedCastling reports what the placement allows, independent of the FEN...');
+assert.strictEqual(F.supportedCastling(START), 'KQkq');
+assert.strictEqual(F.supportedCastling('8/8/8/8/8/8/8/8 w - - 0 1'), '-');
+assert.strictEqual(F.supportedCastling('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'), 'KQkq'); // board-only
+console.log('✓ supportedCastling');
+
 console.log('sanitizeEnPassant keeps only legal target squares...');
 assert.strictEqual(F.sanitizeEnPassant('e3'), 'e3');
 assert.strictEqual(F.sanitizeEnPassant('e6'), 'e6');

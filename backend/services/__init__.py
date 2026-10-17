@@ -1,7 +1,10 @@
 from backend.services.chess_service import (
     get_board_info,
     get_pawn_structure,
+    normalize_castling,
+    position_key,
     search_by_pawn_structure,
+    supported_castling,
     uci_to_san,
     validate_fen,
 )
@@ -28,6 +31,9 @@ __all__ = [
     "validate_fen",
     "get_board_info",
     "get_pawn_structure",
+    "normalize_castling",
+    "position_key",
+    "supported_castling",
     "search_by_pawn_structure",
     "uci_to_san",
     "compute_zobrist",

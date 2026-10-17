@@ -125,6 +125,9 @@ function handleChange(event) {
         case 'practice-filters':
             Practice.applyFilters();
             break;
+        case 'castling-toggle':
+            CastlingToggle.onChange(target);
+            break;
     }
 }
 

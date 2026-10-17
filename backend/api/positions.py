@@ -13,7 +13,12 @@ from backend.api.schemas import (
 )
 from backend.database import get_db
 from backend.models import Position, PositionType, Tag
-from backend.services import validate_fen, generate_placeholder_name
+from backend.services import (
+    generate_placeholder_name,
+    normalize_castling,
+    position_key,
+    validate_fen,
+)
 
 router = APIRouter(prefix="/positions", tags=["positions"])
 
@@ -40,9 +45,16 @@ def create_position(data: PositionCreate, db: Session = Depends(get_db)):
     is_valid, error = validate_fen(data.fen)
     if not is_valid:
         raise HTTPException(status_code=400, detail=f"Invalid FEN: {error}")
+    data.fen = normalize_castling(data.fen)
 
-    # Check for duplicate position with same FEN (global check)
-    existing = db.query(Position).filter(Position.fen == data.fen).first()
+    # Check for duplicate position: same board + side to move, ignoring
+    # castling (narrowed via a board-prefix match, then compared exactly).
+    board = data.fen.split()[0]
+    candidates = db.query(Position).filter(Position.fen.like(f"{board}%")).all()
+    incoming_key = position_key(data.fen)
+    existing = next(
+        (p for p in candidates if position_key(p.fen) == incoming_key), None
+    )
     if existing:
         existing_title = existing.title or "(untitled)"
         # Return existing position data in the response so frontend can navigate to it
@@ -214,7 +226,7 @@ def update_position(
         is_valid, error = validate_fen(data.fen)
         if not is_valid:
             raise HTTPException(status_code=400, detail=f"Invalid FEN: {error}")
-        position.fen = data.fen
+        position.fen = normalize_castling(data.fen)
     if data.title is not None:
         position.title = data.title.strip() or generate_placeholder_name()
     if data.notes is not None:

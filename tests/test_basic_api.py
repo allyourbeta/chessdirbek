@@ -176,6 +176,70 @@ class TestDuplicateMessageAndTitleSearch:
         assert positions[0]["title"] == "swift-otter"
 
 
+class TestCastlingDuplicateRule:
+    """Castling rights are stored by default, trimmed to the pieces; the
+    duplicate check ignores the castling field entirely (same board + side
+    to move is a duplicate no matter what castling either FEN states)."""
+
+    START_BOARD = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+
+    def test_duplicate_ignores_castling_field(self, test_client):
+        r1 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD + " w - - 0 1",
+            "title": "No rights stated",
+            "position_type": "tabiya",
+        })
+        assert r1.status_code == 201
+
+        r2 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD + " w KQkq - 0 1",
+            "title": "Full rights stated",
+            "position_type": "tabiya",
+        })
+        assert r2.status_code == 409
+
+    def test_board_only_fen_matches_full_fen_as_duplicate(self, test_client):
+        r1 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD,
+            "title": "Board only",
+            "position_type": "tabiya",
+        })
+        assert r1.status_code == 201
+
+        r2 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD + " w KQkq - 0 1",
+            "title": "Full fen, same board",
+            "position_type": "tabiya",
+        })
+        assert r2.status_code == 409
+
+    def test_same_board_other_side_to_move_is_not_a_duplicate(self, test_client):
+        r1 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD + " w KQkq - 0 1",
+            "title": "White to move",
+            "position_type": "tabiya",
+        })
+        assert r1.status_code == 201
+
+        r2 = test_client.post("/api/positions/", json={
+            "fen": self.START_BOARD + " b KQkq - 0 1",
+            "title": "Black to move",
+            "position_type": "tabiya",
+        })
+        assert r2.status_code == 201
+
+    def test_requested_rights_trimmed_to_what_pieces_allow(self, test_client):
+        # Start position with all four rooks removed: no castling is possible.
+        no_rooks_board = "1nbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/1NBQKBN1"
+        r = test_client.post("/api/positions/", json={
+            "fen": no_rooks_board + " w KQkq - 0 1",
+            "title": "No rooks",
+            "position_type": "tabiya",
+        })
+        assert r.status_code == 201
+        assert r.json()["fen"].split()[2] == "-"
+
+
 class TestChessServices:
     def test_uci_to_san(self, test_client):
         """Convert UCI moves to SAN notation."""

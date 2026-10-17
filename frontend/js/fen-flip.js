@@ -29,6 +29,14 @@ window.FenFlip = (function () {
             toast('Could not flip this FEN', true);
             return null;
         }
+        // rotateFen180 always resets castling to '-'. Request every right the
+        // rotated placement allows; the backend trims it to what's supported.
+        // A board-only result (no fields beyond the placement) stays board-only.
+        var rotatedParts = rotated.split(' ');
+        if (rotatedParts.length > 1) {
+            rotatedParts[2] = 'KQkq';
+            rotated = rotatedParts.join(' ');
+        }
         var newOrientation = pos.orientation === 'black' ? 'white' : 'black';
         try {
             var updated = await ApiClient.put('/positions/' + pos.id, {

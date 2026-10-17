@@ -72,22 +72,27 @@ def test_build_result_flipped_sets_black_and_side_b():
     assert _field(out["fen"], 1) == "b", out
     # Crucial: the board itself must NOT be rotated — only the turn changes.
     assert _field(out["fen"], 0) == _field(CANON, 0), "placement must not change"
-    print("PASS  flipped board -> orientation 'black' + side-to-move 'b'")
+    # CANON has king+rook on every home square, so castling rights are granted.
+    assert _field(out["fen"], 2) == "KQkq", out
+    print("PASS  flipped board -> orientation 'black' + side-to-move 'b' + castling rights")
 
 
-def test_build_result_not_flipped_is_unchanged():
+def test_build_result_not_flipped_gets_castling_rights():
     out = _build_result(FakeResult(CANON, False))
     assert out["orientation"] == "white", out
     assert _field(out["fen"], 1) == "w", out
-    assert out["fen"] == CANON, "white-on-bottom output must equal input FEN"
-    print("PASS  un-flipped board -> orientation 'white', FEN unchanged")
+    assert _field(out["fen"], 0) == _field(CANON, 0), "placement must not change"
+    # CANON has king+rook on every home square, so castling rights are granted
+    # even though the recognizer always hands back '-'.
+    assert _field(out["fen"], 2) == "KQkq", out
+    print("PASS  un-flipped board -> orientation 'white', castling rights granted")
 
 
 def main():
     test_set_side_to_move()
     test_orientation_from_reads_board_is_flipped()
     test_build_result_flipped_sets_black_and_side_b()
-    test_build_result_not_flipped_is_unchanged()
+    test_build_result_not_flipped_gets_castling_rights()
     print("\nAll OCR orientation tests passed.")
 
 

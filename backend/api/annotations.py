@@ -6,15 +6,9 @@ from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models import FenAnnotation
+from backend.services import position_key
 
 router = APIRouter(prefix="/annotations", tags=["annotations"])
-
-
-def _normalize_fen_key(full_fen: str) -> str:
-    parts = full_fen.strip().split()
-    board = parts[0]
-    side = parts[1] if len(parts) > 1 else 'w'
-    return f"{board} {side}"
 
 
 class AnnotationPut(BaseModel):
@@ -29,7 +23,7 @@ class AnnotationBatchRequest(BaseModel):
 
 @router.get("/")
 def get_annotation(fen: str = Query(...), db: Session = Depends(get_db)):
-    key = _normalize_fen_key(fen)
+    key = position_key(fen)
     row = db.query(FenAnnotation).filter(FenAnnotation.fen_key == key).first()
     if row:
         return {
@@ -43,7 +37,7 @@ def get_annotation(fen: str = Query(...), db: Session = Depends(get_db)):
 
 @router.put("/")
 def put_annotation(body: AnnotationPut, db: Session = Depends(get_db)):
-    key = _normalize_fen_key(body.fen)
+    key = position_key(body.fen)
     note = body.note_text.strip()
     question = body.question_text.strip()
     row = db.query(FenAnnotation).filter(FenAnnotation.fen_key == key).first()
@@ -79,7 +73,7 @@ def put_annotation(body: AnnotationPut, db: Session = Depends(get_db)):
 
 @router.post("/batch")
 def batch_annotations(body: AnnotationBatchRequest, db: Session = Depends(get_db)):
-    keys = [_normalize_fen_key(f) for f in body.fens]
+    keys = [position_key(f) for f in body.fens]
     unique_keys = list(set(keys))
     rows = db.query(FenAnnotation).filter(FenAnnotation.fen_key.in_(unique_keys)).all()
     result = {r.fen_key: r.note_text for r in rows}

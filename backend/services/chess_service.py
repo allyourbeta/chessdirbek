@@ -15,6 +15,72 @@ def validate_fen(fen: str) -> tuple[bool, str]:
         return False, str(e)
 
 
+def _piece_map(board: str) -> dict[str, str]:
+    """Map square name (e.g. 'e1') to its piece char, from a FEN placement field."""
+    pieces: dict[str, str] = {}
+    files = "abcdefgh"
+    for rank_index, row in enumerate(board.split("/")):
+        rank = 8 - rank_index
+        file_index = 0
+        for ch in row:
+            if ch.isdigit():
+                file_index += int(ch)
+            else:
+                if file_index < 8:
+                    pieces[f"{files[file_index]}{rank}"] = ch
+                file_index += 1
+    return pieces
+
+
+def supported_castling(board: str) -> str:
+    """The castling rights a FEN placement field (`board`) can support —
+    king and rook both on their starting squares for that right."""
+    pieces = _piece_map(board)
+    rights = ""
+    if pieces.get("e1") == "K" and pieces.get("h1") == "R":
+        rights += "K"
+    if pieces.get("e1") == "K" and pieces.get("a1") == "R":
+        rights += "Q"
+    if pieces.get("e8") == "k" and pieces.get("h8") == "r":
+        rights += "k"
+    if pieces.get("e8") == "k" and pieces.get("a8") == "r":
+        rights += "q"
+    return rights or "-"
+
+
+def normalize_castling(fen: str) -> str:
+    """Return `fen` as a full 6-field FEN, with castling trimmed to what the
+    piece placement supports. A missing castling field defaults to every
+    right the placement allows; a present one keeps only the supported
+    rights. Missing side defaults to 'w', en-passant to '-', counters to
+    '0 1'.
+    """
+    parts = fen.strip().split()
+    board = parts[0] if parts else ""
+    side = parts[1] if len(parts) > 1 and parts[1] in ("w", "b") else "w"
+    requested = parts[2] if len(parts) > 2 else None
+    allowed = supported_castling(board)
+    if allowed == "-":
+        castling = "-"
+    elif requested is None:
+        castling = allowed
+    else:
+        castling = "".join(c for c in requested if c in allowed) or "-"
+    ep = parts[3] if len(parts) > 3 else "-"
+    halfmove = parts[4] if len(parts) > 4 and parts[4].isdigit() else "0"
+    fullmove = parts[5] if len(parts) > 5 and parts[5].isdigit() else "1"
+    return " ".join([board, side, castling, ep, halfmove, fullmove])
+
+
+def position_key(fen: str) -> str:
+    """A key identifying a position by board + side to move, ignoring
+    castling/en-passant/counters. Side defaults to 'w' when absent."""
+    parts = fen.strip().split()
+    board = parts[0] if parts else ""
+    side = parts[1] if len(parts) > 1 and parts[1] in ("w", "b") else "w"
+    return f"{board} {side}"
+
+
 def set_side_to_move(fen: str, side: str) -> str:
     """Return `fen` with its side-to-move field set to `side` ('w' or 'b').
 

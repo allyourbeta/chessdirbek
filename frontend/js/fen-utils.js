@@ -96,6 +96,13 @@
         return rights || '-';
     }
 
+    // The castling rights a FEN's piece placement can support, regardless of
+    // what the FEN currently states (wraps sanitizeCastlingRights with 'KQkq').
+    function supportedCastling(fen) {
+        const board = normalizeFen(fen).split(' ')[0] || '';
+        return sanitizeCastlingRights(board, 'KQkq');
+    }
+
     function sanitizeEnPassant(ep) {
         return /^[a-h][36]$/.test(ep || '') ? ep : '-';
     }
@@ -204,6 +211,7 @@
         placePiece,
         fenPieceMap,
         sanitizeCastlingRights,
+        supportedCastling,
         sanitizeEnPassant,
         completeAndSanitizeFen,
         forceFenSideToMove,

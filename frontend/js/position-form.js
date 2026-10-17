@@ -125,6 +125,14 @@ function flipBoard() {
     BoardManager.flip('board');
 }
 
+function clearAddBoard() {
+    const f = '8/8/8/8/8/8/8/8 w - - 0 1';
+    document.getElementById('fen-input').value = f;
+    AppState.boardFen = f;
+    BoardManager.setPosition('board', AppState.boardFen);
+    _applyFormOrientation('white');
+}
+
 function clearForm() {
     document.getElementById('edit-id').value = '';
     document.getElementById('fen-input').value = '';

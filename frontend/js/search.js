@@ -122,6 +122,19 @@ function searchSetStart() {
     _searchSetPhase('build');
 }
 
+function searchStartPosition() {
+    const f = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    if (!searchChess) searchChess = new Chess();
+    searchChess.load(f);
+    _syncSearchFen(f, false);
+    BoardManager.setPosition('search-board', f);
+    BoardManager.enableSquareSelect('search-board', searchOnSquareClick);
+    // SAFE_INNER_HTML: Clearing element content
+    document.getElementById('search-results').innerHTML = '';
+    document.getElementById('search-status').textContent = 'Board reset to starting position.';
+    _searchSetPhase('build');
+}
+
 function searchLoadFen() {
     const f = document.getElementById('search-fen').value.trim();
     if (!f) { toast('Enter a FEN', true); return; }

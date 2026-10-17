@@ -55,15 +55,16 @@
     <div class="split-layout">
       <div class="collection-featured">
         <div id="cat-featured-board" class="board-wrap board-wrap--fluid"></div>
-        <div class="featured-board-controls">
-          <button class="btn btn-md btn-ghost" data-action="flip-category-featured-board">Flip</button>
-          <span class="ctl-sep" aria-hidden="true"></span>
-          <button class="btn btn-md btn-ghost" data-action="shuffle-category-featured" title="Show a random position from this category">Random<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></button>
-          <span class="ctl-sep" aria-hidden="true"></span>
-          <button class="btn btn-md btn-ghost" data-action="analyze-featured-on-lichess" title="Open this position in Lichess analysis (opens a new tab)">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
-          <span class="ctl-sep" aria-hidden="true"></span>
-          <button class="btn btn-md btn-ghost" data-action="fork-category-featured" title="Fork — copy into a new position">⑂ Fork</button>
-          <button class="btn btn-md btn-ghost" data-action="show-featured-detail">Details →</button>
+        <div class="board-controls board-toolbar">
+          <div class="control-group">
+            <button class="btn btn-md btn-ghost" data-action="flip-category-featured-board">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-md btn-ghost" data-action="shuffle-category-featured" title="Show a random position from this category">Random<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></button>
+            <button class="btn btn-md btn-ghost" data-action="analyze-featured-on-lichess" title="Open this position in Lichess analysis (opens a new tab)">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-md btn-ghost" data-action="fork-category-featured" title="Fork — copy into a new position">⑂ Fork</button>
+            <button class="btn btn-md btn-ghost" data-action="show-featured-detail">Details →</button>
+          </div>
         </div>
         <div class="featured-info">
           <div class="featured-title-row">
@@ -121,14 +122,19 @@
         <div style="margin-top:12px">
           <label>FEN</label>
           <input type="text" id="fen-input" placeholder="Paste FEN here...">
-          <div class="btn-row">
-            <button class="btn btn-primary btn-md" data-action="save-position">Save Position</button>
-            <button class="btn btn-md" data-action="load-fen">Load Board</button>
-            <button class="btn btn-md" data-action="ocr-paste-image" title="Paste a copied board image and recognize it into a FEN">Paste board image</button>
-            <button class="btn btn-md" data-action="set-start-pos">Starting Position</button>
-            <button class="btn btn-md" data-action="flip-board">Flip Board</button>
-            <button class="btn btn-md" data-action="open-editor-from-form">Editor</button>
-            <button class="btn btn-md" data-action="cancel-add-position">Cancel</button>
+          <div class="board-controls board-toolbar">
+            <div class="control-group">
+              <button class="btn btn-md" data-action="ocr-paste-image" title="Paste a copied board image and recognize it into a FEN">Paste board image</button>
+              <button class="btn btn-md" data-action="load-fen">Load Board</button>
+              <button class="btn btn-md" data-action="open-editor-from-form">Editor</button>
+              <span class="ctl-sep" aria-hidden="true"></span>
+              <button class="btn btn-md" data-action="flip-board">Flip</button>
+              <button class="btn btn-md" data-action="clear-add-board">Clear Board</button>
+              <button class="btn btn-md" data-action="set-start-pos">Starting Position</button>
+              <span class="ctl-sep" aria-hidden="true"></span>
+              <button class="btn btn-primary btn-md" data-action="save-position">Save Position</button>
+            </div>
+            <button class="btn btn-md" data-action="cancel-add-position" style="margin-left:auto">Cancel</button>
           </div>
           <div id="ocr-debug" style="margin-top:16px;padding:12px;border:1px dashed var(--border);border-radius:8px">
             <div style="font-weight:600;margin-bottom:8px;font-size:13px">OCR debug (board image &rarr; FEN)</div>
@@ -199,13 +205,16 @@
         <div style="display:flex;gap:8px;align-items:stretch">
           <div id="game-board" class="board-wrap"></div>
         </div>
-        <div class="board-controls">
+        <div class="board-controls board-toolbar">
           <div class="control-group">
             <span id="gv-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
+            <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="gv-flip">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+            <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="undo-game-board">Undo</button>
             <button class="btn btn-sm" data-action="reset-game-board">Reset</button>
-            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
           </div>
           <div class="control-group">
             <button class="btn btn-success btn-sm" data-save-board="game-board" data-position-type="tabiya">+ Tabiya</button>
@@ -231,7 +240,7 @@
         </div>
         <div class="btn-row" style="margin-top:var(--sp-2)">
           <button class="btn btn-sm" data-action="back-to-games">Back to Games</button>
-          <button class="btn btn-danger btn-sm" data-action="delete-current-game">Delete</button>
+          <button class="btn btn-danger btn-sm" data-action="delete-current-game" style="margin-left:auto">Delete</button>
         </div>
         <div id="opening-tree-panel" class="tree-panel" style="display:none">
           <div class="tree-panel-header">Opening Explorer</div>
@@ -252,10 +261,12 @@
       <div class="card" style="margin:0;padding:var(--sp-4)">
         <div id="search-board" class="board-wrap board-wrap--fluid"></div>
         <div id="search-palette" style="margin-top:12px"></div>
-        <div class="board-controls search-board-controls">
+        <div class="board-controls board-toolbar search-board-controls">
           <div class="control-group">
             <button class="btn btn-sm" data-action="search-flip-board">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="search-set-start">Clear Board</button>
+            <button class="btn btn-sm" data-action="search-start-position">Starting Position</button>
           </div>
         </div>
       </div>
@@ -318,16 +329,16 @@
       <div class="card" style="margin:0;padding:var(--sp-4)">
         <div id="detail-board" class="board-wrap board-wrap--fluid"></div>
         <div id="practice-move-list" class="moves-panel" style="display:none;margin-top:8px;max-height:120px"></div>
-        <div class="board-controls">
+        <div class="board-controls board-toolbar">
           <div class="control-group" id="detail-move-nav-wrap">
             <span id="detail-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
             <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="flip-detail-board">Flip</button>
-            <button class="btn btn-sm" data-action="flip-detail-fen" title="Flip FEN: rotate the position 180° and fix its orientation. Use this for boards captured from the wrong side (e.g. a Black-perspective screenshot read as White-on-bottom).">Flip FEN</button>
             <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" id="detail-random-btn" data-action="random-from-detail" title="Jump to a random position">Random<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></button>
-            <span class="ctl-sep" aria-hidden="true"></span>
             <button class="btn btn-sm" data-action="analyze-detail-on-lichess" title="Open in Lichess analysis board (opens a new tab)">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="flip-detail-fen" title="Flip FEN: rotate the position 180° and fix its orientation. Use this for boards captured from the wrong side (e.g. a Black-perspective screenshot read as White-on-bottom).">Flip FEN</button>
             <label style="display:inline-flex;align-items:center;gap:6px;margin-left:8px;font-size:14px">
               <input type="checkbox" id="detail-castling-toggle" data-change="castling-toggle"> Castling allowed
             </label>
@@ -373,9 +384,9 @@
           </div>
           <div class="btn-row" style="margin:0">
             <button class="btn" id="prev-puzzle-btn" data-navigate-puzzle="previous" style="display:none">← Previous</button>
-            <button class="btn" data-action="edit-position">Edit</button>
-            <button class="btn btn-danger btn-sm" data-action="delete-from-detail">Delete</button>
             <button class="btn" id="detail-back-btn" data-action="detail-back">Back</button>
+            <button class="btn" data-action="edit-position">Edit</button>
+            <button class="btn btn-danger btn-sm" data-action="delete-from-detail" style="margin-left:auto">Delete</button>
             <button class="btn btn-primary" id="next-puzzle-btn" data-navigate-puzzle="next" style="display:none">Next →</button>
           </div>
         </div>
@@ -454,11 +465,14 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
         <div>
           <div id="editor-board" class="board-wrap"></div>
           <div id="editor-palette" style="margin-top:12px"></div>
-          <div class="btn-row" style="margin-top:8px">
-            <button class="btn btn-md" data-editor-action="clear">Clear Board</button>
-            <button class="btn btn-md" data-editor-action="start">Starting Position</button>
-            <button class="btn btn-md" data-editor-action="flip">Flip</button>
-            <button class="btn btn-md" data-nav-cancel="tactics">Cancel</button>
+          <div class="board-controls board-toolbar" style="margin-top:8px">
+            <div class="control-group">
+              <button class="btn btn-md" data-editor-action="flip">Flip</button>
+              <span class="ctl-sep" aria-hidden="true"></span>
+              <button class="btn btn-md" data-editor-action="clear">Clear Board</button>
+              <button class="btn btn-md" data-editor-action="start">Starting Position</button>
+            </div>
+            <button class="btn btn-md" data-nav-cancel="tactics" style="margin-left:auto">Cancel</button>
           </div>
           <div class="btn-row" id="editor-save-single" style="margin-top:8px;display:none">
             <button class="btn btn-success btn-md" id="editor-save-ctx-btn" data-editor-action="save-context">Save</button>
@@ -480,7 +494,7 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
           <div style="display:flex;gap:6px;align-items:center">
             <input type="text" id="editor-fen" readonly style="flex:1;font-family:'SF Mono','Fira Code',Menlo,Consolas,monospace;font-size:12px">
             <button class="btn btn-md" data-editor-action="copy">Copy</button>
-            <button class="btn btn-md" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess</button>
+            <button class="btn btn-md" data-action="analyze-on-lichess" title="Open in Lichess analysis board">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
           </div>
           <label style="margin-top:12px">Title</label>
           <input type="text" id="editor-pos-title" placeholder="Position title (optional)">
@@ -509,12 +523,17 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
       <div>
         <div id="pv-board" class="board-wrap"></div>
         <div id="pv-annotation-container" style="margin-top:8px"></div>
-        <div id="pv-nav-btns" class="nav-btns">
-          <button class="btn btn-sm" data-practice-viewer="first">|&lt;</button>
-          <button class="btn btn-sm" data-practice-viewer="prev">&lt;</button>
-          <button class="btn btn-sm" data-practice-viewer="next">&gt;</button>
-          <button class="btn btn-sm" data-practice-viewer="last">&gt;|</button>
-          <button class="btn btn-sm" data-practice-viewer="flip" style="margin-left:8px">Flip</button>
+        <div id="pv-nav-btns" class="board-controls board-toolbar">
+          <div class="control-group">
+            <button class="btn btn-sm" data-practice-viewer="first">|&lt;</button>
+            <button class="btn btn-sm" data-practice-viewer="prev">&lt;</button>
+            <button class="btn btn-sm" data-practice-viewer="next">&gt;</button>
+            <button class="btn btn-sm" data-practice-viewer="last">&gt;|</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-practice-viewer="flip">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -525,9 +544,9 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
         <label style="margin-top:12px">Notes <span class="text-muted" style="font-size:11px;font-weight:normal">(auto-saved)</span></label>
         <textarea id="pv-notes" placeholder="Reflections on this game... (saves automatically)"></textarea>
         <div class="btn-row">
-          <button class="btn btn-sm" data-practice-viewer="edit-verdict">Edit verdict</button>
-          <button class="btn btn-danger btn-sm" data-practice-viewer="remove">Delete</button>
           <button class="btn btn-sm" data-nav-cancel="practice">Back</button>
+          <button class="btn btn-sm" data-practice-viewer="edit-verdict">Edit verdict</button>
+          <button class="btn btn-danger btn-sm" data-practice-viewer="remove" style="margin-left:auto">Delete</button>
         </div>
       </div>
     </div>
@@ -536,6 +555,13 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
     <div class="split-layout">
       <div class="card" style="margin:0;padding:var(--sp-4)">
         <div id="play-board" class="board-wrap board-wrap--fluid"></div>
+        <div class="board-controls board-toolbar">
+          <div class="control-group">
+            <button class="btn btn-sm" data-action="play-flip">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+          </div>
+        </div>
         <div class="fen-bar" style="margin-top:var(--sp-2)">
           <code id="play-fen" class="fen-display" style="flex:1"></code>
           <button class="btn btn-sm" data-action="copy-play-fen" title="Copy FEN">Copy</button>
@@ -554,12 +580,10 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
           <div id="play-actions-active" class="btn-row" style="margin:0;flex-wrap:wrap">
             <button class="btn btn-danger" data-action="engine-play-resign">Resign</button>
             <button class="btn" data-action="engine-play-end" title="Stop the game here and mark the result yourself">End game</button>
-            <button class="btn" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Analyze on Lichess</button>
           </div>
           <div id="play-actions-finished" class="btn-row" style="margin:0;flex-wrap:wrap;display:none">
             <button class="btn btn-primary" data-action="engine-play-again">Play again</button>
             <button class="btn" data-action="engine-play-back-detail">Back to position</button>
-            <button class="btn" data-action="analyze-on-lichess" title="Open final position in Lichess analysis">Analyze on Lichess</button>
           </div>
           <div id="play-actions-mark" class="btn-row" style="margin:0;flex-wrap:wrap;display:none;align-items:center">
             <span class="text-muted" style="font-size:13px;margin-right:4px">Mark result:</span>
@@ -576,7 +600,15 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
     <div class="split-layout">
       <div class="card" style="margin:0;padding:var(--sp-4)">
         <div id="replay-board" class="board-wrap board-wrap--fluid"></div>
-        <div id="replay-move-nav" class="replay-nav" style="margin-top:var(--sp-3)"></div>
+        <div class="board-controls board-toolbar">
+          <div class="control-group">
+            <span id="replay-move-nav" style="display:inline-flex;gap:4px;align-items:center"></span>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="replay-flip">Flip</button>
+            <span class="ctl-sep" aria-hidden="true"></span>
+            <button class="btn btn-sm" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Lichess<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1 -2 2H5a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>
+          </div>
+        </div>
       </div>
       <div class="panel" style="display:flex;flex-direction:column;gap:var(--sp-4)">
         <div class="card">
@@ -593,7 +625,6 @@ rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1"></textarea>
         </div>
         <div class="card">
           <div class="btn-row" style="margin:0;flex-wrap:wrap">
-            <button class="btn" data-action="analyze-on-lichess" title="Open current position in Lichess analysis">Analyze on Lichess</button>
             <button class="btn" data-action="replay-back">Back</button>
           </div>
         </div>

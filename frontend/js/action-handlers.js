@@ -66,6 +66,9 @@ const ActionHandlers = {
             case 'flip-board':
                 flipBoard();
                 break;
+            case 'clear-add-board':
+                clearAddBoard();
+                break;
             case 'open-editor-from-form':
                 openEditorFromForm();
                 break;
@@ -119,6 +122,9 @@ const ActionHandlers = {
                 break;
             case 'search-set-start':
                 searchSetStart();
+                break;
+            case 'search-start-position':
+                searchStartPosition();
                 break;
             case 'search-load-fen':
                 searchLoadFen();
@@ -209,6 +215,12 @@ const ActionHandlers = {
                 break;
             case 'replay-back':
                 _backToDetailOrCategory();
+                break;
+            case 'replay-flip':
+                BoardManager.flip('replay-board');
+                break;
+            case 'play-flip':
+                BoardManager.flip('play-board');
                 break;
             case 'start-title-edit':
                 startTitleEdit();

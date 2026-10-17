@@ -648,25 +648,24 @@
   align-items: center;
   gap: var(--sp-1);
 }
-/* Comfortably-larger, more prominent buttons in the position-detail board
-   toolbar only (nav arrows, Flip / Flip FEN / Lichess, Save-current chips,
-   Random). Scoped to #view-detail so the games and search toolbars, which
-   share .board-controls, are left untouched. The #id + two classes outrank
-   .btn-sm, so these win without !important. */
-#view-detail .board-controls .btn {
+/* Comfortably-larger, more prominent buttons for every under-board toolbar
+   (nav arrows, Flip / Flip FEN / Lichess, Save-current chips, Random, etc).
+   Applies to any .board-controls that also carries .board-toolbar — the one
+   shared style for every board screen. Two classes outrank .btn-sm/.btn-md,
+   so these win without !important. */
+.board-toolbar .btn {
   padding: 7px 15px;
   font-size: var(--fs-15);
   font-weight: 600;
 }
-#view-detail .board-controls .control-group {
+.board-toolbar .control-group {
   gap: var(--sp-2);
   flex-wrap: wrap;
 }
 /* Thin separator that visually groups the top toolbar by function
    (move-nav | board ops | random | external) without adding button colors.
    The control-group's --sp-2 flex gap supplies the breathing room on each side. */
-.board-controls .ctl-sep,
-.featured-board-controls .ctl-sep {
+.board-controls .ctl-sep {
   width: 1px;
   align-self: stretch;
   min-height: 16px;
@@ -690,13 +689,6 @@
   color: var(--text);
   cursor: pointer;
   margin: 0;
-}
-.nav-btns {
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 .play-msg {
   text-align: center;
@@ -931,12 +923,6 @@
   min-width: 0;
 }
 /* Featured board area structure */
-.featured-board-controls {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  margin-top: 10px;
-}
 .featured-info {
   margin-top: 16px;
   padding-top: 12px;
@@ -1102,8 +1088,4 @@
   color: var(--text-subtle);
   font-style: italic;
   font-family: var(--font-body, inherit);
-}
-.replay-nav {
-  display: flex;
-  justify-content: center;
 }

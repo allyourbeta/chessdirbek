@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Target: board toolbars</title>
+<link rel="stylesheet" href="../../frontend/css/style.css">
+<style>
+body{padding:32px;max-width:900px;font-size:14px}
+.r{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 16px}
+.s{width:1px;height:20px;background:#ccc;margin:0 4px}
+.g{flex:1}.n{font-weight:600;margin-top:8px}
+.new{outline:1px dashed #4a63b8}
+</style></head><body>
+<p style='font-size:12px;color:#888'>Target v01 · 2026-10-16 18:29 PDT · approved layout. Dashed = new button on that screen.</p>
+<div class="n">Position page</div>
+<div class="r"><button class="btn btn-sm">|&lt;</button><button class="btn btn-sm">&lt;</button><button class="btn btn-sm">&gt;</button><button class="btn btn-sm">&gt;|</button><span class="s"></span><button class="btn btn-sm">Flip</button><span class="s"></span><button class="btn btn-sm">Random</button><button class="btn btn-sm">Lichess ↗</button><span class="s"></span><button class="btn btn-sm">Flip FEN</button><label><input type="checkbox" checked> Castling allowed</label></div>
+<div class="r"><button class="btn">← Previous</button><button class="btn">Back</button><button class="btn">Edit</button><span class="g"></span><button class="btn btn-danger btn-sm">Delete</button><button class="btn btn-primary">Next →</button></div>
+<div class="n">Category preview</div>
+<div class="r"><button class="btn btn-sm">Flip</button><span class="s"></span><button class="btn btn-sm">Random</button><button class="btn btn-sm">Lichess ↗</button><span class="s"></span><button class="btn btn-sm">⑂ Fork</button><button class="btn btn-sm">Details →</button></div>
+<div class="n">Game viewer</div>
+<div class="r"><button class="btn btn-sm">|&lt;</button><button class="btn btn-sm">&lt;</button><button class="btn btn-sm">&gt;</button><button class="btn btn-sm">&gt;|</button><span class="s"></span><button class="btn btn-sm">Flip</button><span class="s"></span><button class="btn btn-sm">Lichess ↗</button><span class="s"></span><button class="btn btn-sm">Undo</button><button class="btn btn-sm">Reset</button></div>
+<div class="r"><button class="btn btn-sm">Back to Games</button><span class="g"></span><button class="btn btn-danger btn-sm">Delete</button></div>
+<div class="n">Engine game replay</div>
+<div class="r"><button class="btn btn-sm">|&lt;</button><button class="btn btn-sm">&lt;</button><button class="btn btn-sm">&gt;</button><button class="btn btn-sm">&gt;|</button><span class="s"></span><button class="btn btn-sm new">Flip</button><span class="s"></span><button class="btn btn-sm">Lichess ↗</button></div>
+<div class="n">Practice game viewer</div>
+<div class="r"><button class="btn btn-sm">|&lt;</button><button class="btn btn-sm">&lt;</button><button class="btn btn-sm">&gt;</button><button class="btn btn-sm">&gt;|</button><span class="s"></span><button class="btn btn-sm">Flip</button><span class="s"></span><button class="btn btn-sm new">Lichess ↗</button></div>
+<div class="r"><button class="btn btn-sm">Back</button><button class="btn btn-sm">Edit verdict</button><span class="g"></span><button class="btn btn-danger btn-sm">Delete</button></div>
+<div class="n">Play vs engine</div>
+<div class="r"><button class="btn btn-sm new">Flip</button><span class="s"></span><button class="btn btn-sm">Lichess ↗</button></div>
+<div class="n">Editor and Search</div>
+<div class="r"><button class="btn btn-md">Flip</button><span class="s"></span><button class="btn btn-md">Clear Board</button><button class="btn btn-md">Starting Position</button><span class="g"></span><button class="btn btn-md">Cancel</button></div>
+<div class="n">Add form</div>
+<div class="r"><button class="btn btn-md">Paste board image</button><button class="btn btn-md">Load Board</button><button class="btn btn-md">Editor</button><span class="s"></span><button class="btn btn-md">Flip</button><button class="btn btn-md">Clear Board</button><button class="btn btn-md">Starting Position</button><span class="s"></span><button class="btn btn-primary btn-md">Save Position</button><span class="g"></span><button class="btn btn-md">Cancel</button></div>
+</body></html>

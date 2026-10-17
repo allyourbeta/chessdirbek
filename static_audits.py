@@ -10,6 +10,91 @@ import re
 
 ROOT = Path(__file__).parent
 FRONTEND_JS = ROOT / "frontend" / "js"
+INDEX_HTML = ROOT / "frontend" / "index.html"
+
+
+def _strip_tags(html_fragment):
+    """Visible text of an html fragment, nested tags (e.g. svg icons) removed."""
+    return re.sub(r"<[^>]*>", "", html_fragment).strip()
+
+
+def _balanced_div(content, open_start):
+    """Given the index of a '<div' open tag, return (inner_html, inner_start, close_end)
+    for its matching '</div>', by tracking div-nesting depth."""
+    open_end = content.index(">", open_start) + 1
+    depth = 1
+    for m in re.finditer(r"<(/?)div\b", content[open_end:]):
+        depth += -1 if m.group(1) else 1
+        if depth == 0:
+            close_start = open_end + m.start()
+            close_end = content.index(">", close_start) + 1
+            return content[open_end:close_start], open_end, close_end
+    return content[open_end:], open_end, len(content)
+
+
+def audit_board_toolbars(content=None, label="frontend/index.html"):
+    """Check the one-button-layout rule for every board toolbar (SPEC-TOOLBARS)."""
+    print("\n=== Board Toolbar Layout Audit ===")
+    if content is None:
+        content = INDEX_HTML.read_text(errors="ignore")
+    violations = []
+
+    # 1. The retired "Analyze on Lichess" wording must be gone.
+    if "Analyze on Lichess" in content:
+        violations.append(f"{label}: retired text 'Analyze on Lichess' still present")
+
+    # 2. Every Lichess-action button's visible text must start with "Lichess".
+    button_re = re.compile(r"<button\b([^>]*)>(.*?)</button>", re.S)
+    for m in button_re.finditer(content):
+        attrs, inner = m.group(1), m.group(2)
+        if 'data-action="analyze' in attrs and "lichess" in attrs.lower():
+            text = _strip_tags(inner)
+            if not text.startswith("Lichess"):
+                violations.append(
+                    f"{label}: Lichess button text is {text!r}, expected it to start with 'Lichess'"
+                )
+
+    # 3. Inside every .board-toolbar: move arrows (if any) first, then Flip before Lichess.
+    for m in re.finditer(r'<div\b[^>]*\bclass="[^"]*\bboard-toolbar\b[^"]*"[^>]*>', content):
+        inner, inner_start, _ = _balanced_div(content, m.start())
+
+        move_nav = re.search(r'id="[^"]*move-nav[^"]*"', inner)
+        flip = next(
+            (b for b in button_re.finditer(inner) if _strip_tags(b.group(2)) == "Flip"),
+            None,
+        )
+        lichess = next(
+            (b for b in button_re.finditer(inner) if _strip_tags(b.group(2)).startswith("Lichess")),
+            None,
+        )
+
+        if move_nav and flip and move_nav.start() > flip.start():
+            violations.append(f"{label}: move arrows must come before Flip (toolbar at offset {inner_start})")
+        if flip and lichess and flip.start() > lichess.start():
+            violations.append(f"{label}: Flip must come before Lichess (toolbar at offset {inner_start})")
+
+    # 4. In every button row holding a Delete button, Delete is last, except an
+    #    optional trailing "Next →".
+    for m in re.finditer(r'<div\b[^>]*\bclass="[^"]*\bbtn-row\b[^"]*"[^>]*>', content):
+        inner, inner_start, _ = _balanced_div(content, m.start())
+        texts = [_strip_tags(b.group(2)) for b in button_re.finditer(inner)]
+        if "Delete" not in texts:
+            continue
+        idx = texts.index("Delete")
+        last = len(texts) - 1
+        if idx != last and not (idx == last - 1 and texts[last].startswith("Next")):
+            violations.append(
+                f"{label}: Delete is not last in its row (row at offset {inner_start}): {texts}"
+            )
+
+    if violations:
+        print("BOARD TOOLBAR LAYOUT VIOLATIONS FOUND:")
+        for v in violations:
+            print(f"  {v}")
+        return False
+    else:
+        print("✅ Every board toolbar follows the one-button-layout rule")
+        return True
 
 def audit_inline_handlers():
     """Check for inline event handlers that should be centralized."""
@@ -259,7 +344,8 @@ def main():
         audit_clipboard_writes,
         audit_inner_html_safety,
         audit_business_logic_duplication,
-        audit_duplicate_messages
+        audit_duplicate_messages,
+        audit_board_toolbars,
     ]
     
     for audit in audits:
